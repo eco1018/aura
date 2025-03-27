@@ -1,162 +1,149 @@
-//
+
 //  AuthViewModel.swift
 //  aura
 //
 //  Created by Ella A. Sadduq on 3/27/25.
 //
-// AuthViewModel.swift
-// aura
+
+///
+//  AuthViewModel.swift
+//  aura
 //
-// Created by Ella A. Sadduq on 3/27/25.
+//  Created by Ella A. Sadduq on 3/27/25.
 //
 
 import Foundation
 import FirebaseAuth
 import FirebaseFirestore
-import Combine
 
 @MainActor
 final class AuthViewModel: ObservableObject {
     static let shared = AuthViewModel()
 
-    // 🔐 Login Credentials
-    @Published var email: String = ""
-    @Published var password: String = ""
-    @Published var confirmPassword: String = "" // ✅ Added for SignUp
-    @Published var errorMessage: String?
-    @Published var isLoading: Bool = false
     @Published var user: User?
+    @Published var errorMessage: String?
+    @Published var successMessage: String?
 
-    // 🧍 User Info for Onboarding
-    @Published var firstName: String = ""
-    @Published var lastName: String = ""
-    @Published var age: Int = 0
-    @Published var gender: String = ""
-
-    // 🧑‍💻 Firestore Profile Data
-    @Published var userProfile: [String: Any] = [:]
-
-    private var db = Firestore.firestore()
-
-    // Initializing
-    private init() {
+    init() {
         self.user = Auth.auth().currentUser
-        Auth.auth().addStateDidChangeListener { _, user in
-            self.user = user
-            Task {
-                await self.fetchUserProfile()
-            }
+    }
+
+    func fetchUserProfile() async {
+        // Optional: implement later
+    }
+
+    func saveUserProfile(firstName: String, lastName: String, email: String) async {
+        guard let uid = user?.uid else {
+            self.errorMessage = "Missing user ID"
+            return
+        }
+
+        let db = Firestore.firestore()
+        let userData: [String: Any] = [
+            "firstName": firstName,
+            "lastName": lastName,
+            "email": email,
+            "createdAt": Timestamp()
+        ]
+
+        do {
+            try await db.collection("users").document(uid).setData(userData)
+            self.successMessage = "User profile saved!"
+            print("✅ User profile saved to Firestore for UID: \(uid)")
+        } catch {
+            let authError = AuthError(from: error)
+            self.errorMessage = authError.localizedDescription
         }
     }
 
-    // 🔐 Sign In
-    func signInWithEmail() async {
-        isLoading = true
+    func signInWithEmail(email: String, password: String) async {
         errorMessage = nil
+        successMessage = nil
+
         do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             self.user = result.user
             await fetchUserProfile()
         } catch {
-            self.errorMessage = error.localizedDescription
+            let authError = AuthError(from: error)
+            self.errorMessage = authError.localizedDescription
         }
-        isLoading = false
     }
 
-    // ✍️ Sign Up
-    func signUpWithEmail() async {
-        isLoading = true
+    func signUpWithEmail(email: String, password: String, confirmPassword: String, firstName: String, lastName: String) async {
         errorMessage = nil
-        
-        // ✅ Match passwords before Firebase call
+        successMessage = nil
+
         guard password == confirmPassword else {
             self.errorMessage = "Passwords do not match"
-            isLoading = false
             return
         }
 
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             self.user = result.user
-            await saveUserProfile()  // Save profile data after user is created
-        } catch {
-            self.errorMessage = error.localizedDescription
-        }
-        isLoading = false
-    }
+            await saveUserProfile(firstName: firstName, lastName: lastName, email: email)
 
-    // 📥 Fetch User Profile from Firestore
-    func fetchUserProfile() async {
-        guard let userId = user?.uid else {
-            return
-        }
-
-        let docRef = db.collection("users").document(userId)
-        do {
-            let snapshot = try await docRef.getDocument()
-            if let data = snapshot.data() {
-                userProfile = data
-                // If you want to bind profile info to UI components
-                firstName = data["firstName"] as? String ?? ""
-                lastName = data["lastName"] as? String ?? ""
-                age = data["age"] as? Int ?? 0
-                gender = data["gender"] as? String ?? ""
-            }
+            try await Auth.auth().currentUser?.reload()
+            self.user = Auth.auth().currentUser
         } catch {
-            print("❌ Error fetching user profile: \(error.localizedDescription)")
+            let authError = AuthError(from: error)
+            self.errorMessage = authError.localizedDescription
         }
     }
 
-    // 📤 Save User Profile to Firestore
-    func saveUserProfile() async {
-        guard let userId = user?.uid else {
-            return
-        }
-
-        let userData: [String: Any] = [
-            "firstName": firstName,
-            "lastName": lastName,
-            "age": age,
-            "gender": gender,
-            "email": email,
-            "createdAt": FieldValue.serverTimestamp()
-        ]
-
-        do {
-            try await db.collection("users").document(userId).setData(userData, merge: true)
-            print("✅ Successfully saved user profile to Firestore")
-        } catch {
-            print("❌ Failed to save user profile: \(error.localizedDescription)")
-        }
-    }
-
-    // 🔄 Reset Password
     func resetPassword(email: String) async {
-        isLoading = true
         errorMessage = nil
+        successMessage = nil
+
         do {
             try await Auth.auth().sendPasswordReset(withEmail: email)
-            print("✅ Password reset email sent.")
+            successMessage = "Password reset email sent successfully. Check your inbox."
         } catch {
-            self.errorMessage = error.localizedDescription
+            let authError = AuthError(from: error)
+            self.errorMessage = authError.localizedDescription
         }
-        isLoading = false
+    }
+}
+
+enum AuthError: Error {
+    case invalidEmail, wrongPassword, userNotFound
+    case emailAlreadyInUse, weakPassword
+    case invalidResetEmail, tooManyResetRequests
+    case networkError, operationNotAllowed, unknownError
+
+    init(from error: Error) {
+        let nsError = error as NSError
+        switch nsError.domain {
+        case "FIRAuthErrorDomain":
+            switch nsError.code {
+            case AuthErrorCode.invalidEmail.rawValue: self = .invalidEmail
+            case AuthErrorCode.wrongPassword.rawValue: self = .wrongPassword
+            case AuthErrorCode.userNotFound.rawValue: self = .userNotFound
+            case AuthErrorCode.emailAlreadyInUse.rawValue: self = .emailAlreadyInUse
+            case AuthErrorCode.weakPassword.rawValue: self = .weakPassword
+            case AuthErrorCode.tooManyRequests.rawValue: self = .tooManyResetRequests
+            case AuthErrorCode.networkError.rawValue: self = .networkError
+            case AuthErrorCode.operationNotAllowed.rawValue: self = .operationNotAllowed
+            default: self = .unknownError
+            }
+        default:
+            self = .unknownError
+        }
     }
 
-    // 🚪 Sign Out
-    func signOut() {
-        do {
-            try Auth.auth().signOut()
-            self.user = nil
-            firstName = ""
-            lastName = ""
-            age = 0
-            gender = ""
-            userProfile = [:]
-            print("✅ Successfully signed out.")
-        } catch {
-            self.errorMessage = "Failed to sign out: \(error.localizedDescription)"
-            print("❌ Error signing out: \(error.localizedDescription)")
+    var localizedDescription: String {
+        switch self {
+        case .invalidEmail: return "The email address is not valid. Please check and try again."
+        case .wrongPassword: return "Incorrect password. Please try again."
+        case .userNotFound: return "No account found with this email. Please sign up."
+        case .emailAlreadyInUse: return "This email is already registered. Try logging in or use a different email."
+        case .weakPassword: return "Password is too weak. Use at least 8 characters with uppercase, lowercase, and numbers."
+        case .invalidResetEmail: return "The email address is invalid or does not exist."
+        case .tooManyResetRequests: return "Too many reset attempts. Please wait before trying again."
+        case .networkError: return "Network error. Please check your internet connection."
+        case .operationNotAllowed: return "This operation is not allowed. Please contact support."
+        case .unknownError: return "An unexpected error occurred. Please try again."
         }
     }
 }

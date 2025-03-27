@@ -6,39 +6,85 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct ForgotPasswordView: View {
     @EnvironmentObject var authVM: AuthViewModel
-
-    @State private var email: String = "" // Local state to hold email value
-
+    @State private var email: String = ""
+    @State private var isLoading = false
+    @State private var showSuccessMessage = false
+    
     var body: some View {
-        VStack {
-            TextField("Email", text: $email)
-                .keyboardType(.emailAddress)
-                .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocorrectionDisabled(true)
-            
-            Button("Reset Password") {
-                Task {
-                    await authVM.resetPassword(email: email) // Pass the email here
+        NavigationView {
+            VStack(spacing: 20) {
+                // App Title
+                Text("AURA")
+                    .font(.system(size: 36, weight: .bold))
+                    .foregroundColor(.blue)
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Reset Password")
+                        .font(.title)
+                        .fontWeight(.bold)
+                    
+                    Text("Enter your email to reset your password")
+                        .foregroundColor(.gray)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal)
+                
+                // Email Input
+                TextField("Email", text: $email)
+                    .modifier(AuthTextFieldStyle())
+                    .keyboardType(.emailAddress)
+                    .autocapitalization(.none)
+                    .padding(.horizontal)
+                
+                // Success or Error Message
+                if showSuccessMessage {
+                    Text("Password reset email sent!")
+                        .foregroundColor(.green)
+                        .font(.caption)
+                } else if let errorMessage = authVM.errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+                
+                // Reset Password Button
+                Button(action: {
+                    Task {
+                        isLoading = true
+                        defer { isLoading = false }
+                        await authVM.resetPassword(email: email)
+                        
+                        // Check for success message
+                        if authVM.successMessage != nil {
+                            showSuccessMessage = true
+                            email = "" // Clear email field
+                        }
+                    }
+                }) {
+                    if isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    } else {
+                        Text("Reset Password")
+                    }
+                }
+                .buttonStyle(PrimaryButtonStyle())
+                .padding(.horizontal)
+                .disabled(isLoading)
+                
+                // Back to Sign In
+                NavigationLink(destination: SignInView()) {
+                    Text("Back to Sign In")
+                        .foregroundColor(.blue)
+                }
+                .padding()
+                
+                Spacer()
             }
-            .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(10)
-
-            if let errorMessage = authVM.errorMessage {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .padding()
-            }
-        }
-        .padding()
-        .onChange(of: email) { newValue in
-            authVM.email = newValue
         }
     }
 }
