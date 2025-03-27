@@ -10,6 +10,11 @@
 		C8BB14262D95D46500E3D1AF /* auraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14222D95D46500E3D1AF /* auraApp.swift */; };
 		C8BB14272D95D46500E3D1AF /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14232D95D46500E3D1AF /* AuthViewModel.swift */; };
 		C8BB14282D95D46500E3D1AF /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14252D95D46500E3D1AF /* RootView.swift */; };
+		C8BB14422D95DE7000E3D1AF /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14412D95DE6600E3D1AF /* MainView.swift */; };
+		C8BB14442D95DE9200E3D1AF /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14432D95DE8600E3D1AF /* SignInView.swift */; };
+		C8BB14462D95DEA400E3D1AF /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14452D95DE9900E3D1AF /* SignUpView.swift */; };
+		C8BB14482D95DEB600E3D1AF /* ForgotPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14472D95DEB300E3D1AF /* ForgotPasswordView.swift */; };
+		C8BB144A2D95DF7200E3D1AF /* AuthSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14492D95DF6600E3D1AF /* AuthSettings.swift */; };
 		C8DFCCB92D95D25A00F5D20C /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = C8DFCCB82D95D25A00F5D20C /* FirebaseAnalytics */; };
 		C8DFCCBB2D95D25A00F5D20C /* FirebaseAnalyticsOnDeviceConversion in Frameworks */ = {isa = PBXBuildFile; productRef = C8DFCCBA2D95D25A00F5D20C /* FirebaseAnalyticsOnDeviceConversion */; };
 		C8DFCCBD2D95D25A00F5D20C /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = C8DFCCBC2D95D25A00F5D20C /* FirebaseAnalyticsWithoutAdIdSupport */; };
@@ -60,6 +65,12 @@
 		C8BB14222D95D46500E3D1AF /* auraApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = auraApp.swift; sourceTree = "<group>"; };
 		C8BB14232D95D46500E3D1AF /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		C8BB14252D95D46500E3D1AF /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		C8BB14412D95DE6600E3D1AF /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		C8BB14432D95DE8600E3D1AF /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		C8BB14452D95DE9900E3D1AF /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
+		C8BB14472D95DEB300E3D1AF /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
+		C8BB14492D95DF6600E3D1AF /* AuthSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSettings.swift; sourceTree = "<group>"; };
+		C8BB14C02D95E3B200E3D1AF /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -132,6 +143,8 @@
 		C82400972D95C935004AE981 = {
 			isa = PBXGroup;
 			children = (
+				C8BB14BF2D95E39A00E3D1AF /* shared */,
+				C8BB14402D95DC0300E3D1AF /* auth */,
 				C8BB14322D95DABB00E3D1AF /* root */,
 				C82400A22D95C935004AE981 /* aura */,
 				C82400B52D95C936004AE981 /* auraTests */,
@@ -153,11 +166,31 @@
 		C8BB14322D95DABB00E3D1AF /* root */ = {
 			isa = PBXGroup;
 			children = (
-				C8BB14232D95D46500E3D1AF /* AuthViewModel.swift */,
+				C8BB14412D95DE6600E3D1AF /* MainView.swift */,
 				C8BB14222D95D46500E3D1AF /* auraApp.swift */,
 				C8BB14252D95D46500E3D1AF /* RootView.swift */,
 			);
 			path = root;
+			sourceTree = "<group>";
+		};
+		C8BB14402D95DC0300E3D1AF /* auth */ = {
+			isa = PBXGroup;
+			children = (
+				C8BB14492D95DF6600E3D1AF /* AuthSettings.swift */,
+				C8BB14472D95DEB300E3D1AF /* ForgotPasswordView.swift */,
+				C8BB14452D95DE9900E3D1AF /* SignUpView.swift */,
+				C8BB14432D95DE8600E3D1AF /* SignInView.swift */,
+				C8BB14232D95D46500E3D1AF /* AuthViewModel.swift */,
+			);
+			path = auth;
+			sourceTree = "<group>";
+		};
+		C8BB14BF2D95E39A00E3D1AF /* shared */ = {
+			isa = PBXGroup;
+			children = (
+				C8BB14C02D95E3B200E3D1AF /* UserProfile.swift */,
+			);
+			path = shared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -331,9 +364,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C8BB144A2D95DF7200E3D1AF /* AuthSettings.swift in Sources */,
 				C8BB14262D95D46500E3D1AF /* auraApp.swift in Sources */,
+				C8BB14482D95DEB600E3D1AF /* ForgotPasswordView.swift in Sources */,
+				C8BB14422D95DE7000E3D1AF /* MainView.swift in Sources */,
 				C8BB14272D95D46500E3D1AF /* AuthViewModel.swift in Sources */,
 				C8BB14282D95D46500E3D1AF /* RootView.swift in Sources */,
+				C8BB14462D95DEA400E3D1AF /* SignUpView.swift in Sources */,
+				C8BB14442D95DE9200E3D1AF /* SignInView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
