@@ -17,20 +17,20 @@ import FirebaseAuth
 
 struct MainView: View {
     @EnvironmentObject var authVM: AuthViewModel
-
+    
     var body: some View {
         VStack(spacing: 24) {
             Text("Welcome to the Main App Screen")
                 .font(.largeTitle)
                 .padding()
-
+            
             Button(action: {
                 do {
                     try Auth.auth().signOut()
                     authVM.user = nil
                 } catch {
                     print("❌ Failed to sign out: \(error.localizedDescription)")
-                    authVM.errorMessage = "Error signing out. Please try again."
+                    // Optional: Add custom UI for errors later
                 }
             }) {
                 Text("Log Out")

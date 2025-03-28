@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C85F82C02D961BD2008583F3 /* AuthSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85F82BF2D961BC3008583F3 /* AuthSettings.swift */; };
+		C85F82DB2D9623EA008583F3 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14C02D95E3B200E3D1AF /* UserProfile.swift */; };
 		C8BB14262D95D46500E3D1AF /* auraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14222D95D46500E3D1AF /* auraApp.swift */; };
 		C8BB14272D95D46500E3D1AF /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14232D95D46500E3D1AF /* AuthViewModel.swift */; };
 		C8BB14282D95D46500E3D1AF /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14252D95D46500E3D1AF /* RootView.swift */; };
@@ -372,6 +373,7 @@
 				C8BB14282D95D46500E3D1AF /* RootView.swift in Sources */,
 				C8BB14462D95DEA400E3D1AF /* SignUpView.swift in Sources */,
 				C8BB14442D95DE9200E3D1AF /* SignInView.swift in Sources */,
+				C85F82DB2D9623EA008583F3 /* UserProfile.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

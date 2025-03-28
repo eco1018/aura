@@ -34,19 +34,21 @@
 import SwiftUI
 
 struct RootView: View {
-    @EnvironmentObject var authVM: AuthViewModel
-    @EnvironmentObject var authSettings: AuthSettings
-
+    @StateObject private var authVM = AuthViewModel.shared
+    
     var body: some View {
         Group {
-            if authVM.user == nil {
+            switch authVM.authFlow {
+            case .signIn:
                 SignInView()
-            } else {
-                MainView()
+            case .signUp:
+                SignUpView()
+            case .forgotPassword:
+                ForgotPasswordView()
+            case .main:
+                MainView() // Your app’s main content
             }
         }
-        .onAppear {
-            print("🌀 RootView appeared — authVM.user = \(authVM.user?.email ?? "nil")")
-        }
+        .environmentObject(authVM)
     }
 }
