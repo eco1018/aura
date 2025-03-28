@@ -1,6 +1,6 @@
 # 🌿 aura
 
-**aura** is an immersive, emotionally intelligent iOS app for users practicing Dialectical Behavior Therapy (DBT). Designed with fluid motion, organic UI, and a personalized DBT diary card system, aura supports self-awareness, emotion regulation, and skill-based healing — with future-ready AI insights and real-time coaching.
+**Aura** is an immersive, emotionally intelligent iOS app for users practicing Dialectical Behavior Therapy (DBT). Designed with fluid motion, organic UI, and a personalized DBT diary card system, aura supports self-awareness, emotion regulation, and skill-based healing — with future-ready AI insights and real-time coaching.
 
 > "Healing is not linear — but it can be beautiful."
 
