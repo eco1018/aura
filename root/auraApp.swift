@@ -5,7 +5,15 @@
 //  Created by Ella A. Sadduq on 3/27/25.
 //
 
-// AuraApp.swift
+//
+// 
+//
+//  AuraApp.swift
+//  aura
+//
+//  Created by Ella A. Sadduq on 3/27/25.
+//
+
 import SwiftUI
 import FirebaseCore
 
@@ -20,12 +28,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct AuraApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+
     @StateObject private var authVM = AuthViewModel.shared
+    @StateObject private var authSettings = AuthSettings()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(authVM)
+                .environmentObject(authSettings)
         }
     }
 }

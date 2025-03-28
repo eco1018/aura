@@ -2,25 +2,53 @@
 //
 // RootView.swift
 
+// RootView.swift
+// aura
+//
+// Created by Ella A. Sadduq on 3/27/25.
+//
+
+// RootView.swift
+
+//
+//  RootView.swift
+//  aura
+//
+//  Created by Ella A. Sadduq on 3/27/25.
+//
+
+//
+//  RootView.swift
+//  aura
+//
+//  Created by Ella A. Sadduq on 3/27/25.
+//
+
+//
+//  RootView.swift
+//  aura
+//
+//  Created by Ella A. Sadduq on 3/27/25.
+//
+
 import SwiftUI
 
 struct RootView: View {
-    @EnvironmentObject var authVM: AuthViewModel
-
+    @StateObject private var authVM = AuthViewModel.shared
+    
     var body: some View {
         Group {
-            if authVM.isLoading {
-                ProgressView("Loading...")
-            } else if authVM.user == nil {
-                Text("🔐 User not signed in")
-            } else {
-                Text("🌟 User is signed in")
+            switch authVM.authFlow {
+            case .signIn:
+                SignInView()
+            case .signUp:
+                SignUpView()
+            case .forgotPassword:
+                ForgotPasswordView()
+            case .main:
+                MainView() // Your app’s main content
             }
         }
+        .environmentObject(authVM)
     }
-}
-
-#Preview {
-    RootView()
-        .environmentObject(AuthViewModel.shared)
 }
