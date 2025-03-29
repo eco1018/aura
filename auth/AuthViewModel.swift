@@ -1,4 +1,6 @@
 
+
+//
 //  AuthViewModel.swift
 //  aura
 //
@@ -37,7 +39,7 @@ final class AuthViewModel: ObservableObject {
             
             if let uid = user?.uid {
                 self.loadUserProfile(uid: uid)
-                self.authFlow = .main
+                // Let RootView decide what to show next
             } else {
                 self.userProfile = nil
                 self.authFlow = .signIn
@@ -58,7 +60,7 @@ final class AuthViewModel: ObservableObject {
                 self?.user = user
                 self?.isAuthenticated = true
                 self?.loadUserProfile(uid: user.uid)
-                self?.authFlow = .main
+                // Let RootView decide
             }
         }
     }
@@ -80,7 +82,8 @@ final class AuthViewModel: ObservableObject {
                         self?.user = user
                         self?.userProfile = newUser
                         self?.isAuthenticated = true
-                        self?.authFlow = .main
+                        OnboardingViewModel.shared.hasCompletedOnboarding = false
+                        // Don't set authFlow = .main
                     }
                 }
             }
@@ -123,12 +126,4 @@ final class AuthViewModel: ObservableObject {
             Auth.auth().removeStateDidChangeListener(handle)
         }
     }
-}
-
-// MARK: - Auth Flow Enum
-enum AuthFlowStep {
-    case signIn
-    case signUp
-    case forgotPassword
-    case main
 }

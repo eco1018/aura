@@ -1,29 +1,8 @@
 //
 //
-// RootView.swift
-
-// RootView.swift
-// aura
-//
-// Created by Ella A. Sadduq on 3/27/25.
-//
-
-// RootView.swift
 
 //
-//  RootView.swift
-//  aura
 //
-//  Created by Ella A. Sadduq on 3/27/25.
-//
-
-//
-//  RootView.swift
-//  aura
-//
-//  Created by Ella A. Sadduq on 3/27/25.
-//
-
 //
 //  RootView.swift
 //  aura
@@ -35,20 +14,27 @@ import SwiftUI
 
 struct RootView: View {
     @StateObject private var authVM = AuthViewModel.shared
-    
+    @StateObject private var onboardingVM = OnboardingViewModel.shared
+
     var body: some View {
-        Group {
-            switch authVM.authFlow {
-            case .signIn:
-                SignInView()
-            case .signUp:
-                SignUpView()
-            case .forgotPassword:
-                ForgotPasswordView()
-            case .main:
-                MainView() // Your app’s main content
-            }
+        if !authVM.isAuthenticated {
+            authFlowView(for: authVM.authFlow)
+        } else if !onboardingVM.hasCompletedOnboarding {
+            OnboardingFlowView()
+        } else {
+            MainView()
         }
-        .environmentObject(authVM)
+    }
+
+    @ViewBuilder
+    private func authFlowView(for step: AuthFlowStep) -> some View {
+        switch step {
+        case .signIn:
+            SignInView()
+        case .signUp:
+            SignUpView()
+        case .forgotPassword:
+            ForgotPasswordView()
+        }
     }
 }

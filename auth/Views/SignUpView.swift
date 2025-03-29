@@ -19,9 +19,6 @@ struct SignUpView: View {
                 .font(.largeTitle)
                 .bold()
 
-            TextField("Name", text: $name)
-                .textContentType(.name)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
 
             TextField("Email", text: $email)
                 .keyboardType(.emailAddress)

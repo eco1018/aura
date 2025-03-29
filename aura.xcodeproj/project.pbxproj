@@ -7,6 +7,27 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C83BF0CC2D98AC6700538904 /* ActionsIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0B62D98AC6700538904 /* ActionsIntroView.swift */; };
+		C83BF0CD2D98AC6700538904 /* ActionsSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0B72D98AC6700538904 /* ActionsSelectionView.swift */; };
+		C83BF0CE2D98AC6700538904 /* BirthdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0B92D98AC6700538904 /* BirthdateView.swift */; };
+		C83BF0CF2D98AC6700538904 /* DiaryCardReminderTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0BA2D98AC6700538904 /* DiaryCardReminderTimeView.swift */; };
+		C83BF0D02D98AC6700538904 /* DiaryCardReminderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0BB2D98AC6700538904 /* DiaryCardReminderView.swift */; };
+		C83BF0D12D98AC6700538904 /* DiaryIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0BC2D98AC6700538904 /* DiaryIntroView.swift */; };
+		C83BF0D22D98AC6700538904 /* FirstNameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0BD2D98AC6700538904 /* FirstNameView.swift */; };
+		C83BF0D32D98AC6700538904 /* GoalsIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0BE2D98AC6700538904 /* GoalsIntroView.swift */; };
+		C83BF0D42D98AC6700538904 /* GoalsSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0BF2D98AC6700538904 /* GoalsSelectionView.swift */; };
+		C83BF0D52D98AC6700538904 /* LastNameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C12D98AC6700538904 /* LastNameView.swift */; };
+		C83BF0D62D98AC6700538904 /* MedicationAddingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C22D98AC6700538904 /* MedicationAddingView.swift */; };
+		C83BF0D72D98AC6700538904 /* MedicationIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C32D98AC6700538904 /* MedicationIntroView.swift */; };
+		C83BF0D82D98AC6700538904 /* MedicationReminderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C42D98AC6700538904 /* MedicationReminderView.swift */; };
+		C83BF0D92D98AC6700538904 /* UrgesIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C52D98AC6700538904 /* UrgesIntroView.swift */; };
+		C83BF0DA2D98AC6700538904 /* UrgesSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C62D98AC6700538904 /* UrgesSelectionView.swift */; };
+		C83BF0DB2D98AC6700538904 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C72D98AC6700538904 /* WelcomeView.swift */; };
+		C83BF0DC2D98AC6700538904 /* WrapUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C82D98AC6700538904 /* WrapUpView.swift */; };
+		C83BF0E42D98ACE900538904 /* AuthFlowStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0E32D98ACE700538904 /* AuthFlowStep.swift */; };
+		C83BF0E62D98ADE100538904 /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0E52D98ADE100538904 /* OnboardingStep.swift */; };
+		C83BF0ED2D98B8A100538904 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0EC2D98B89E00538904 /* OnboardingFlowView.swift */; };
+		C83BF0EF2D98B92900538904 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0EE2D98B92600538904 /* OnboardingViewModel.swift */; };
 		C85F82C02D961BD2008583F3 /* AuthSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85F82BF2D961BC3008583F3 /* AuthSettings.swift */; };
 		C85F82DB2D9623EA008583F3 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14C02D95E3B200E3D1AF /* UserProfile.swift */; };
 		C8BB14262D95D46500E3D1AF /* auraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14222D95D46500E3D1AF /* auraApp.swift */; };
@@ -63,6 +84,27 @@
 		C82400A02D95C935004AE981 /* aura.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = aura.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C82400B22D95C936004AE981 /* auraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = auraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C82400BC2D95C936004AE981 /* auraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = auraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C83BF0B62D98AC6700538904 /* ActionsIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionsIntroView.swift; sourceTree = "<group>"; };
+		C83BF0B72D98AC6700538904 /* ActionsSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionsSelectionView.swift; sourceTree = "<group>"; };
+		C83BF0B92D98AC6700538904 /* BirthdateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BirthdateView.swift; sourceTree = "<group>"; };
+		C83BF0BA2D98AC6700538904 /* DiaryCardReminderTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryCardReminderTimeView.swift; sourceTree = "<group>"; };
+		C83BF0BB2D98AC6700538904 /* DiaryCardReminderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryCardReminderView.swift; sourceTree = "<group>"; };
+		C83BF0BC2D98AC6700538904 /* DiaryIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryIntroView.swift; sourceTree = "<group>"; };
+		C83BF0BD2D98AC6700538904 /* FirstNameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstNameView.swift; sourceTree = "<group>"; };
+		C83BF0BE2D98AC6700538904 /* GoalsIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalsIntroView.swift; sourceTree = "<group>"; };
+		C83BF0BF2D98AC6700538904 /* GoalsSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalsSelectionView.swift; sourceTree = "<group>"; };
+		C83BF0C12D98AC6700538904 /* LastNameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastNameView.swift; sourceTree = "<group>"; };
+		C83BF0C22D98AC6700538904 /* MedicationAddingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicationAddingView.swift; sourceTree = "<group>"; };
+		C83BF0C32D98AC6700538904 /* MedicationIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicationIntroView.swift; sourceTree = "<group>"; };
+		C83BF0C42D98AC6700538904 /* MedicationReminderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicationReminderView.swift; sourceTree = "<group>"; };
+		C83BF0C52D98AC6700538904 /* UrgesIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgesIntroView.swift; sourceTree = "<group>"; };
+		C83BF0C62D98AC6700538904 /* UrgesSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgesSelectionView.swift; sourceTree = "<group>"; };
+		C83BF0C72D98AC6700538904 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		C83BF0C82D98AC6700538904 /* WrapUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WrapUpView.swift; sourceTree = "<group>"; };
+		C83BF0E32D98ACE700538904 /* AuthFlowStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFlowStep.swift; sourceTree = "<group>"; };
+		C83BF0E52D98ADE100538904 /* OnboardingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep.swift; sourceTree = "<group>"; };
+		C83BF0EC2D98B89E00538904 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
+		C83BF0EE2D98B92600538904 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		C85F82BF2D961BC3008583F3 /* AuthSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSettings.swift; sourceTree = "<group>"; };
 		C8BB14222D95D46500E3D1AF /* auraApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = auraApp.swift; sourceTree = "<group>"; };
 		C8BB14232D95D46500E3D1AF /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
@@ -144,6 +186,7 @@
 		C82400972D95C935004AE981 = {
 			isa = PBXGroup;
 			children = (
+				C83BF0E72D98B2BF00538904 /* onboardingfeature */,
 				C8BB14BF2D95E39A00E3D1AF /* shared */,
 				C8BB14402D95DC0300E3D1AF /* auth */,
 				C8BB14322D95DABB00E3D1AF /* root */,
@@ -164,6 +207,67 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		C83BF0E72D98B2BF00538904 /* onboardingfeature */ = {
+			isa = PBXGroup;
+			children = (
+				C83BF0EA2D98B6E200538904 /* Models */,
+				C83BF0E82D98B66800538904 /* Views */,
+				C83BF0E92D98B6BE00538904 /* ViewModels */,
+			);
+			path = onboardingfeature;
+			sourceTree = "<group>";
+		};
+		C83BF0E82D98B66800538904 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				C83BF0BA2D98AC6700538904 /* DiaryCardReminderTimeView.swift */,
+				C83BF0BE2D98AC6700538904 /* GoalsIntroView.swift */,
+				C83BF0B62D98AC6700538904 /* ActionsIntroView.swift */,
+				C83BF0C52D98AC6700538904 /* UrgesIntroView.swift */,
+				C83BF0BC2D98AC6700538904 /* DiaryIntroView.swift */,
+				C83BF0C72D98AC6700538904 /* WelcomeView.swift */,
+				C83BF0BF2D98AC6700538904 /* GoalsSelectionView.swift */,
+				C83BF0C22D98AC6700538904 /* MedicationAddingView.swift */,
+				C83BF0B72D98AC6700538904 /* ActionsSelectionView.swift */,
+				C83BF0C12D98AC6700538904 /* LastNameView.swift */,
+				C83BF0C82D98AC6700538904 /* WrapUpView.swift */,
+				C83BF0C32D98AC6700538904 /* MedicationIntroView.swift */,
+				C83BF0C42D98AC6700538904 /* MedicationReminderView.swift */,
+				C83BF0B92D98AC6700538904 /* BirthdateView.swift */,
+				C83BF0BD2D98AC6700538904 /* FirstNameView.swift */,
+				C83BF0BB2D98AC6700538904 /* DiaryCardReminderView.swift */,
+				C83BF0C62D98AC6700538904 /* UrgesSelectionView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		C83BF0E92D98B6BE00538904 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				C83BF0EE2D98B92600538904 /* OnboardingViewModel.swift */,
+				C83BF0EC2D98B89E00538904 /* OnboardingFlowView.swift */,
+				C83BF0E52D98ADE100538904 /* OnboardingStep.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		C83BF0EA2D98B6E200538904 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		C83BF0EB2D98B70300538904 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				C8BB14472D95DEB300E3D1AF /* ForgotPasswordView.swift */,
+				C8BB14432D95DE8600E3D1AF /* SignInView.swift */,
+				C8BB14452D95DE9900E3D1AF /* SignUpView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		C8BB14322D95DABB00E3D1AF /* root */ = {
 			isa = PBXGroup;
 			children = (
@@ -177,10 +281,9 @@
 		C8BB14402D95DC0300E3D1AF /* auth */ = {
 			isa = PBXGroup;
 			children = (
+				C83BF0EB2D98B70300538904 /* Views */,
+				C83BF0E32D98ACE700538904 /* AuthFlowStep.swift */,
 				C85F82BF2D961BC3008583F3 /* AuthSettings.swift */,
-				C8BB14472D95DEB300E3D1AF /* ForgotPasswordView.swift */,
-				C8BB14432D95DE8600E3D1AF /* SignInView.swift */,
-				C8BB14452D95DE9900E3D1AF /* SignUpView.swift */,
 				C8BB14232D95D46500E3D1AF /* AuthViewModel.swift */,
 			);
 			path = auth;
@@ -365,14 +468,35 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C83BF0CC2D98AC6700538904 /* ActionsIntroView.swift in Sources */,
+				C83BF0CD2D98AC6700538904 /* ActionsSelectionView.swift in Sources */,
+				C83BF0CE2D98AC6700538904 /* BirthdateView.swift in Sources */,
+				C83BF0CF2D98AC6700538904 /* DiaryCardReminderTimeView.swift in Sources */,
+				C83BF0D02D98AC6700538904 /* DiaryCardReminderView.swift in Sources */,
+				C83BF0E42D98ACE900538904 /* AuthFlowStep.swift in Sources */,
+				C83BF0D12D98AC6700538904 /* DiaryIntroView.swift in Sources */,
+				C83BF0D22D98AC6700538904 /* FirstNameView.swift in Sources */,
+				C83BF0D32D98AC6700538904 /* GoalsIntroView.swift in Sources */,
+				C83BF0D42D98AC6700538904 /* GoalsSelectionView.swift in Sources */,
+				C83BF0D52D98AC6700538904 /* LastNameView.swift in Sources */,
+				C83BF0D62D98AC6700538904 /* MedicationAddingView.swift in Sources */,
+				C83BF0ED2D98B8A100538904 /* OnboardingFlowView.swift in Sources */,
+				C83BF0D72D98AC6700538904 /* MedicationIntroView.swift in Sources */,
+				C83BF0D82D98AC6700538904 /* MedicationReminderView.swift in Sources */,
+				C83BF0D92D98AC6700538904 /* UrgesIntroView.swift in Sources */,
+				C83BF0DA2D98AC6700538904 /* UrgesSelectionView.swift in Sources */,
+				C83BF0DB2D98AC6700538904 /* WelcomeView.swift in Sources */,
+				C83BF0DC2D98AC6700538904 /* WrapUpView.swift in Sources */,
 				C85F82C02D961BD2008583F3 /* AuthSettings.swift in Sources */,
 				C8BB14262D95D46500E3D1AF /* auraApp.swift in Sources */,
 				C8BB14482D95DEB600E3D1AF /* ForgotPasswordView.swift in Sources */,
 				C8BB14422D95DE7000E3D1AF /* MainView.swift in Sources */,
 				C8BB14272D95D46500E3D1AF /* AuthViewModel.swift in Sources */,
 				C8BB14282D95D46500E3D1AF /* RootView.swift in Sources */,
+				C83BF0EF2D98B92900538904 /* OnboardingViewModel.swift in Sources */,
 				C8BB14462D95DEA400E3D1AF /* SignUpView.swift in Sources */,
 				C8BB14442D95DE9200E3D1AF /* SignInView.swift in Sources */,
+				C83BF0E62D98ADE100538904 /* OnboardingStep.swift in Sources */,
 				C85F82DB2D9623EA008583F3 /* UserProfile.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
