@@ -1,69 +1,69 @@
-//
-//  MedicationIntroView.swift
+
+//  MedicationsIntroView.swift
 //  aura
 //
-//  Created by Ella A. Sadduq on 3/29/25.
-//
-//
-//  MedicationIntroView.swift
-//  aura
-//
-//  Created by Ella A. Sadduq on 3/29/25.
+//  Created by Ella A. Sadduq on 3/30/25.
 //
 
 import SwiftUI
 
-struct MedicationIntroView: View {
+struct MedicationsIntroView: View {
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: 24) {
             Spacer()
 
-            // MARK: - Title
-            Text("Let’s Talk About Medications")
-                .font(.title2)
+            // MARK: - Intro Message
+            Text("Many people find support through prescribed medications.")
+                .font(.body)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.secondary)
+                .padding(.horizontal)
+
+            // MARK: - Main Prompt
+            Text("Do you take any daily medications?")
+                .font(.title)
                 .fontWeight(.semibold)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
 
-            // MARK: - Description
-            Text("""
-            In DBT, tracking medications is an important part of understanding how they affect your emotional and mental well-being.
-
-            If you take any medications, this step will help you track them. If not, no worries — we’ll skip this part.
-            """)
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
             Spacer()
 
-            // MARK: - Continue Button (UI-only)
-            Text("Continue")
-                .font(.headline)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.accentColor)
-                .foregroundColor(.white)
-                .cornerRadius(12)
-                .padding(.horizontal)
-
-            // MARK: - Skip Button
+            // MARK: - Yes Button
             Button(action: {
-                // Handle skip action here (navigate to next step)
+                OnboardingViewModel.shared.onboardingStep = .medicationsList
             }) {
-                Text("Skip this step")
-                    .font(.body)
-                    .foregroundColor(.gray)
+                Text("Yes")
+                    .foregroundColor(.white)
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.accentColor)
+                    .cornerRadius(12)
+                    .padding(.horizontal)
             }
-            .padding(.top, 8)
+
+            // MARK: - No Button
+            Button(action: {
+                OnboardingViewModel.shared.onboardingStep = .diaryReminder
+            }) {
+                Text("No")
+                    .foregroundColor(.accentColor)
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.accentColor, lineWidth: 2)
+                    )
+                    .padding(.horizontal)
+            }
+
+            Spacer()
         }
         .padding()
     }
 }
 
 #Preview {
-    MedicationIntroView()
-}
-#Preview {
-    MedicationIntroView()
+    MedicationsIntroView()
 }

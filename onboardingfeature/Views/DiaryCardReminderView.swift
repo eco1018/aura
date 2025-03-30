@@ -1,4 +1,5 @@
 
+//
 //  DiaryCardReminderView.swift
 //  aura
 //
@@ -32,7 +33,9 @@ struct DiaryCardReminderView: View {
             // MARK: - Reminder Options
             VStack(spacing: 16) {
                 Button(action: {
-                    // Handle once per day selection
+                    // Save selection: once per day
+                    OnboardingViewModel.shared.reminderFrequency = .once
+                    OnboardingViewModel.shared.goToNextStep() // Move to AM time
                 }) {
                     Text("Once per day")
                         .font(.body)
@@ -45,7 +48,9 @@ struct DiaryCardReminderView: View {
                 }
 
                 Button(action: {
-                    // Handle twice per day selection
+                    // Save selection: twice per day
+                    OnboardingViewModel.shared.reminderFrequency = .twice
+                    OnboardingViewModel.shared.goToNextStep() // Move to AM time first
                 }) {
                     Text("Twice per day")
                         .font(.body)
@@ -59,16 +64,6 @@ struct DiaryCardReminderView: View {
             }
 
             Spacer()
-
-            // MARK: - Continue Button
-            Text("Continue")
-                .font(.headline)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.accentColor)
-                .foregroundColor(.white)
-                .cornerRadius(12)
-                .padding(.horizontal)
         }
         .padding()
     }

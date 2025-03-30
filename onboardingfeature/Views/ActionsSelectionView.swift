@@ -119,16 +119,18 @@ struct ActionsSelectionView: View {
 
             Spacer()
 
-            // MARK: - Continue Button (UI only)
-            Text("Continue")
-                .font(.headline)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(selectedActions.count == 3 ? Color.accentColor : Color.gray)
-                .foregroundColor(.white)
-                .cornerRadius(12)
-                .padding(.horizontal)
-                .disabled(selectedActions.count != 3)
+            Button(action: {
+                OnboardingViewModel.shared.goToNextStep()
+            }) {
+                Text("Next")
+                    .foregroundColor(.white)
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.accentColor)
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+            }
         }
         .padding(.horizontal)
     }

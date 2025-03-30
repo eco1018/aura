@@ -32,15 +32,19 @@ struct WelcomeView: View {
 
             Spacer()
             
-            // MARK: - Get Started Button (no action)
-            Text("Get Started")
-                .font(.headline)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.accentColor)
-                .foregroundColor(.white)
-                .cornerRadius(12)
-                .padding(.horizontal)
+            // MARK: - Get Started Button (real)
+            Button(action: {
+                OnboardingViewModel.shared.goToNextStep()
+            }) {
+                Text("Get Started")
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+            }
         }
         .padding()
     }

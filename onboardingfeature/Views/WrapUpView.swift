@@ -4,49 +4,46 @@
 //
 //  Created by Ella A. Sadduq on 3/29/25.
 //
-
 //
 //  WrapUpView.swift
 //  aura
 //
-//  Created by Ella A. Sadduq on 3/29/25.
+//  Created by Ella A. Sadduq on 3/30/25.
 //
 
 import SwiftUI
 
 struct WrapUpView: View {
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: 24) {
             Spacer()
 
-            // MARK: - Title
-            Text("Beautiful Work!")
-                .font(.title2)
-                .fontWeight(.semibold)
+            // MARK: - Message
+            Text("You're all set!")
+                .font(.largeTitle)
+                .fontWeight(.bold)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal)
 
-            // MARK: - Description
-            Text("""
-            You just created your personal tracking map. These choices will help guide your journey, and they’re completely yours — you can update them anytime.
-
-            This is the beginning of noticing your patterns, honoring your progress, and building a life worth living.
-            """)
+            Text("Let’s begin your journey toward greater self-awareness and emotional well-being.")
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
 
             Spacer()
 
-            // MARK: - Continue Button
-            Text("Finish")
-                .font(.headline)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.accentColor)
-                .foregroundColor(.white)
-                .cornerRadius(12)
-                .padding(.horizontal)
+            // MARK: - Finish Button
+            Button(action: {
+                OnboardingViewModel.shared.completeOnboarding()
+            }) {
+                Text("Finish")
+                    .foregroundColor(.white)
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.accentColor)
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+            }
         }
         .padding()
     }

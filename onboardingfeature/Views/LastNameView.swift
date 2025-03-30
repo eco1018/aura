@@ -1,10 +1,4 @@
-//
-//  LastNameView.swift
-//  aura
-//
-//  Created by Ella A. Sadduq on 3/29/25.
-//
-//
+
 //  LastNameView.swift
 //  aura
 //
@@ -34,14 +28,20 @@ struct LastNameView: View {
 
             Spacer()
 
-            // MARK: - Button (no logic yet)
-            Text("Next")
-                .foregroundColor(.white)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(lastNameInput.isEmpty ? Color.gray : Color.accentColor)
-                .cornerRadius(10)
-                .padding(.horizontal)
+            // MARK: - Next Button
+            Button(action: {
+                // 🚀 Save last name to profile later if needed
+                OnboardingViewModel.shared.goToNextStep()
+            }) {
+                Text("Next")
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(lastNameInput.isEmpty ? Color.gray : Color.accentColor)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+            }
+            .disabled(lastNameInput.isEmpty)
         }
         .padding()
     }

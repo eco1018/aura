@@ -34,15 +34,18 @@ struct UrgesIntroView: View {
 
             Spacer()
 
-            // MARK: - Continue Button (UI-only)
-            Text("Continue")
-                .font(.headline)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.accentColor)
-                .foregroundColor(.white)
-                .cornerRadius(12)
-                .padding(.horizontal)
+            Button(action: {
+                OnboardingViewModel.shared.goToNextStep()
+            }) {
+                Text("Next")
+                    .foregroundColor(.white)
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.accentColor)
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+            }
         }
         .padding()
     }

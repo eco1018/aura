@@ -34,15 +34,18 @@ struct FirstNameView: View {
                 .autocapitalization(.words)
 
             Spacer()
-
-            // MARK: - Button (no navigation logic)
-            Text("Next")
-                .foregroundColor(.white)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(firstNameInput.isEmpty ? Color.gray : Color.accentColor)
-                .cornerRadius(10)
-                .padding(.horizontal)
+            Button(action: {
+                OnboardingViewModel.shared.goToNextStep()
+            }) {
+                Text("Next")
+                    .foregroundColor(.white)
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.accentColor)
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+            }
         }
         .padding()
     }

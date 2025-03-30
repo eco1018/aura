@@ -1,10 +1,4 @@
-//
-//  BirthdateView.swift
-//  aura
-//
-//  Created by Ella A. Sadduq on 3/29/25.
-//
-//
+
 //  BirthdateView.swift
 //  aura
 //
@@ -34,14 +28,19 @@ struct BirthdateView: View {
 
             Spacer()
 
-            // MARK: - Button (no logic yet)
-            Text("Next")
-                .foregroundColor(.white)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.accentColor)
-                .cornerRadius(10)
-                .padding(.horizontal)
+            // MARK: - Next Button
+            Button(action: {
+                // 🚀 Save birthdate to profile here later if needed
+                OnboardingViewModel.shared.goToNextStep()
+            }) {
+                Text("Next")
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.accentColor)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+            }
         }
         .padding()
     }

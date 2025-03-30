@@ -121,16 +121,18 @@ struct GoalsSelectionView: View {
 
             Spacer()
 
-            // MARK: - Continue Button (UI only)
-            Text("Continue")
-                .font(.headline)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(selectedGoals.count == 3 ? Color.accentColor : Color.gray)
-                .foregroundColor(.white)
-                .cornerRadius(12)
-                .padding(.horizontal)
-                .disabled(selectedGoals.count != 3)
+            Button(action: {
+                OnboardingViewModel.shared.goToNextStep()
+            }) {
+                Text("Next")
+                    .foregroundColor(.white)
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.accentColor)
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+            }
         }
         .padding(.horizontal)
     }

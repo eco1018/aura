@@ -33,22 +33,22 @@ struct MedicationReminderView: View {
                 .labelsHidden()
                 .padding(.horizontal)
 
-            // MARK: - Evening Reminder Time Picker
-            DatePicker("Evening Reminder", selection: .constant(Date()), displayedComponents: .hourAndMinute)
-                .labelsHidden()
-                .padding(.horizontal)
+            
 
             Spacer()
 
-            // MARK: - Continue Button (UI-only)
-            Text("Save Reminders")
-                .font(.headline)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.accentColor)
-                .foregroundColor(.white)
-                .cornerRadius(12)
-                .padding(.horizontal)
+            Button(action: {
+                OnboardingViewModel.shared.goToNextStep()
+            }) {
+                Text("Next")
+                    .foregroundColor(.white)
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.accentColor)
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+            }
         }
         .padding()
     }

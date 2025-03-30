@@ -41,7 +41,7 @@ struct OnboardingFlowView: View {
         case .goalsSelection:
             GoalsSelectionView()
         case .medicationsIntro:
-            MedicationIntroView()
+            MedicationsIntroView()
         case .medicationsList:
             MedicationAddingView()
         case .medicationReminder:
