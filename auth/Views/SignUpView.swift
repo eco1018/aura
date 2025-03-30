@@ -1,3 +1,5 @@
+
+
 //
 //  SignUpView.swift
 //  aura
@@ -9,16 +11,16 @@ import SwiftUI
 
 struct SignUpView: View {
     @EnvironmentObject var authVM: AuthViewModel
-    @State private var name: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var confirmPassword: String = ""
+    @State private var showPasswordMismatch: Bool = false
 
     var body: some View {
         VStack(spacing: 20) {
             Text("Sign Up")
                 .font(.largeTitle)
                 .bold()
-
 
             TextField("Email", text: $email)
                 .keyboardType(.emailAddress)
@@ -30,8 +32,23 @@ struct SignUpView: View {
                 .textContentType(.newPassword)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
 
+            SecureField("Confirm Password", text: $confirmPassword)
+                .textContentType(.newPassword)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+
+            if showPasswordMismatch {
+                Text("Passwords do not match")
+                    .font(.footnote)
+                    .foregroundColor(.red)
+            }
+
             Button(action: {
-                authVM.signUp(name: name, email: email, password: password)
+                if password == confirmPassword {
+                    showPasswordMismatch = false
+                    authVM.signUp(name: "", email: email, password: password)
+                } else {
+                    showPasswordMismatch = true
+                }
             }) {
                 Text("Create Account")
                     .frame(maxWidth: .infinity)
