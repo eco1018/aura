@@ -1,6 +1,5 @@
 
 
-
 //
 //  OnboardingStep.swift
 //  aura
@@ -27,6 +26,7 @@ enum OnboardingStep: Int, CaseIterable {
     case medicationsList
     case medicationReminder
     case diaryReminder
-    case diaryReminderTime
+    case diaryReminderTimeMorning
+    case diaryReminderTimeEvening
     case wrapUp
 }

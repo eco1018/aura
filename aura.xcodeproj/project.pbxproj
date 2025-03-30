@@ -28,6 +28,8 @@
 		C83BF0E62D98ADE100538904 /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0E52D98ADE100538904 /* OnboardingStep.swift */; };
 		C83BF0ED2D98B8A100538904 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0EC2D98B89E00538904 /* OnboardingFlowView.swift */; };
 		C83BF0EF2D98B92900538904 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0EE2D98B92600538904 /* OnboardingViewModel.swift */; };
+		C83BF0FE2D98C93800538904 /* MorningDiaryReminderTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0FD2D98C93500538904 /* MorningDiaryReminderTimeView.swift */; };
+		C83BF1002D98C96700538904 /* EveningDiaryReminderTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0FF2D98C96400538904 /* EveningDiaryReminderTimeView.swift */; };
 		C85F82C02D961BD2008583F3 /* AuthSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85F82BF2D961BC3008583F3 /* AuthSettings.swift */; };
 		C85F82DB2D9623EA008583F3 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14C02D95E3B200E3D1AF /* UserProfile.swift */; };
 		C8BB14262D95D46500E3D1AF /* auraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14222D95D46500E3D1AF /* auraApp.swift */; };
@@ -105,6 +107,8 @@
 		C83BF0E52D98ADE100538904 /* OnboardingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep.swift; sourceTree = "<group>"; };
 		C83BF0EC2D98B89E00538904 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
 		C83BF0EE2D98B92600538904 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
+		C83BF0FD2D98C93500538904 /* MorningDiaryReminderTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorningDiaryReminderTimeView.swift; sourceTree = "<group>"; };
+		C83BF0FF2D98C96400538904 /* EveningDiaryReminderTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveningDiaryReminderTimeView.swift; sourceTree = "<group>"; };
 		C85F82BF2D961BC3008583F3 /* AuthSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSettings.swift; sourceTree = "<group>"; };
 		C8BB14222D95D46500E3D1AF /* auraApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = auraApp.swift; sourceTree = "<group>"; };
 		C8BB14232D95D46500E3D1AF /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
@@ -220,6 +224,8 @@
 		C83BF0E82D98B66800538904 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				C83BF0FF2D98C96400538904 /* EveningDiaryReminderTimeView.swift */,
+				C83BF0FD2D98C93500538904 /* MorningDiaryReminderTimeView.swift */,
 				C83BF0BA2D98AC6700538904 /* DiaryCardReminderTimeView.swift */,
 				C83BF0BE2D98AC6700538904 /* GoalsIntroView.swift */,
 				C83BF0B62D98AC6700538904 /* ActionsIntroView.swift */,
@@ -474,9 +480,11 @@
 				C83BF0CF2D98AC6700538904 /* DiaryCardReminderTimeView.swift in Sources */,
 				C83BF0D02D98AC6700538904 /* DiaryCardReminderView.swift in Sources */,
 				C83BF0E42D98ACE900538904 /* AuthFlowStep.swift in Sources */,
+				C83BF0FE2D98C93800538904 /* MorningDiaryReminderTimeView.swift in Sources */,
 				C83BF0D12D98AC6700538904 /* DiaryIntroView.swift in Sources */,
 				C83BF0D22D98AC6700538904 /* FirstNameView.swift in Sources */,
 				C83BF0D32D98AC6700538904 /* GoalsIntroView.swift in Sources */,
+				C83BF1002D98C96700538904 /* EveningDiaryReminderTimeView.swift in Sources */,
 				C83BF0D42D98AC6700538904 /* GoalsSelectionView.swift in Sources */,
 				C83BF0D52D98AC6700538904 /* LastNameView.swift in Sources */,
 				C83BF0D62D98AC6700538904 /* MedicationAddingView.swift in Sources */,

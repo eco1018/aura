@@ -1,10 +1,10 @@
 
 //
 //  DiaryCardReminderView.swift
+//  DiaryCardReminderView.swift
 //  aura
 //
 //  Created by Ella A. Sadduq on 3/29/25.
-//
 
 import SwiftUI
 
@@ -33,9 +33,9 @@ struct DiaryCardReminderView: View {
             // MARK: - Reminder Options
             VStack(spacing: 16) {
                 Button(action: {
-                    // Save selection: once per day
+                    // Save selection: once per day → go directly to evening time view
                     OnboardingViewModel.shared.reminderFrequency = .once
-                    OnboardingViewModel.shared.goToNextStep() // Move to AM time
+                    OnboardingViewModel.shared.onboardingStep = .diaryReminderTimeEvening
                 }) {
                     Text("Once per day")
                         .font(.body)
@@ -48,9 +48,9 @@ struct DiaryCardReminderView: View {
                 }
 
                 Button(action: {
-                    // Save selection: twice per day
+                    // Save selection: twice per day → go to morning first
                     OnboardingViewModel.shared.reminderFrequency = .twice
-                    OnboardingViewModel.shared.goToNextStep() // Move to AM time first
+                    OnboardingViewModel.shared.onboardingStep = .diaryReminderTimeMorning
                 }) {
                     Text("Twice per day")
                         .font(.body)

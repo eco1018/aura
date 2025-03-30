@@ -1,10 +1,4 @@
-//
-//  OnboardingFlowView.swift
-//  aura
-//
-//  Created by Ella A. Sadduq on 3/30/25.
-//
-//
+
 //  OnboardingFlowView.swift
 //  aura
 //
@@ -48,8 +42,10 @@ struct OnboardingFlowView: View {
             MedicationReminderView()
         case .diaryReminder:
             DiaryCardReminderView()
-        case .diaryReminderTime:
-            DiaryCardReminderTimeView()
+        case .diaryReminderTimeMorning:
+            MorningDiaryReminderTimeView()
+        case .diaryReminderTimeEvening:
+            EveningDiaryReminderTimeView()
         case .wrapUp:
             WrapUpView()
         }
