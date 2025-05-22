@@ -1,7 +1,6 @@
 
 //
 //
-//
 //  OnboardingViewModel.swift
 //  aura
 //
@@ -40,6 +39,10 @@ final class OnboardingViewModel: ObservableObject {
     @Published var customGoals: [String] = []
     @Published var selectedEmotions: [String] = []
     @Published var selectedMedications: [String] = []
+    
+    // Medication Support
+    @Published var takesMedications: Bool = false
+    @Published var medications: [Medication] = []
     
     // Reminder Times
     @Published var morningReminderTime: Date = Calendar.current.date(bySettingHour: 8, minute: 30, second: 0, of: Date()) ?? Date()
@@ -98,6 +101,29 @@ final class OnboardingViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Medication Management
+    func addMedication(_ medication: Medication) {
+        if !medications.contains(where: { $0.rxcui == medication.rxcui }) {
+            medications.append(medication)
+            takesMedications = true
+            print("💊 Added medication: \(medication.displayName). Total: \(medications.count)")
+        }
+    }
+    
+    func removeMedication(withRxcui rxcui: String) {
+        medications.removeAll { $0.rxcui == rxcui }
+        takesMedications = !medications.isEmpty
+        print("🗑️ Removed medication with RXCUI: \(rxcui). Remaining: \(medications.count)")
+    }
+    
+    func setMedicationTaking(_ taking: Bool) {
+        takesMedications = taking
+        if !taking {
+            medications.removeAll()
+        }
+        print("💊 Set takes medications: \(taking)")
+    }
+    
     // MARK: - Load Existing Profile
     private func loadExistingProfile() {
         guard let userId = Auth.auth().currentUser?.uid else {
@@ -126,6 +152,11 @@ final class OnboardingViewModel: ObservableObject {
                     self.customUrges = profile.customUrges
                     self.customGoals = profile.customGoals
                     self.selectedEmotions = profile.selectedEmotions
+                    
+                    // Load medication data
+                    self.takesMedications = profile.takesMedications
+                    self.medications = profile.medications
+                    
                     self.morningReminderTime = profile.morningReminderTime ?? self.morningReminderTime
                     self.eveningReminderTime = profile.eveningReminderTime ?? self.eveningReminderTime
                 }
@@ -152,6 +183,8 @@ final class OnboardingViewModel: ObservableObject {
         print("   Selected Actions: \(selectedActions)")
         print("   Custom Urges: \(customUrges)")
         print("   Custom Goals: \(customGoals)")
+        print("   Takes Medications: \(takesMedications)")
+        print("   Medications Count: \(medications.count)")
         
         isLoading = true
         errorMessage = ""
@@ -172,6 +205,9 @@ final class OnboardingViewModel: ObservableObject {
             customUrges: Array(allUrges),
             customGoals: Array(allGoals),
             selectedEmotions: selectedEmotions,
+            takesMedications: takesMedications,
+            medications: medications,
+            medicationProfileVersion: takesMedications ? 1 : 0,
             morningReminderTime: reminderFrequency == .twice ? morningReminderTime : nil,
             eveningReminderTime: eveningReminderTime,
             hasCompletedOnboarding: true
@@ -181,6 +217,7 @@ final class OnboardingViewModel: ObservableObject {
         print("   Profile UID: \(updatedProfile.uid)")
         print("   Profile Name: \(updatedProfile.name)")
         print("   Profile Actions: \(updatedProfile.customActions)")
+        print("   Profile Medications: \(updatedProfile.medications.count)")
         
         // Save to Firestore
         updatedProfile.save { [weak self] success in

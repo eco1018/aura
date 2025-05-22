@@ -17,7 +17,6 @@
 		C83BF0D32D98AC6700538904 /* GoalsIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0BE2D98AC6700538904 /* GoalsIntroView.swift */; };
 		C83BF0D42D98AC6700538904 /* GoalsSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0BF2D98AC6700538904 /* GoalsSelectionView.swift */; };
 		C83BF0D52D98AC6700538904 /* LastNameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C12D98AC6700538904 /* LastNameView.swift */; };
-		C83BF0D62D98AC6700538904 /* MedicationAddingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C22D98AC6700538904 /* MedicationAddingView.swift */; };
 		C83BF0D72D98AC6700538904 /* MedicationIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C32D98AC6700538904 /* MedicationIntroView.swift */; };
 		C83BF0D82D98AC6700538904 /* MedicationReminderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C42D98AC6700538904 /* MedicationReminderView.swift */; };
 		C83BF0D92D98AC6700538904 /* UrgesIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C52D98AC6700538904 /* UrgesIntroView.swift */; };
@@ -98,7 +97,6 @@
 		C83BF0BE2D98AC6700538904 /* GoalsIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalsIntroView.swift; sourceTree = "<group>"; };
 		C83BF0BF2D98AC6700538904 /* GoalsSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalsSelectionView.swift; sourceTree = "<group>"; };
 		C83BF0C12D98AC6700538904 /* LastNameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastNameView.swift; sourceTree = "<group>"; };
-		C83BF0C22D98AC6700538904 /* MedicationAddingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicationAddingView.swift; sourceTree = "<group>"; };
 		C83BF0C32D98AC6700538904 /* MedicationIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicationIntroView.swift; sourceTree = "<group>"; };
 		C83BF0C42D98AC6700538904 /* MedicationReminderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicationReminderView.swift; sourceTree = "<group>"; };
 		C83BF0C52D98AC6700538904 /* UrgesIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgesIntroView.swift; sourceTree = "<group>"; };
@@ -148,6 +146,11 @@
 		C84F27362DDF4F1600E1D280 /* Settings */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		C84F27D02DDF625300E1D280 /* Medications */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Medications;
 			sourceTree = "<group>";
 		};
 		C8FD92982DBFFE3C00F8488C /* TestUIViews */ = {
@@ -209,6 +212,7 @@
 		C82400972D95C935004AE981 = {
 			isa = PBXGroup;
 			children = (
+				C84F27D02DDF625300E1D280 /* Medications */,
 				C84F27362DDF4F1600E1D280 /* Settings */,
 				C84F26B92DDF3AFA00E1D280 /* SkillsStepView.swift */,
 				C881F7912DDF008000F83F9B /* GoogleService-Info.plist */,
@@ -257,7 +261,6 @@
 				C83BF0BC2D98AC6700538904 /* DiaryIntroView.swift */,
 				C83BF0C72D98AC6700538904 /* WelcomeView.swift */,
 				C83BF0BF2D98AC6700538904 /* GoalsSelectionView.swift */,
-				C83BF0C22D98AC6700538904 /* MedicationAddingView.swift */,
 				C83BF0B72D98AC6700538904 /* ActionsSelectionView.swift */,
 				C83BF0C12D98AC6700538904 /* LastNameView.swift */,
 				C83BF0C82D98AC6700538904 /* WrapUpView.swift */,
@@ -354,6 +357,7 @@
 				C8032C982DBF65EB008AC9E3 /* Diary Card */,
 				C82400A22D95C935004AE981 /* aura */,
 				C84F27362DDF4F1600E1D280 /* Settings */,
+				C84F27D02DDF625300E1D280 /* Medications */,
 				C8FD92982DBFFE3C00F8488C /* TestUIViews */,
 			);
 			name = aura;
@@ -524,7 +528,6 @@
 				C83BF1002D98C96700538904 /* EveningDiaryReminderTimeView.swift in Sources */,
 				C83BF0D42D98AC6700538904 /* GoalsSelectionView.swift in Sources */,
 				C83BF0D52D98AC6700538904 /* LastNameView.swift in Sources */,
-				C83BF0D62D98AC6700538904 /* MedicationAddingView.swift in Sources */,
 				C83BF0ED2D98B8A100538904 /* OnboardingFlowView.swift in Sources */,
 				C83BF0D72D98AC6700538904 /* MedicationIntroView.swift in Sources */,
 				C83BF0D82D98AC6700538904 /* MedicationReminderView.swift in Sources */,

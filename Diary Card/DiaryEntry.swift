@@ -1,5 +1,7 @@
 //
 //
+//
+//
 //  DiaryEntry.swift
 //  aura
 //
@@ -37,7 +39,7 @@ struct DiaryEntry: Codable, Identifiable {
         self.urges = UrgeData(customUrges: userProfile?.customUrges ?? [])
         self.emotions = EmotionData(selectedEmotions: userProfile?.selectedEmotions ?? [])
         self.skills = SkillData()
-        self.medications = MedicationData()
+        self.medications = MedicationData(userMedications: userProfile?.medications ?? [])
         self.goals = GoalData(customGoals: userProfile?.customGoals ?? [])
         self.dailyNote = DailyNoteData()
     }
@@ -125,11 +127,38 @@ struct MedicationData: Codable {
     var tookMedication: Bool
     var missedDoses: Int
     var notes: String
+    var individualMedications: [DailyMedicationEntry] // Track each medication separately
     
-    init() {
+    init(userMedications: [Medication] = []) {
         self.tookMedication = false
         self.missedDoses = 0
         self.notes = ""
+        self.individualMedications = userMedications.filter(\.isActive).map { medication in
+            DailyMedicationEntry(
+                medicationId: medication.id ?? medication.rxcui,
+                medicationName: medication.displayName
+            )
+        }
+    }
+    
+    // Helper computed property for overall compliance
+    var overallCompliance: Bool {
+        return individualMedications.allSatisfy { $0.taken }
+    }
+    
+    // Helper to get medication entry by ID
+    mutating func updateMedicationEntry(medicationId: String, taken: Bool, notes: String? = nil) {
+        if let index = individualMedications.firstIndex(where: { $0.medicationId == medicationId }) {
+            individualMedications[index].taken = taken
+            individualMedications[index].takenAt = taken ? Date() : nil
+            if let notes = notes {
+                individualMedications[index].notes = notes
+            }
+        }
+        
+        // Update overall tracking
+        tookMedication = overallCompliance
+        missedDoses = individualMedications.filter { !$0.taken }.count
     }
 }
 
