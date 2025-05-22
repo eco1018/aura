@@ -3,55 +3,50 @@
 //
 //
 //
+//
+///
+//
+//
+//
+//
 //  MedicationAddingView.swift
 //  aura
 //
-//  Production-ready medication adding with real RxNorm API integration
+//  Enhanced with multi-step medication selection flow
 
 import SwiftUI
 
 struct MedicationAddingView: View {
     @ObservedObject var onboardingVM = OnboardingViewModel.shared
-    @State private var searchText = ""
-    @State private var searchResults: [MedicationSearchResult] = []
     @State private var selectedMedications: [Medication] = []
-    @State private var isSearching = false
-    @State private var searchTask: Task<Void, Never>?
-    @State private var errorMessage: String = ""
-    @State private var showingError = false
-    @State private var showingRetry = false
+    @State private var showingMedicationBuilder = false
+    @State private var showingBasicSearch = false
+    @State private var searchMethod: SearchMethod = .enhanced
     
-    private let apiService = MedicationAPIServiceFactory.create()
+    enum SearchMethod {
+        case enhanced
+        case basic
+    }
     
     var body: some View {
         VStack(spacing: 24) {
             // Header
             headerSection
             
-            // Search Interface
-            searchSection
+            // Search Method Selection
+            searchMethodSelector
             
-            // Content Area
-            ScrollView {
-                VStack(spacing: 16) {
-                    // Selected Medications
-                    if !selectedMedications.isEmpty {
-                        selectedMedicationsSection
-                    }
-                    
-                    // Search Results
-                    if !searchResults.isEmpty {
-                        searchResultsSection
-                    }
-                    
-                    // Empty States
-                    if searchText.isEmpty && selectedMedications.isEmpty {
-                        emptyStateView
-                    } else if !searchText.isEmpty && searchResults.isEmpty && !isSearching && !showingError {
-                        noResultsView
-                    }
-                }
-                .padding(.horizontal)
+            // Selected Medications
+            if !selectedMedications.isEmpty {
+                selectedMedicationsSection
+            }
+            
+            // Add Medication Button
+            addMedicationButton
+            
+            // Empty State or Help
+            if selectedMedications.isEmpty {
+                emptyStateView
             }
             
             Spacer()
@@ -59,24 +54,16 @@ struct MedicationAddingView: View {
             // Continue Button
             continueButton
         }
-        .padding(.vertical)
-        .onChange(of: searchText) { _, newValue in
-            performDelayedSearch()
-        }
-        .onDisappear {
-            searchTask?.cancel()
-        }
-        .alert("Search Error", isPresented: $showingError) {
-            Button("Retry") {
-                performSearch()
+        .padding()
+        .sheet(isPresented: $showingMedicationBuilder) {
+            MedicationBuilderFlow { medication in
+                addMedication(medication)
             }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(errorMessage)
-                if let apiError = getLastError() as? MedicationAPIError {
-                    Text(apiError.recoveryAdvice)
-                        .font(.caption)
+        }
+        .sheet(isPresented: $showingBasicSearch) {
+            BasicMedicationSearchSheet { medications in
+                for medication in medications {
+                    addMedication(medication)
                 }
             }
         }
@@ -84,13 +71,13 @@ struct MedicationAddingView: View {
     
     // MARK: - Header Section
     private var headerSection: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             Text("Add Your Medications")
                 .font(.title2)
                 .fontWeight(.semibold)
                 .multilineTextAlignment(.center)
             
-            Text("Search the National Library of Medicine database")
+            Text("Search from the National Library of Medicine database with detailed medication selection")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -98,61 +85,73 @@ struct MedicationAddingView: View {
         .padding(.horizontal)
     }
     
-    // MARK: - Search Section
-    private var searchSection: some View {
+    // MARK: - Search Method Selector
+    private var searchMethodSelector: some View {
         VStack(spacing: 12) {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
-                
-                TextField("Search medications (e.g., aspirin, ibuprofen)", text: $searchText)
-                    .textInputAutocapitalization(.words)
-                    .autocorrectionDisabled()
-                    .onSubmit {
-                        performSearch()
-                    }
-                
-                if isSearching {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                } else if !searchText.isEmpty {
-                    Button("Clear") {
-                        searchText = ""
-                        searchResults = []
-                    }
-                    .font(.caption)
-                    .foregroundColor(.blue)
-                }
-            }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemGray6))
-            )
-            .padding(.horizontal)
+            Text("Choose Search Method")
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(.secondary)
             
-            // Search status
-            if isSearching {
-                HStack {
-                    ProgressView()
-                        .scaleEffect(0.7)
-                    Text("Searching RxNorm database...")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+            HStack(spacing: 12) {
+                // Enhanced Search Button
+                Button(action: {
+                    searchMethod = .enhanced
+                }) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.title2)
+                        
+                        Text("Detailed")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                        
+                        Text("Step-by-step")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(searchMethod == .enhanced ? Color.blue : Color(.systemGray6))
+                    )
+                    .foregroundColor(searchMethod == .enhanced ? .white : .primary)
                 }
-            } else if showingRetry {
-                Button("Tap to retry search") {
-                    performSearch()
+                .buttonStyle(PlainButtonStyle())
+                
+                // Basic Search Button
+                Button(action: {
+                    searchMethod = .basic
+                }) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.title2)
+                        
+                        Text("Quick")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                        
+                        Text("Basic search")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(searchMethod == .basic ? Color.blue : Color(.systemGray6))
+                    )
+                    .foregroundColor(searchMethod == .basic ? .white : .primary)
                 }
-                .font(.caption)
-                .foregroundColor(.blue)
+                .buttonStyle(PlainButtonStyle())
             }
         }
     }
     
     // MARK: - Selected Medications Section
     private var selectedMedicationsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("Your Medications")
                     .font(.headline)
@@ -177,37 +176,27 @@ struct MedicationAddingView: View {
         }
     }
     
-    // MARK: - Search Results Section
-    private var searchResultsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+    // MARK: - Add Medication Button
+    private var addMedicationButton: some View {
+        Button(action: {
+            if searchMethod == .enhanced {
+                showingMedicationBuilder = true
+            } else {
+                showingBasicSearch = true
+            }
+        }) {
             HStack {
-                Text("Search Results")
+                Image(systemName: "plus.circle.fill")
+                    .font(.title3)
+                
+                Text(searchMethod == .enhanced ? "Add Medication (Detailed)" : "Add Medication (Quick)")
                     .font(.headline)
-                    .fontWeight(.semibold)
-                
-                Spacer()
-                
-                Text("RxNorm Database")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 1)
-                    .background(Color.blue.opacity(0.1))
-                    .cornerRadius(3)
             }
-            
-            ForEach(searchResults) { result in
-                SearchResultCard(
-                    result: result,
-                    isSelected: isAlreadySelected(result)
-                ) {
-                    if isAlreadySelected(result) {
-                        removeMedicationByRxcui(result.rxcui)
-                    } else {
-                        addMedication(result)
-                    }
-                }
-            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.blue)
+            .cornerRadius(12)
         }
     }
     
@@ -215,58 +204,30 @@ struct MedicationAddingView: View {
     private var emptyStateView: some View {
         VStack(spacing: 16) {
             Image(systemName: "pills.circle")
-                .font(.system(size: 60))
+                .font(.system(size: 50))
                 .foregroundColor(.gray)
             
-            Text("Search for Your Medications")
+            Text("No Medications Added Yet")
                 .font(.headline)
                 .fontWeight(.semibold)
             
             VStack(spacing: 8) {
-                Text("Access to 100,000+ medications from the")
-                Text("National Library of Medicine RxNorm database")
-                
-                Text("Try searching for common medications:")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding(.top, 8)
-                
-                HStack(spacing: 12) {
-                    searchSuggestionButton("Aspirin")
-                    searchSuggestionButton("Ibuprofen")
-                    searchSuggestionButton("Metformin")
+                if searchMethod == .enhanced {
+                    Text("• **Detailed Search**: Step-by-step selection")
+                    Text("• Choose exact formulation (XR, IR, etc.)")
+                    Text("• Select precise strength and dosage")
+                    Text("• Set custom reminder times")
+                } else {
+                    Text("• **Quick Search**: Fast medication lookup")
+                    Text("• Basic medication information")
+                    Text("• Faster for commonly known medications")
                 }
             }
-            .font(.body)
-            .foregroundColor(.secondary)
-            .multilineTextAlignment(.center)
-            .padding(.horizontal)
-        }
-        .padding(.vertical, 40)
-    }
-    
-    // MARK: - No Results View
-    private var noResultsView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 40))
-                .foregroundColor(.gray)
-            
-            Text("No medications found")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
-            VStack(spacing: 4) {
-                Text("Try searching with:")
-                Text("• Generic name (e.g., 'ibuprofen' not 'Advil')")
-                Text("• Different spelling or abbreviation")
-                Text("• Just the medication name without dosage")
-            }
-            .font(.body)
+            .font(.subheadline)
             .foregroundColor(.secondary)
             .multilineTextAlignment(.leading)
         }
-        .padding(.vertical, 30)
+        .padding(.vertical, 20)
     }
     
     // MARK: - Continue Button
@@ -278,7 +239,6 @@ struct MedicationAddingView: View {
                 } else {
                     Text("Continue with \(selectedMedications.count) medication\(selectedMedications.count == 1 ? "" : "s")")
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.headline)
                 }
             }
             .foregroundColor(.white)
@@ -288,128 +248,20 @@ struct MedicationAddingView: View {
             .background(Color.accentColor)
             .cornerRadius(12)
         }
-        .padding(.horizontal)
-    }
-    
-    // MARK: - Helper Views
-    private func searchSuggestionButton(_ text: String) -> some View {
-        Button(text) {
-            searchText = text
-            performSearch()
-        }
-        .font(.caption)
-        .foregroundColor(.blue)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Color.blue.opacity(0.1))
-        .cornerRadius(6)
     }
     
     // MARK: - Helper Methods
-    private func performDelayedSearch() {
-        // Cancel previous search
-        searchTask?.cancel()
-        
-        // Clear error state
-        showingError = false
-        showingRetry = false
-        errorMessage = ""
-        
-        // Only search if there's meaningful input
-        guard searchText.count >= 2 else {
-            searchResults = []
-            return
+    private func addMedication(_ medication: Medication) {
+        // Check if medication already exists (by rxcui)
+        if !selectedMedications.contains(where: { $0.rxcui == medication.rxcui }) {
+            selectedMedications.append(medication)
+            print("✅ Added medication: \(medication.displayName)")
         }
-        
-        // Debounce search by 1 second for production API
-        searchTask = Task {
-            try? await Task.sleep(nanoseconds: 1_000_000_000)
-            
-            if !Task.isCancelled {
-                await performSearch()
-            }
-        }
-    }
-    
-    private func performSearch() {
-        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else {
-            searchResults = []
-            return
-        }
-        
-        Task {
-            await MainActor.run {
-                isSearching = true
-                showingError = false
-                showingRetry = false
-                errorMessage = ""
-            }
-            
-            do {
-                let results = try await apiService.searchMedications(query: searchText)
-                
-                await MainActor.run {
-                    self.searchResults = results
-                    self.isSearching = false
-                    
-                    print("✅ RxNorm search completed: \(results.count) results")
-                }
-            } catch let error as MedicationAPIError {
-                await MainActor.run {
-                    handleSearchError(error)
-                }
-            } catch {
-                await MainActor.run {
-                    handleSearchError(.networkError)
-                }
-            }
-        }
-    }
-    
-    private func handleSearchError(_ error: MedicationAPIError) {
-        print("❌ Medication search error: \(error)")
-        
-        searchResults = []
-        isSearching = false
-        errorMessage = error.localizedDescription
-        
-        switch error {
-        case .rateLimited:
-            showingRetry = true
-            // Auto-retry after delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
-                if showingRetry {
-                    performSearch()
-                }
-            }
-        case .networkError:
-            showingError = true
-        default:
-            showingError = true
-        }
-    }
-    
-    private func addMedication(_ result: MedicationSearchResult) {
-        let medication = result.toMedication()
-        selectedMedications.append(medication)
-        
-        // Remove from search results to avoid confusion
-        searchResults.removeAll { $0.rxcui == result.rxcui }
-        
-        print("✅ Added medication: \(medication.displayName)")
     }
     
     private func removeMedication(_ medication: Medication) {
         selectedMedications.removeAll { $0.rxcui == medication.rxcui }
         print("🗑️ Removed medication: \(medication.displayName)")
-    }
-    
-    private func removeMedicationByRxcui(_ rxcui: String) {
-        selectedMedications.removeAll { $0.rxcui == rxcui }
-    }
-    
-    private func isAlreadySelected(_ result: MedicationSearchResult) -> Bool {
-        return selectedMedications.contains { $0.rxcui == result.rxcui }
     }
     
     private func saveMedicationsAndContinue() {
@@ -422,16 +274,206 @@ struct MedicationAddingView: View {
         // Continue to next step
         onboardingVM.goToNextStep()
     }
+}
+
+// MARK: - Basic Search Sheet (Fallback)
+struct BasicMedicationSearchSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let onMedicationsSelected: ([Medication]) -> Void
     
-    private func getLastError() -> Error? {
-        // This would ideally be stored in state, simplified for now
-        return MedicationAPIError.networkError
+    @State private var searchText = ""
+    @State private var searchResults: [MedicationSearchResult] = []
+    @State private var selectedMedications: [Medication] = []
+    @State private var isSearching = false
+    @State private var errorMessage = ""
+    @State private var showingError = false
+    
+    private let apiService = MedicationAPIServiceFactory.create()
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                // Search Bar
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.gray)
+                    
+                    TextField("Search medications (quick search)", text: $searchText)
+                        .textInputAutocapitalization(.words)
+                        .autocorrectionDisabled()
+                        .onSubmit {
+                            performSearch()
+                        }
+                    
+                    if isSearching {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    }
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.systemGray6))
+                )
+                .padding(.horizontal)
+                
+                // Results
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        // Selected medications
+                        if !selectedMedications.isEmpty {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Selected (\(selectedMedications.count))")
+                                    .font(.headline)
+                                    .padding(.horizontal)
+                                
+                                ForEach(selectedMedications) { medication in
+                                    SelectedMedicationCard(medication: medication) {
+                                        removeMedication(medication)
+                                    }
+                                    .padding(.horizontal)
+                                }
+                            }
+                        }
+                        
+                        // Search results
+                        if !searchResults.isEmpty {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Search Results")
+                                    .font(.headline)
+                                    .padding(.horizontal)
+                                
+                                ForEach(searchResults) { result in
+                                    BasicSearchResultCard(
+                                        result: result,
+                                        isSelected: isSelected(result)
+                                    ) {
+                                        toggleSelection(result)
+                                    }
+                                    .padding(.horizontal)
+                                }
+                            }
+                        }
+                        
+                        // Empty state
+                        if searchText.isEmpty && selectedMedications.isEmpty {
+                            VStack(spacing: 16) {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.gray)
+                                
+                                Text("Quick Medication Search")
+                                    .font(.headline)
+                                
+                                Text("Enter medication name for basic search")
+                                    .font(.body)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 40)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Quick Search")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Add (\(selectedMedications.count))") {
+                        onMedicationsSelected(selectedMedications)
+                        dismiss()
+                    }
+                    .disabled(selectedMedications.isEmpty)
+                    .fontWeight(.semibold)
+                }
+            }
+        }
+        .onChange(of: searchText) { _, _ in
+            performDelayedSearch()
+        }
+        .alert("Search Error", isPresented: $showingError) {
+            Button("OK") { }
+        } message: {
+            Text(errorMessage)
+        }
+    }
+    
+    @State private var searchTask: Task<Void, Never>?
+    
+    private func performDelayedSearch() {
+        searchTask?.cancel()
+        
+        guard searchText.count >= 2 else {
+            searchResults = []
+            return
+        }
+        
+        searchTask = Task {
+            try? await Task.sleep(nanoseconds: 800_000_000)
+            
+            if !Task.isCancelled {
+                await performSearch()
+            }
+        }
+    }
+    
+    private func performSearch() {
+        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else {
+            return
+        }
+        
+        Task {
+            await MainActor.run {
+                isSearching = true
+                showingError = false
+            }
+            
+            do {
+                let results = try await apiService.searchMedications(query: searchText)
+                
+                await MainActor.run {
+                    self.searchResults = results
+                    self.isSearching = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.searchResults = []
+                    self.isSearching = false
+                    self.errorMessage = error.localizedDescription
+                    self.showingError = true
+                }
+            }
+        }
+    }
+    
+    private func toggleSelection(_ result: MedicationSearchResult) {
+        if isSelected(result) {
+            selectedMedications.removeAll { $0.rxcui == result.rxcui }
+        } else {
+            selectedMedications.append(result.toMedication())
+        }
+        
+        // Remove from search results to avoid confusion
+        searchResults.removeAll { $0.rxcui == result.rxcui }
+    }
+    
+    private func removeMedication(_ medication: Medication) {
+        selectedMedications.removeAll { $0.rxcui == medication.rxcui }
+    }
+    
+    private func isSelected(_ result: MedicationSearchResult) -> Bool {
+        selectedMedications.contains { $0.rxcui == result.rxcui }
     }
 }
 
 // MARK: - Supporting Card Views
 
-private struct SelectedMedicationCard: View {
+struct SelectedMedicationCard: View {
     let medication: Medication
     let onRemove: () -> Void
     
@@ -442,10 +484,31 @@ private struct SelectedMedicationCard: View {
                     .font(.body)
                     .fontWeight(.medium)
                 
-                if let genericName = medication.genericName, genericName != medication.name {
-                    Text("Generic: \(genericName)")
+                HStack {
+                    if let strength = medication.strength {
+                        Text(strength)
+                            .font(.caption)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.blue.opacity(0.1))
+                            .cornerRadius(4)
+                    }
+                    
+                    if let form = medication.dosageForm {
+                        Text(form)
+                            .font(.caption)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.green.opacity(0.1))
+                            .cornerRadius(4)
+                    }
+                    
+                    Text(medication.frequency.displayName)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.orange.opacity(0.1))
+                        .cornerRadius(4)
                 }
                 
                 Text("RxCUI: \(medication.rxcui)")
@@ -471,7 +534,7 @@ private struct SelectedMedicationCard: View {
     }
 }
 
-private struct SearchResultCard: View {
+struct BasicSearchResultCard: View {
     let result: MedicationSearchResult
     let isSelected: Bool
     let action: () -> Void
