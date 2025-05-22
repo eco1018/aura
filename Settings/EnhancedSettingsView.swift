@@ -15,6 +15,7 @@ struct EnhancedSettingsView: View {
     @State private var showingDiaryHistory = false
     @State private var showingPersonalInfoEdit = false
     @State private var showingTrackingPreferencesEdit = false
+    @State private var showingMedicationSettings = false
     
     var body: some View {
         NavigationView {
@@ -35,12 +36,22 @@ struct EnhancedSettingsView: View {
                             showingDiaryHistory = true
                         }
                         
+                        // Medications
+                        SettingsOptionCard(
+                            icon: "pills",
+                            title: "Medications",
+                            subtitle: "Manage your medication list",
+                            iconColor: .green
+                        ) {
+                            showingMedicationSettings = true
+                        }
+                        
                         // Edit Personal Info
                         SettingsOptionCard(
                             icon: "person.circle",
                             title: "Personal Information",
                             subtitle: "Update your name, age, and details",
-                            iconColor: .green
+                            iconColor: .purple
                         ) {
                             showingPersonalInfoEdit = true
                         }
@@ -50,7 +61,7 @@ struct EnhancedSettingsView: View {
                             icon: "slider.horizontal.3",
                             title: "Tracking Preferences",
                             subtitle: "Update your diary card preferences",
-                            iconColor: .purple
+                            iconColor: .orange
                         ) {
                             showingTrackingPreferencesEdit = true
                         }
@@ -93,6 +104,10 @@ struct EnhancedSettingsView: View {
         }
         .sheet(isPresented: $showingDiaryHistory) {
             DiaryHistoryView()
+        }
+        .sheet(isPresented: $showingMedicationSettings) {
+            MedicationSettingsView()
+                .environmentObject(authVM)
         }
         .sheet(isPresented: $showingPersonalInfoEdit) {
             PersonalInfoEditView()

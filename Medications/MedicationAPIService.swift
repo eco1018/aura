@@ -1,178 +1,369 @@
 //
 //
-//
 //  MedicationAPIService.swift
 //  aura
 //
-//  Created by Assistant on 5/22/25.
-//
+//  Enhanced medication API with detailed medication selection
 
 import Foundation
 
-// MARK: - Medication API Service Protocol
-protocol MedicationAPIServiceProtocol {
-    func searchMedications(query: String) async throws -> [MedicationSearchResult]
-    func getMedicationDetails(rxcui: String) async throws -> MedicationSearchResult?
-}
+// MARK: - Enhanced Medication Models
 
-// MARK: - Real RxNorm API Service with Debug
-class RxNormAPIService: MedicationAPIServiceProtocol {
-    private let baseURL = "https://rxnav.nlm.nih.gov/REST"
-    private let session = URLSession.shared
+struct DetailedMedicationSearchResult: Codable, Identifiable {
+    let id = UUID()
+    let rxcui: String
+    let name: String
+    let genericName: String?
+    let strength: String?
+    let dosageForm: String? // tablet, capsule, etc.
+    let brandNames: [String]
+    let isGeneric: Bool
     
-    func searchMedications(query: String) async throws -> [MedicationSearchResult] {
-        guard !query.trimmingCharacters(in: .whitespaces).isEmpty else {
-            return []
+    var displayName: String {
+        if let strength = strength {
+            return "\(name) \(strength)"
+        }
+        return name
+    }
+    
+    var fullDescription: String {
+        var components: [String] = [name]
+        
+        if let strength = strength {
+            components.append(strength)
         }
         
-        // Encode the query for URL
-        guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
-            print("❌ Failed to encode query: \(query)")
+        if let form = dosageForm {
+            components.append(form)
+        }
+        
+        if let generic = genericName, generic != name {
+            components.append("(\(generic))")
+        }
+        
+        return components.joined(separator: " ")
+    }
+}
+
+struct MedicationStrength: Codable, Identifiable {
+    let id = UUID()
+    let strength: String
+    let rxcui: String
+    let dosageForm: String
+    
+    var displayText: String {
+        return "\(strength) \(dosageForm)"
+    }
+}
+
+// MARK: - Enhanced API Service Protocol
+protocol EnhancedMedicationAPIServiceProtocol {
+    func searchMedicationNames(query: String) async throws -> [String]
+    func getMedicationDetails(name: String) async throws -> [DetailedMedicationSearchResult]
+    func getMedicationStrengths(rxcui: String) async throws -> [MedicationStrength]
+}
+
+// MARK: - Enhanced RxNorm API Service
+class EnhancedRxNormAPIService: EnhancedMedicationAPIServiceProtocol {
+    private let baseURL = "https://rxnav.nlm.nih.gov/REST"
+    private let session: URLSession
+    
+    init() {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 15.0
+        config.timeoutIntervalForResource = 30.0
+        config.waitsForConnectivity = true
+        self.session = URLSession(configuration: config)
+    }
+    
+    // MARK: - Step 1: Search for medication names
+    func searchMedicationNames(query: String) async throws -> [String] {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespaces)
+        
+        guard !trimmedQuery.isEmpty && trimmedQuery.count >= 2 else {
             throw MedicationAPIError.invalidQuery
         }
         
-        // Build the search URL for approximate search
-        let urlString = "\(baseURL)/approximateTerm.json?term=\(encodedQuery)&maxEntries=20"
+        guard let encodedQuery = trimmedQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+            throw MedicationAPIError.invalidQuery
+        }
+        
+        // Use drugs endpoint for cleaner name search
+        let urlString = "\(baseURL)/drugs.json?name=\(encodedQuery)"
         guard let url = URL(string: urlString) else {
-            print("❌ Failed to create URL: \(urlString)")
             throw MedicationAPIError.invalidURL
         }
         
-        print("🔍 Searching RxNorm API: \(urlString)")
+        print("🔍 Searching medication names: \(urlString)")
         
         do {
-            // Make the request with timeout
-            let request = URLRequest(url: url, timeoutInterval: 10.0)
-            let (data, response) = try await session.data(for: request)
+            let (data, response) = try await session.data(from: url)
             
-            guard let httpResponse = response as? HTTPURLResponse else {
-                print("❌ Invalid response type")
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
                 throw MedicationAPIError.networkError
             }
             
-            print("📡 API Response Status: \(httpResponse.statusCode)")
+            let decoder = JSONDecoder()
+            let apiResponse = try decoder.decode(RxNormDrugsResponse.self, from: data)
             
-            guard httpResponse.statusCode == 200 else {
-                print("❌ RxNorm API Error: Status \(httpResponse.statusCode)")
-                print("📄 Response data: \(String(data: data, encoding: .utf8) ?? "No data")")
-                throw MedicationAPIError.networkError
-            }
+            let names = parseDrugNames(apiResponse)
+            print("✅ Found \(names.count) medication names")
+            return names
             
-            // Print raw response for debugging
-            if let responseString = String(data: data, encoding: .utf8) {
-                print("📄 Raw API Response: \(responseString)")
-            }
-            
-            // Parse the response
-            do {
-                let apiResponse = try JSONDecoder().decode(RxNormApproximateResponse.self, from: data)
-                let results = parseApproximateResults(apiResponse)
-                print("✅ Found \(results.count) medications from RxNorm")
-                return results
-            } catch {
-                print("❌ Failed to parse RxNorm response: \(error)")
-                print("📄 Response was: \(String(data: data, encoding: .utf8) ?? "No data")")
-                throw MedicationAPIError.parsingError
-            }
         } catch {
-            print("❌ Network error: \(error)")
-            throw MedicationAPIError.networkError
+            if error is MedicationAPIError {
+                throw error
+            } else {
+                throw MedicationAPIError.networkError
+            }
         }
     }
     
-    func getMedicationDetails(rxcui: String) async throws -> MedicationSearchResult? {
+    // MARK: - Step 2: Get detailed medication info
+    func getMedicationDetails(name: String) async throws -> [DetailedMedicationSearchResult] {
+        guard let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+            throw MedicationAPIError.invalidQuery
+        }
+        
+        // Get RxCUIs for this drug name
+        let urlString = "\(baseURL)/rxcui.json?name=\(encodedName)"
+        guard let url = URL(string: urlString) else {
+            throw MedicationAPIError.invalidURL
+        }
+        
+        print("🔍 Getting details for: \(name)")
+        
+        do {
+            let (data, response) = try await session.data(from: url)
+            
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
+                throw MedicationAPIError.networkError
+            }
+            
+            let decoder = JSONDecoder()
+            let rxcuiResponse = try decoder.decode(RxNormRxCUIResponse.self, from: data)
+            
+            var allMedications: [DetailedMedicationSearchResult] = []
+            
+            // Get details for each RXCUI
+            if let rxcuis = rxcuiResponse.idGroup?.rxnormId {
+                for rxcui in rxcuis.prefix(10) { // Limit to prevent too many API calls
+                    if let medications = try? await getMedicationsByRxCUI(rxcui: rxcui) {
+                        allMedications.append(contentsOf: medications)
+                    }
+                }
+            }
+            
+            // Remove duplicates and sort
+            let uniqueMedications = Array(Set(allMedications.map { $0.rxcui }))
+                .compactMap { rxcui in allMedications.first { $0.rxcui == rxcui } }
+                .sorted { $0.name < $1.name }
+            
+            print("✅ Found \(uniqueMedications.count) detailed medications")
+            return uniqueMedications
+            
+        } catch {
+            if error is MedicationAPIError {
+                throw error
+            } else {
+                throw MedicationAPIError.networkError
+            }
+        }
+    }
+    
+    // MARK: - Step 3: Get strengths for a specific medication
+    func getMedicationStrengths(rxcui: String) async throws -> [MedicationStrength] {
+        let urlString = "\(baseURL)/rxcui/\(rxcui)/related.json?tty=SBD+SCD"
+        guard let url = URL(string: urlString) else {
+            throw MedicationAPIError.invalidURL
+        }
+        
+        print("🔍 Getting strengths for RXCUI: \(rxcui)")
+        
+        do {
+            let (data, response) = try await session.data(from: url)
+            
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
+                throw MedicationAPIError.networkError
+            }
+            
+            let decoder = JSONDecoder()
+            let relatedResponse = try decoder.decode(RxNormRelatedResponse.self, from: data)
+            
+            let strengths = parseStrengths(relatedResponse)
+            print("✅ Found \(strengths.count) strengths")
+            return strengths
+            
+        } catch {
+            if error is MedicationAPIError {
+                throw error
+            } else {
+                throw MedicationAPIError.networkError
+            }
+        }
+    }
+    
+    // MARK: - Private Helper Methods
+    
+    private func getMedicationsByRxCUI(rxcui: String) async throws -> [DetailedMedicationSearchResult] {
         let urlString = "\(baseURL)/rxcui/\(rxcui)/properties.json"
         guard let url = URL(string: urlString) else {
             throw MedicationAPIError.invalidURL
         }
         
-        let (data, response) = try await session.data(from: url)
-        
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            throw MedicationAPIError.networkError
-        }
-        
         do {
-            let apiResponse = try JSONDecoder().decode(RxNormPropertiesResponse.self, from: data)
-            return parsePropertiesResult(apiResponse)
+            let (data, response) = try await session.data(from: url)
+            
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
+                return []
+            }
+            
+            let decoder = JSONDecoder()
+            let propertiesResponse = try decoder.decode(RxNormPropertiesResponse.self, from: data)
+            
+            return parseDetailedMedications(propertiesResponse)
+            
         } catch {
-            throw MedicationAPIError.parsingError
+            return []
         }
     }
     
-    // MARK: - Private Parsing Methods
-    
-    private func parseApproximateResults(_ response: RxNormApproximateResponse) -> [MedicationSearchResult] {
-        print("🔍 Parsing response: \(response)")
-        
-        guard let candidates = response.approximateGroup?.candidate else {
-            print("⚠️ No candidates found in response")
+    private func parseDrugNames(_ response: RxNormDrugsResponse) -> [String] {
+        guard let drugGroup = response.drugGroup,
+              let conceptGroup = drugGroup.conceptGroup else {
             return []
         }
         
-        print("🔍 Found \(candidates.count) candidates")
+        var names: Set<String> = []
         
-        var results: [MedicationSearchResult] = []
+        for group in conceptGroup {
+            if let conceptProperties = group.conceptProperties {
+                for property in conceptProperties {
+                    names.insert(property.name)
+                }
+            }
+        }
         
-        for candidate in candidates {
-            print("🔍 Processing candidate: \(candidate.name) (RXCUI: \(candidate.rxcui))")
-            let result = MedicationSearchResult(
-                rxcui: candidate.rxcui,
-                name: candidate.name,
-                synonym: candidate.name,
-                tty: nil
+        return Array(names).sorted().prefix(15).map { $0 }
+    }
+    
+    private func parseDetailedMedications(_ response: RxNormPropertiesResponse) -> [DetailedMedicationSearchResult] {
+        guard let properties = response.properties else { return [] }
+        
+        return properties.compactMap { property in
+            // Extract strength and dosage form from name
+            let (strength, dosageForm) = extractStrengthAndForm(from: property.name)
+            
+            return DetailedMedicationSearchResult(
+                rxcui: property.rxcui,
+                name: property.name,
+                genericName: property.synonym,
+                strength: strength,
+                dosageForm: dosageForm,
+                brandNames: [], // Would need additional API call
+                isGeneric: property.tty?.contains("SCD") == true
             )
-            results.append(result)
+        }
+    }
+    
+    private func parseStrengths(_ response: RxNormRelatedResponse) -> [MedicationStrength] {
+        guard let relatedGroup = response.relatedGroup,
+              let conceptGroup = relatedGroup.conceptGroup else {
+            return []
         }
         
-        return results
-    }
-    
-    private func parsePropertiesResult(_ response: RxNormPropertiesResponse) -> MedicationSearchResult? {
-        guard let properties = response.properties?.first else {
-            return nil
+        var strengths: [MedicationStrength] = []
+        
+        for group in conceptGroup {
+            if let conceptProperties = group.conceptProperties {
+                for property in conceptProperties {
+                    let (strength, dosageForm) = extractStrengthAndForm(from: property.name)
+                    
+                    if let strength = strength, let dosageForm = dosageForm {
+                        strengths.append(MedicationStrength(
+                            strength: strength,
+                            rxcui: property.rxcui,
+                            dosageForm: dosageForm
+                        ))
+                    }
+                }
+            }
         }
         
-        return MedicationSearchResult(
-            rxcui: properties.rxcui,
-            name: properties.name,
-            synonym: properties.synonym,
-            tty: properties.tty
-        )
+        return Array(Set(strengths.map { "\($0.strength)|\($0.dosageForm)" }))
+            .compactMap { key in
+                strengths.first { "\($0.strength)|\($0.dosageForm)" == key }
+            }
+            .sorted { $0.strength < $1.strength }
     }
-}
-
-// MARK: - RxNorm API Response Models
-
-struct RxNormApproximateResponse: Codable {
-    let approximateGroup: ApproximateGroup?
     
-    enum CodingKeys: String, CodingKey {
-        case approximateGroup
+    private func extractStrengthAndForm(from name: String) -> (strength: String?, dosageForm: String?) {
+        let strengthPattern = #"(\d+(?:\.\d+)?\s*(?:mg|mcg|g|ml|units?))"#
+        let formPattern = #"\b(tablet|capsule|injection|syrup|cream|ointment|patch|solution|suspension|extended.release|XR|IR|SR|ER)\b"#
+        
+        let strengthRegex = try? NSRegularExpression(pattern: strengthPattern, options: .caseInsensitive)
+        let formRegex = try? NSRegularExpression(pattern: formPattern, options: .caseInsensitive)
+        
+        let range = NSRange(name.startIndex..<name.endIndex, in: name)
+        
+        let strength = strengthRegex?.firstMatch(in: name, options: [], range: range)
+            .flatMap { Range($0.range, in: name) }
+            .map { String(name[$0]) }
+        
+        let dosageForm = formRegex?.firstMatch(in: name, options: [], range: range)
+            .flatMap { Range($0.range, in: name) }
+            .map { String(name[$0]) }
+        
+        return (strength, dosageForm)
     }
 }
 
-struct ApproximateGroup: Codable {
-    let candidate: [RxNormCandidate]?
-    
-    enum CodingKeys: String, CodingKey {
-        case candidate
-    }
+// MARK: - Enhanced Response Models
+
+struct RxNormDrugsResponse: Codable {
+    let drugGroup: DrugGroup?
 }
 
-struct RxNormCandidate: Codable {
+struct DrugGroup: Codable {
+    let conceptGroup: [ConceptGroup]?
+}
+
+struct ConceptGroup: Codable {
+    let tty: String?
+    let conceptProperties: [ConceptProperty]?
+}
+
+struct ConceptProperty: Codable {
     let rxcui: String
     let name: String
-    let score: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case rxcui
-        case name
-        case score
-    }
+    let synonym: String?
+    let tty: String?
+    let language: String?
+    let suppress: String?
+    let umlscui: String?
 }
 
+struct RxNormRxCUIResponse: Codable {
+    let idGroup: IdGroup?
+}
+
+struct IdGroup: Codable {
+    let rxnormId: [String]?
+}
+
+struct RxNormRelatedResponse: Codable {
+    let relatedGroup: RelatedGroup?
+}
+
+struct RelatedGroup: Codable {
+    let conceptGroup: [ConceptGroup]?
+}
+
+// MARK: - Keep existing simple models for compatibility
 struct RxNormPropertiesResponse: Codable {
     let properties: [RxNormProperty]?
 }
@@ -184,105 +375,7 @@ struct RxNormProperty: Codable {
     let tty: String?
 }
 
-// MARK: - Enhanced Mock Service with Real Medications
-class EnhancedMockMedicationAPIService: MedicationAPIServiceProtocol {
-    
-    // Comprehensive mock database
-    private let mockMedications: [MedicationSearchResult] = [
-        // Popular Brand Names
-        MedicationSearchResult(rxcui: "1049221", name: "Advil", synonym: "Ibuprofen", tty: "BN"),
-        MedicationSearchResult(rxcui: "1049589", name: "Tylenol", synonym: "Acetaminophen", tty: "BN"),
-        MedicationSearchResult(rxcui: "1049640", name: "Aspirin", synonym: "Aspirin", tty: "IN"),
-        MedicationSearchResult(rxcui: "1053652", name: "Prozac", synonym: "Fluoxetine", tty: "BN"),
-        MedicationSearchResult(rxcui: "1094019", name: "Xanax", synonym: "Alprazolam", tty: "BN"),
-        MedicationSearchResult(rxcui: "1094235", name: "Zoloft", synonym: "Sertraline", tty: "BN"),
-        MedicationSearchResult(rxcui: "1097663", name: "Lipitor", synonym: "Atorvastatin", tty: "BN"),
-        
-        // Generic Names - Mental Health
-        MedicationSearchResult(rxcui: "32967", name: "Sertraline", synonym: "Sertraline", tty: "IN"),
-        MedicationSearchResult(rxcui: "42347", name: "Fluoxetine", synonym: "Fluoxetine", tty: "IN"),
-        MedicationSearchResult(rxcui: "41127", name: "Escitalopram", synonym: "Escitalopram", tty: "IN"),
-        MedicationSearchResult(rxcui: "2597", name: "Alprazolam", synonym: "Alprazolam", tty: "IN"),
-        MedicationSearchResult(rxcui: "2624", name: "Lorazepam", synonym: "Lorazepam", tty: "IN"),
-        MedicationSearchResult(rxcui: "39786", name: "Trazodone", synonym: "Trazodone", tty: "IN"),
-        MedicationSearchResult(rxcui: "6470", name: "Lithium", synonym: "Lithium", tty: "IN"),
-        MedicationSearchResult(rxcui: "42503", name: "Lamotrigine", synonym: "Lamotrigine", tty: "IN"),
-        MedicationSearchResult(rxcui: "89013", name: "Quetiapine", synonym: "Quetiapine", tty: "IN"),
-        MedicationSearchResult(rxcui: "73178", name: "Aripiprazole", synonym: "Aripiprazole", tty: "IN"),
-        
-        // Common Medical Conditions
-        MedicationSearchResult(rxcui: "6809", name: "Metformin", synonym: "Metformin", tty: "IN"),
-        MedicationSearchResult(rxcui: "29046", name: "Lisinopril", synonym: "Lisinopril", tty: "IN"),
-        MedicationSearchResult(rxcui: "36567", name: "Atorvastatin", synonym: "Atorvastatin", tty: "IN"),
-        MedicationSearchResult(rxcui: "153165", name: "Omeprazole", synonym: "Omeprazole", tty: "IN"),
-        MedicationSearchResult(rxcui: "20610", name: "Amlodipine", synonym: "Amlodipine", tty: "IN"),
-        MedicationSearchResult(rxcui: "35606", name: "Simvastatin", synonym: "Simvastatin", tty: "IN"),
-        
-        // Pain & Inflammation
-        MedicationSearchResult(rxcui: "5640", name: "Ibuprofen", synonym: "Ibuprofen", tty: "IN"),
-        MedicationSearchResult(rxcui: "161", name: "Acetaminophen", synonym: "Acetaminophen", tty: "IN"),
-        MedicationSearchResult(rxcui: "1191", name: "Aspirin", synonym: "Aspirin", tty: "IN"),
-        MedicationSearchResult(rxcui: "7052", name: "Naproxen", synonym: "Naproxen", tty: "IN"),
-        
-        // Sleep & Supplements
-        MedicationSearchResult(rxcui: "141927", name: "Melatonin", synonym: "Melatonin", tty: "IN"),
-        MedicationSearchResult(rxcui: "1190533", name: "Vitamin D", synonym: "Vitamin D", tty: "IN"),
-        MedicationSearchResult(rxcui: "6038", name: "Magnesium", synonym: "Magnesium", tty: "IN"),
-        
-        // ADHD
-        MedicationSearchResult(rxcui: "18631", name: "Methylphenidate", synonym: "Methylphenidate", tty: "IN"),
-        MedicationSearchResult(rxcui: "1158447", name: "Adderall", synonym: "Amphetamine/Dextroamphetamine", tty: "BN"),
-        
-        // Blood Pressure
-        MedicationSearchResult(rxcui: "50166", name: "Losartan", synonym: "Losartan", tty: "IN"),
-        MedicationSearchResult(rxcui: "18867", name: "Metoprolol", synonym: "Metoprolol", tty: "IN"),
-    ]
-    
-    func searchMedications(query: String) async throws -> [MedicationSearchResult] {
-        print("🔄 Using enhanced mock service for query: \(query)")
-        
-        // Simulate realistic network delay
-        try await Task.sleep(nanoseconds: 600_000_000) // 0.6 seconds
-        
-        guard !query.trimmingCharacters(in: .whitespaces).isEmpty else {
-            return []
-        }
-        
-        let lowercaseQuery = query.lowercased()
-        
-        let results = mockMedications.filter { medication in
-            medication.name.lowercased().contains(lowercaseQuery) ||
-            medication.synonym?.lowercased().contains(lowercaseQuery) == true
-        }
-        
-        // Sort by relevance (exact matches first)
-        let sortedResults = results.sorted { med1, med2 in
-            let med1ExactMatch = med1.name.lowercased().hasPrefix(lowercaseQuery) ||
-                                med1.synonym?.lowercased().hasPrefix(lowercaseQuery) == true
-            let med2ExactMatch = med2.name.lowercased().hasPrefix(lowercaseQuery) ||
-                                med2.synonym?.lowercased().hasPrefix(lowercaseQuery) == true
-            
-            if med1ExactMatch && !med2ExactMatch {
-                return true
-            } else if !med1ExactMatch && med2ExactMatch {
-                return false
-            } else {
-                return med1.name < med2.name
-            }
-        }
-        
-        let finalResults = Array(sortedResults.prefix(15))
-        print("✅ Enhanced mock found \(finalResults.count) results for: \(query)")
-        return finalResults
-    }
-    
-    func getMedicationDetails(rxcui: String) async throws -> MedicationSearchResult? {
-        try await Task.sleep(nanoseconds: 300_000_000)
-        return mockMedications.first { $0.rxcui == rxcui }
-    }
-}
-
-// MARK: - API Errors
+// MARK: - API Errors (Updated)
 enum MedicationAPIError: Error, LocalizedError {
     case invalidQuery
     case invalidURL
@@ -294,29 +387,50 @@ enum MedicationAPIError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidQuery:
-            return "Invalid search query"
+            return "Please enter at least 2 characters to search"
         case .invalidURL:
-            return "Invalid API URL"
+            return "Invalid search request"
         case .networkError:
-            return "Network request failed"
+            return "Please check your internet connection and try again"
         case .parsingError:
-            return "Failed to parse response"
+            return "Unable to process search results"
         case .noResults:
-            return "No medications found"
+            return "No medications found for your search"
         case .rateLimited:
-            return "Too many requests. Please try again later."
+            return "Too many searches. Please wait a moment and try again"
         }
     }
 }
 
-// MARK: - Service Factory with Fallback
+// MARK: - Service Factory
 class MedicationAPIServiceFactory {
-    static func create() -> MedicationAPIServiceProtocol {
-        // For debugging, let's use the enhanced mock first
-        // This will work reliably while we debug the real API
-        return EnhancedMockMedicationAPIService()
-        
-        // Switch back to real API when ready:
-        // return RxNormAPIService()
+    static func create() -> EnhancedMedicationAPIServiceProtocol {
+        return EnhancedRxNormAPIService()
+    }
+    
+    // Keep old interface for backward compatibility
+    static func createSimple() -> MedicationAPIServiceProtocol {
+        return SimpleRxNormAdapter()
+    }
+}
+
+// MARK: - Adapter for backward compatibility
+class SimpleRxNormAdapter: MedicationAPIServiceProtocol {
+    private let enhancedService = EnhancedRxNormAPIService()
+    
+    func searchMedications(query: String) async throws -> [MedicationSearchResult] {
+        let names = try await enhancedService.searchMedicationNames(query: query)
+        return names.map { name in
+            MedicationSearchResult(
+                rxcui: UUID().uuidString, // Temporary
+                name: name,
+                synonym: nil,
+                tty: nil
+            )
+        }
+    }
+    
+    func getMedicationDetails(rxcui: String) async throws -> MedicationSearchResult? {
+        return nil
     }
 }
