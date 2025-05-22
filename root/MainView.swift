@@ -1,4 +1,5 @@
 //
+//
 //  MainView.swift
 //  aura
 //
@@ -113,7 +114,8 @@ struct MainView: View {
             DiaryCardFlowView(session: determineSession())
         }
         .sheet(isPresented: $showingSettings) {
-            SettingsView()
+            EnhancedSettingsView()
+                .environmentObject(authVM)
         }
     }
     
@@ -132,51 +134,6 @@ struct MainView: View {
         // Manual: All other times
         else {
             return .manual
-        }
-    }
-}
-
-// MARK: - Settings View (Basic)
-struct SettingsView: View {
-    @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var authVM: AuthViewModel
-    
-    var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                Text("Settings")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .padding(.top)
-                
-                Spacer()
-                
-                // Sign out button
-                Button(action: {
-                    authVM.signOut()
-                    dismiss()
-                }) {
-                    Text("Sign Out")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.red)
-                        .cornerRadius(12)
-                }
-                .padding(.horizontal)
-                
-                Spacer()
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
         }
     }
 }
