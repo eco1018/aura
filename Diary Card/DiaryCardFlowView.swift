@@ -1,16 +1,9 @@
 //
+//
 //  DiaryCardFlowView.swift
 //  aura
 //
 //  Created by Ella A. Sadduq on 5/22/25.
-//
-
-
-//
-//  DiaryCardFlowView.swift
-//  aura
-//
-//  Created by Ella A. Sadduq on 3/28/25.
 //
 
 import SwiftUI
@@ -85,6 +78,14 @@ struct DiaryCardFlowView: View {
         } message: {
             Text(diaryEntry.saveMessage)
         }
+        .onAppear {
+            print("📱 DiaryCardFlowView appeared")
+            print("   - Session: \(diaryEntry.diaryEntry.session)")
+            print("   - User has custom actions: \(diaryEntry.getAllActions().count)")
+            print("   - User has custom urges: \(diaryEntry.getAllUrges().count)")
+            print("   - User has custom goals: \(diaryEntry.getAllGoals().count)")
+            print("   - User has emotions: \(diaryEntry.getAllEmotions().count)")
+        }
     }
     
     private var stepNumber: Int {
@@ -97,17 +98,17 @@ struct DiaryCardFlowView: View {
         case .actions:
             ActionsStepView(diaryEntry: diaryEntry)
         case .urges:
-            PlaceholderStepView(step: .urges)
+            UrgesStepView(diaryEntry: diaryEntry)
         case .emotions:
-            PlaceholderStepView(step: .emotions)
+            EmotionsStepView(diaryEntry: diaryEntry)
         case .skills:
-            PlaceholderStepView(step: .skills)
+            SkillsStepView(diaryEntry: diaryEntry)
         case .medications:
-            PlaceholderStepView(step: .medications)
+            MedicationsStepView(diaryEntry: diaryEntry)
         case .goals:
-            PlaceholderStepView(step: .goals)
+            GoalsStepView(diaryEntry: diaryEntry)
         case .dailyNote:
-            PlaceholderStepView(step: .dailyNote)
+            DailyNoteStepView(diaryEntry: diaryEntry)
         }
     }
     
@@ -155,9 +156,13 @@ struct DiaryCardFlowView: View {
     }
     
     private func saveEntry() {
+        print("💾 Saving diary entry...")
         diaryEntry.saveEntry { success in
             if success {
                 showingSaveConfirmation = true
+                print("✅ Diary entry saved successfully!")
+            } else {
+                print("❌ Failed to save diary entry")
             }
         }
     }

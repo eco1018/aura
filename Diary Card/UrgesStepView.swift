@@ -1,8 +1,6 @@
 //
 //
-//
-//
-//  ActionsStepView.swift
+//  UrgesStepView.swift
 //  aura
 //
 //  Created by Ella A. Sadduq on 5/22/25.
@@ -10,7 +8,7 @@
 
 import SwiftUI
 
-struct ActionsStepView: View {
+struct UrgesStepView: View {
     @ObservedObject var diaryEntry: DiaryEntryViewModel
     
     var body: some View {
@@ -18,24 +16,24 @@ struct ActionsStepView: View {
             VStack(spacing: 24) {
                 // Header section
                 VStack(spacing: 8) {
-                    Image(systemName: DiaryStep.actions.systemImage)
+                    Image(systemName: DiaryStep.urges.systemImage)
                         .font(.largeTitle)
-                        .foregroundColor(.orange)
+                        .foregroundColor(.red)
                     
-                    Text(DiaryStep.actions.title)
+                    Text(DiaryStep.urges.title)
                         .font(.title2)
                         .fontWeight(.bold)
                     
-                    Text(DiaryStep.actions.description)
+                    Text(DiaryStep.urges.description)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top)
                 
-                // Rating cards for all actions (fixed + custom)
+                // Rating cards for all urges (fixed + custom)
                 VStack(spacing: 16) {
-                    // Fixed actions section
+                    // Fixed urges section
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
                             Text("Standard Tracking")
@@ -47,29 +45,29 @@ struct ActionsStepView: View {
                             
                             Text("Required for all users")
                                 .font(.caption)
-                                .foregroundColor(.orange)
+                                .foregroundColor(.red)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 2)
-                                .background(Color.orange.opacity(0.1))
+                                .background(Color.red.opacity(0.1))
                                 .cornerRadius(4)
                         }
                         .padding(.horizontal)
                         
-                        // Fixed action cards
-                        ForEach(fixedActions, id: \.key) { action in
-                            ActionRatingCard(
-                                key: action.key,
-                                title: action.title,
-                                currentRating: action.value.value,
+                        // Fixed urge cards
+                        ForEach(fixedUrges, id: \.key) { urge in
+                            UrgeRatingCard(
+                                key: urge.key,
+                                title: urge.title,
+                                currentRating: urge.value.value,
                                 onRatingChanged: { newValue in
-                                    diaryEntry.updateActionRating(action.key, value: newValue)
+                                    diaryEntry.updateUrgeRating(urge.key, value: newValue)
                                 }
                             )
                         }
                     }
                     
-                    // Custom actions section (if any)
-                    if !customActions.isEmpty {
+                    // Custom urges section (if any)
+                    if !customUrges.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
                                 Text("Your Personal Tracking")
@@ -89,14 +87,14 @@ struct ActionsStepView: View {
                             }
                             .padding(.horizontal)
                             
-                            // Custom action cards
-                            ForEach(customActions, id: \.key) { action in
-                                ActionRatingCard(
-                                    key: action.key,
-                                    title: action.title,
-                                    currentRating: action.value.value,
+                            // Custom urge cards
+                            ForEach(customUrges, id: \.key) { urge in
+                                UrgeRatingCard(
+                                    key: urge.key,
+                                    title: urge.title,
+                                    currentRating: urge.value.value,
                                     onRatingChanged: { newValue in
-                                        diaryEntry.updateActionRating(action.key, value: newValue)
+                                        diaryEntry.updateUrgeRating(urge.key, value: newValue)
                                     }
                                 )
                             }
@@ -111,19 +109,20 @@ struct ActionsStepView: View {
     }
     
     // MARK: - Helper Methods
-    var fixedActions: [(key: String, title: String, value: IntensityRating)] {
+    var fixedUrges: [(key: String, title: String, value: IntensityRating)] {
         [
-            ("selfHarm", "Self-harm", diaryEntry.diaryEntry.actions.selfHarm),
-            ("suicide", "Suicide", diaryEntry.diaryEntry.actions.suicide)
+            ("selfHarmUrge", "Self-harm urge", diaryEntry.diaryEntry.urges.selfHarmUrge),
+            ("suicideUrge", "Suicide urge", diaryEntry.diaryEntry.urges.suicideUrge),
+            ("quitTherapyUrge", "Quit therapy urge", diaryEntry.diaryEntry.urges.quitTherapyUrge)
         ]
     }
     
-    var customActions: [(key: String, title: String, value: IntensityRating)] {
-        diaryEntry.diaryEntry.actions.customActions.map { (key: $0.key, title: $0.key, value: $0.value) }
+    var customUrges: [(key: String, title: String, value: IntensityRating)] {
+        diaryEntry.diaryEntry.urges.customUrges.map { (key: $0.key, title: $0.key, value: $0.value) }
     }
 }
 
-struct ActionRatingCard: View {
+struct UrgeRatingCard: View {
     let key: String
     let title: String
     let currentRating: Int
@@ -136,9 +135,7 @@ struct ActionRatingCard: View {
         self.title = title
         self.currentRating = currentRating
         self.onRatingChanged = onRatingChanged
-        // Ensure the value is within bounds and not NaN
-        let safeValue = max(0, min(10, currentRating))
-        self._sliderValue = State(initialValue: Double(safeValue))
+        self._sliderValue = State(initialValue: Double(currentRating))
     }
     
     var body: some View {
@@ -163,14 +160,9 @@ struct ActionRatingCard: View {
                         .foregroundColor(.secondary)
                     
                     Slider(value: $sliderValue, in: 0...10, step: 1)
-                        .tint(getColorFor(Int(sliderValue.isNaN ? 0 : sliderValue)))
+                        .tint(getColorFor(Int(sliderValue)))
                         .onChange(of: sliderValue) { _, newValue in
-                            // Ensure the value is valid before updating
-                            let safeValue = newValue.isNaN ? 0 : max(0, min(10, newValue))
-                            if safeValue != sliderValue {
-                                sliderValue = safeValue
-                            }
-                            onRatingChanged(Int(safeValue))
+                            onRatingChanged(Int(newValue))
                         }
                     
                     Text("10")
@@ -180,17 +172,16 @@ struct ActionRatingCard: View {
                 
                 // Current value display with intensity description
                 HStack {
-                    let displayValue = Int(sliderValue.isNaN ? 0 : sliderValue)
-                    Text("Current rating: \(displayValue)")
+                    Text("Current rating: \(Int(sliderValue))")
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundColor(.primary)
                     
                     Spacer()
                     
-                    Text(getIntensityText(displayValue))
+                    Text(getIntensityText(Int(sliderValue)))
                         .font(.caption)
-                        .foregroundColor(getColorFor(displayValue))
+                        .foregroundColor(getColorFor(Int(sliderValue)))
                         .fontWeight(.medium)
                 }
             }
@@ -204,12 +195,14 @@ struct ActionRatingCard: View {
     
     func getDescriptionFor(_ key: String) -> String {
         switch key {
-        case "selfHarm":
-            return "Did you engage in any self-harm behaviors today?"
-        case "suicide":
-            return "Did you attempt suicide or engage in suicidal behaviors today?"
+        case "selfHarmUrge":
+            return "Rate the intensity of self-harm urges today"
+        case "suicideUrge":
+            return "Rate the intensity of suicidal urges today"
+        case "quitTherapyUrge":
+            return "Rate the intensity of urges to quit therapy/treatment today"
         default:
-            return "Rate how much you engaged in this behavior today"
+            return "Rate how intense this urge was today"
         }
     }
     
@@ -249,5 +242,5 @@ struct ActionRatingCard: View {
 }
 
 #Preview {
-    ActionsStepView(diaryEntry: DiaryEntryViewModel(session: .manual))
+    UrgesStepView(diaryEntry: DiaryEntryViewModel(session: .manual))
 }

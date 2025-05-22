@@ -5,6 +5,8 @@
 //
 //
 //  RootView.swift
+//
+//  RootView.swift
 //  aura
 //
 //  Created by Ella A. Sadduq on 3/27/25.
@@ -17,12 +19,27 @@ struct RootView: View {
     @StateObject private var onboardingVM = OnboardingViewModel.shared
 
     var body: some View {
-        if !authVM.isAuthenticated {
-            authFlowView(for: authVM.authFlow)
-        } else if !onboardingVM.hasCompletedOnboarding {
-            OnboardingFlowView()
-        } else {
-            MainView()
+        Group {
+            if !authVM.isAuthenticated {
+                authFlowView(for: authVM.authFlow)
+            } else if !onboardingVM.hasCompletedOnboarding {
+                OnboardingFlowView()
+                    .environmentObject(onboardingVM)
+            } else {
+                MainView()
+                    .environmentObject(authVM)
+            }
+        }
+        .onReceive(onboardingVM.$hasCompletedOnboarding) { completed in
+            if completed {
+                print("🎯 Onboarding completion detected in RootView")
+            }
+        }
+        .onAppear {
+            print("📱 RootView appeared")
+            print("   - Authenticated: \(authVM.isAuthenticated)")
+            print("   - Onboarding Complete: \(onboardingVM.hasCompletedOnboarding)")
+            print("   - User Profile: \(authVM.userProfile?.name ?? "nil")")
         }
     }
 
@@ -31,10 +48,17 @@ struct RootView: View {
         switch step {
         case .signIn:
             SignInView()
+                .environmentObject(authVM)
         case .signUp:
             SignUpView()
+                .environmentObject(authVM)
         case .forgotPassword:
             ForgotPasswordView()
+                .environmentObject(authVM)
         }
     }
+}
+
+#Preview {
+    RootView()
 }

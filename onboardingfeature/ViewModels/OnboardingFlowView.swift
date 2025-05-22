@@ -16,6 +16,16 @@ struct OnboardingFlowView: View {
             // Show current view
             currentOnboardingView()
         }
+        .onAppear {
+            print("📱 OnboardingFlowView appeared")
+            print("   - Current step: \(onboardingVM.onboardingStep)")
+            print("   - Has completed: \(onboardingVM.hasCompletedOnboarding)")
+        }
+        .onChange(of: onboardingVM.hasCompletedOnboarding) { _, completed in
+            if completed {
+                print("🎯 Onboarding completed! Should transition to main app.")
+            }
+        }
     }
 
     private var progress: Double {
@@ -48,4 +58,8 @@ struct OnboardingFlowView: View {
         case .wrapUp: WrapUpView()
         }
     }
+}
+
+#Preview {
+    OnboardingFlowView()
 }
