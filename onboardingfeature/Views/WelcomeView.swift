@@ -19,7 +19,7 @@ struct WelcomeView: View {
             Spacer()
             
             // MARK: - Title
-            Text("Welcome to Aura")
+            Text("Welcome")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)

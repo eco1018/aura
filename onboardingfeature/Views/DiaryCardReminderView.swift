@@ -22,9 +22,7 @@ struct DiaryCardReminderView: View {
 
             // MARK: - Description
             Text("""
-            You can choose to complete your Diary Card once or twice a day.
-
-            Reflecting on your day can help you track your progress and stay connected to your emotions and experiences.
+            You can choose to complete your Diary Card once or twice a day. Reflecting on your day can help you track your progress and stay connected to your emotions and experiences.
             """)
                 .font(.body)
                 .multilineTextAlignment(.center)

@@ -121,6 +121,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		C8032C982DBF65EB008AC9E3 /* Diary Card */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Diary Card";
+			sourceTree = "<group>";
+		};
 		C82400A22D95C935004AE981 /* aura */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = aura;
@@ -134,6 +139,11 @@
 		C82400BF2D95C936004AE981 /* auraUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = auraUITests;
+			sourceTree = "<group>";
+		};
+		C8FD92982DBFFE3C00F8488C /* TestUIViews */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TestUIViews;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -190,6 +200,7 @@
 		C82400972D95C935004AE981 = {
 			isa = PBXGroup;
 			children = (
+				C8032C982DBF65EB008AC9E3 /* Diary Card */,
 				C83BF0E72D98B2BF00538904 /* onboardingfeature */,
 				C8BB14BF2D95E39A00E3D1AF /* shared */,
 				C8BB14402D95DC0300E3D1AF /* auth */,
@@ -224,6 +235,7 @@
 		C83BF0E82D98B66800538904 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				C8FD92982DBFFE3C00F8488C /* TestUIViews */,
 				C83BF0FF2D98C96400538904 /* EveningDiaryReminderTimeView.swift */,
 				C83BF0FD2D98C93500538904 /* MorningDiaryReminderTimeView.swift */,
 				C83BF0BA2D98AC6700538904 /* DiaryCardReminderTimeView.swift */,
@@ -274,6 +286,16 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		C83BF1022D99541C00538904 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				C85F82BF2D961BC3008583F3 /* AuthSettings.swift */,
+				C83BF0E32D98ACE700538904 /* AuthFlowStep.swift */,
+				C8BB14232D95D46500E3D1AF /* AuthViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
 		C8BB14322D95DABB00E3D1AF /* root */ = {
 			isa = PBXGroup;
 			children = (
@@ -287,10 +309,8 @@
 		C8BB14402D95DC0300E3D1AF /* auth */ = {
 			isa = PBXGroup;
 			children = (
+				C83BF1022D99541C00538904 /* ViewModels */,
 				C83BF0EB2D98B70300538904 /* Views */,
-				C83BF0E32D98ACE700538904 /* AuthFlowStep.swift */,
-				C85F82BF2D961BC3008583F3 /* AuthSettings.swift */,
-				C8BB14232D95D46500E3D1AF /* AuthViewModel.swift */,
 			);
 			path = auth;
 			sourceTree = "<group>";
@@ -319,7 +339,9 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				C8032C982DBF65EB008AC9E3 /* Diary Card */,
 				C82400A22D95C935004AE981 /* aura */,
+				C8FD92982DBFFE3C00F8488C /* TestUIViews */,
 			);
 			name = aura;
 			packageProductDependencies = (
