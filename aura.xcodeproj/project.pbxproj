@@ -32,6 +32,7 @@
 		C83BF1002D98C96700538904 /* EveningDiaryReminderTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0FF2D98C96400538904 /* EveningDiaryReminderTimeView.swift */; };
 		C85F82C02D961BD2008583F3 /* AuthSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85F82BF2D961BC3008583F3 /* AuthSettings.swift */; };
 		C85F82DB2D9623EA008583F3 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14C02D95E3B200E3D1AF /* UserProfile.swift */; };
+		C881F7922DDF008000F83F9B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C881F7912DDF008000F83F9B /* GoogleService-Info.plist */; };
 		C8BB14262D95D46500E3D1AF /* auraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14222D95D46500E3D1AF /* auraApp.swift */; };
 		C8BB14272D95D46500E3D1AF /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14232D95D46500E3D1AF /* AuthViewModel.swift */; };
 		C8BB14282D95D46500E3D1AF /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BB14252D95D46500E3D1AF /* RootView.swift */; };
@@ -110,6 +111,7 @@
 		C83BF0FD2D98C93500538904 /* MorningDiaryReminderTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorningDiaryReminderTimeView.swift; sourceTree = "<group>"; };
 		C83BF0FF2D98C96400538904 /* EveningDiaryReminderTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveningDiaryReminderTimeView.swift; sourceTree = "<group>"; };
 		C85F82BF2D961BC3008583F3 /* AuthSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSettings.swift; sourceTree = "<group>"; };
+		C881F7912DDF008000F83F9B /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		C8BB14222D95D46500E3D1AF /* auraApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = auraApp.swift; sourceTree = "<group>"; };
 		C8BB14232D95D46500E3D1AF /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		C8BB14252D95D46500E3D1AF /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -200,6 +202,7 @@
 		C82400972D95C935004AE981 = {
 			isa = PBXGroup;
 			children = (
+				C881F7912DDF008000F83F9B /* GoogleService-Info.plist */,
 				C8032C982DBF65EB008AC9E3 /* Diary Card */,
 				C83BF0E72D98B2BF00538904 /* onboardingfeature */,
 				C8BB14BF2D95E39A00E3D1AF /* shared */,
@@ -472,6 +475,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C881F7922DDF008000F83F9B /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

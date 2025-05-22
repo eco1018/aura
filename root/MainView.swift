@@ -1,5 +1,10 @@
 //
-// MARK: - Views/MainView.swift
+//  MainView.swift
+//  aura
+//
+//  Created by Ella A. Sadduq on 3/27/25.
+//
+
 import SwiftUI
 
 struct MainView: View {
@@ -105,73 +110,33 @@ struct MainView: View {
             .navigationBarHidden(true)
         }
         .sheet(isPresented: $showingDiaryCard) {
-            DiaryCardView()
+            DiaryCardFlowView(session: determineSession())
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
         }
     }
-}
-
-// MARK: - Views/DiaryCardView.swift (Updated to be presentable)
-struct DiaryCardView: View {
-    @Environment(\.dismiss) private var dismiss
-    @State private var selfHarmUrges: Double = 0
     
-    var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Header
-                    VStack(spacing: 8) {
-                        Text("Daily Diary Card")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                        
-                        Text(Date(), style: .date)
-                            .font(.headline)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.top)
-                    
-                    // First rating section - Self-harm urges
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Actions")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                        
-                        RatingCardView(
-                            title: "Self-harm urges",
-                            description: "Rate the intensity of self-harm urges today",
-                            value: $selfHarmUrges
-                        )
-                    }
-                    
-                    Spacer(minLength: 100)
-                }
-                .padding()
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        // TODO: Save functionality
-                        dismiss()
-                    }
-                    .fontWeight(.semibold)
-                }
-            }
+    // MARK: - Helper Methods
+    private func determineSession() -> DiarySession {
+        let hour = Calendar.current.component(.hour, from: Date())
+        
+        // Morning: 5 AM - 12 PM
+        if hour >= 5 && hour < 12 {
+            return .morning
+        }
+        // Evening: 6 PM - 11 PM
+        else if hour >= 18 && hour < 23 {
+            return .evening
+        }
+        // Manual: All other times
+        else {
+            return .manual
         }
     }
 }
 
-// MARK: - Views/SettingsView.swift (Basic placeholder)
+// MARK: - Settings View (Basic)
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var authVM: AuthViewModel
@@ -216,55 +181,6 @@ struct SettingsView: View {
     }
 }
 
-// MARK: - Components/RatingCardView.swift (Same as before)
-struct RatingCardView: View {
-    let title: String
-    let description: String
-    @Binding var value: Double
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.headline)
-                    .fontWeight(.medium)
-                
-                Text(description)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            
-            VStack(spacing: 8) {
-                // Rating slider
-                HStack {
-                    Text("0")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Slider(value: $value, in: 0...10, step: 1)
-                        .tint(.blue)
-                    
-                    Text("10")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                // Current value display
-                Text("Current rating: \(Int(value))")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemGray6))
-        )
-    }
-}
-
-// MARK: - Preview
 #Preview {
     MainView()
         .environmentObject(AuthViewModel.shared)

@@ -55,6 +55,9 @@ struct UserProfile: Codable, Identifiable {
     
     static func fetch(uid: String, completion: @escaping (UserProfile?) -> Void) {
         let db = Firestore.firestore()
+        
+        print("🔍 Fetching user profile for UID: \(uid)")
+        
         db.collection("users").document(uid).getDocument { snapshot, error in
             if let error = error {
                 print("❌ Failed to fetch user: \(error.localizedDescription)")
@@ -64,8 +67,10 @@ struct UserProfile: Codable, Identifiable {
             
             do {
                 if let user = try snapshot?.data(as: UserProfile.self) {
+                    print("✅ User profile fetched successfully")
                     completion(user)
                 } else {
+                    print("⚠️ No user profile found, returning nil")
                     completion(nil)
                 }
             } catch {
@@ -77,12 +82,19 @@ struct UserProfile: Codable, Identifiable {
     
     func save(completion: ((Bool) -> Void)? = nil) {
         let db = Firestore.firestore()
+        
+        print("🔍 Saving user profile:")
+        print("   - UID: \(uid)")
+        print("   - Name: \(name)")
+        print("   - Email: \(email)")
+        
         do {
             try db.collection("users").document(uid).setData(from: self) { error in
                 if let error = error {
                     print("❌ Failed to save user: \(error.localizedDescription)")
                     completion?(false)
                 } else {
+                    print("✅ User profile saved successfully")
                     completion?(true)
                 }
             }

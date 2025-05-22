@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.aura.app</string>
+	<string>com.genesis.MHT.aura</string>
 	<key>PROJECT_ID</key>
 	<string>aura-9ec22</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1003626871580:ios:e2c635adb97bac127c58d9</string>
+	<string>1:1003626871580:ios:2ef15d2c48e3c8e67c58d9</string>
 </dict>
 </plist>
