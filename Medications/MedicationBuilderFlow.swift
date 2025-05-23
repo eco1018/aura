@@ -2,6 +2,9 @@
 //  MedicationBuilderFlow.swift
 //  aura
 //
+//  MedicationBuilderFlow.swift
+//  aura
+//
 //  Created by Ella A. Sadduq on 5/23/25.
 //
 //
@@ -69,11 +72,15 @@ class MedicationBuilderState: ObservableObject {
     }
     
     func nextStep() {
-        guard canProceedToNext(),
-              let nextStepRaw = currentStep.rawValue + 1,
-              nextStepRaw < MedicationSelectionStep.allCases.count else { return }
+        guard canProceedToNext() else { return }
         
-        currentStep = MedicationSelectionStep(rawValue: nextStepRaw) ?? currentStep
+        let nextStepRawValue = currentStep.rawValue + 1
+        guard nextStepRawValue < MedicationSelectionStep.allCases.count,
+              let nextStep = MedicationSelectionStep(rawValue: nextStepRawValue) else {
+            return
+        }
+        
+        currentStep = nextStep
         
         // Setup reminder times when frequency is selected
         if currentStep == .review {
@@ -83,7 +90,9 @@ class MedicationBuilderState: ObservableObject {
     
     func previousStep() {
         guard currentStep.rawValue > 0 else { return }
-        currentStep = MedicationSelectionStep(rawValue: currentStep.rawValue - 1) ?? currentStep
+        let previousStepRawValue = currentStep.rawValue - 1
+        guard let previousStep = MedicationSelectionStep(rawValue: previousStepRawValue) else { return }
+        currentStep = previousStep
     }
     
     func buildFinalMedication() -> Medication? {

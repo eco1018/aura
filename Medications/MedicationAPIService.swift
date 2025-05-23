@@ -1,4 +1,5 @@
 //
+//
 //  MedicationAPIService.swift
 //  aura
 //
@@ -14,7 +15,7 @@
 import Foundation
 
 // MARK: - Basic Medication Search Result (Keep for compatibility)
-struct MedicationSearchResult: Codable, Identifiable {
+struct BasicMedicationSearchResult: Codable, Identifiable {
     let id = UUID()
     let rxcui: String
     let name: String
@@ -53,8 +54,8 @@ struct MedicationSearchResult: Codable, Identifiable {
 
 // MARK: - Basic API Service Protocol (Keep for compatibility)
 protocol MedicationAPIServiceProtocol {
-    func searchMedications(query: String) async throws -> [MedicationSearchResult]
-    func getMedicationDetails(rxcui: String) async throws -> MedicationSearchResult?
+    func searchMedications(query: String) async throws -> [BasicMedicationSearchResult]
+    func getMedicationDetails(rxcui: String) async throws -> BasicMedicationSearchResult?
 }
 
 // MARK: - Basic RxNorm API Service (Keep for compatibility)
@@ -69,7 +70,7 @@ class RxNormAPIService: MedicationAPIServiceProtocol {
         self.session = URLSession(configuration: config)
     }
     
-    func searchMedications(query: String) async throws -> [MedicationSearchResult] {
+    func searchMedications(query: String) async throws -> [BasicMedicationSearchResult] {
         let trimmedQuery = query.trimmingCharacters(in: .whitespaces)
         
         guard !trimmedQuery.isEmpty && trimmedQuery.count >= 2 else {
@@ -119,7 +120,7 @@ class RxNormAPIService: MedicationAPIServiceProtocol {
         }
     }
     
-    func getMedicationDetails(rxcui: String) async throws -> MedicationSearchResult? {
+    func getMedicationDetails(rxcui: String) async throws -> BasicMedicationSearchResult? {
         let urlString = "\(baseURL)/rxcui/\(rxcui)/properties.json"
         guard let url = URL(string: urlString) else {
             throw MedicationAPIError.invalidURL
@@ -143,18 +144,18 @@ class RxNormAPIService: MedicationAPIServiceProtocol {
         }
     }
     
-    private func parseMedicationSearchResults(_ response: RxNormDrugsResponse) -> [MedicationSearchResult] {
+    private func parseMedicationSearchResults(_ response: RxNormDrugsResponse) -> [BasicMedicationSearchResult] {
         guard let drugGroup = response.drugGroup,
               let conceptGroup = drugGroup.conceptGroup else {
             return []
         }
         
-        var results: [MedicationSearchResult] = []
+        var results: [BasicMedicationSearchResult] = []
         
         for group in conceptGroup {
             if let conceptProperties = group.conceptProperties {
                 for property in conceptProperties {
-                    results.append(MedicationSearchResult(
+                    results.append(BasicMedicationSearchResult(
                         rxcui: property.rxcui,
                         name: property.name,
                         synonym: property.synonym,
@@ -173,10 +174,10 @@ class RxNormAPIService: MedicationAPIServiceProtocol {
         return Array(uniqueResults.prefix(20))
     }
     
-    private func parsePropertyToSearchResult(_ response: BasicPropertiesResponse) -> MedicationSearchResult? {
+    private func parsePropertyToSearchResult(_ response: BasicPropertiesResponse) -> BasicMedicationSearchResult? {
         guard let property = response.properties?.first else { return nil }
         
-        return MedicationSearchResult(
+        return BasicMedicationSearchResult(
             rxcui: property.rxcui,
             name: property.name,
             synonym: property.synonym,

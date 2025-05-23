@@ -9,6 +9,15 @@
 //
 //
 //
+//
+//
+//
+//
+///
+//
+//
+//
+//
 //  MedicationAddingView.swift
 //  aura
 //
@@ -282,7 +291,7 @@ struct BasicMedicationSearchSheet: View {
     let onMedicationsSelected: ([Medication]) -> Void
     
     @State private var searchText = ""
-    @State private var searchResults: [MedicationSearchResult] = []
+    @State private var searchResults: [BasicMedicationSearchResult] = []
     @State private var selectedMedications: [Medication] = []
     @State private var isSearching = false
     @State private var errorMessage = ""
@@ -451,7 +460,7 @@ struct BasicMedicationSearchSheet: View {
         }
     }
     
-    private func toggleSelection(_ result: MedicationSearchResult) {
+    private func toggleSelection(_ result: BasicMedicationSearchResult) {
         if isSelected(result) {
             selectedMedications.removeAll { $0.rxcui == result.rxcui }
         } else {
@@ -466,7 +475,7 @@ struct BasicMedicationSearchSheet: View {
         selectedMedications.removeAll { $0.rxcui == medication.rxcui }
     }
     
-    private func isSelected(_ result: MedicationSearchResult) -> Bool {
+    private func isSelected(_ result: BasicMedicationSearchResult) -> Bool {
         selectedMedications.contains { $0.rxcui == result.rxcui }
     }
 }
@@ -535,7 +544,7 @@ struct SelectedMedicationCard: View {
 }
 
 struct BasicSearchResultCard: View {
-    let result: MedicationSearchResult
+    let result: BasicMedicationSearchResult
     let isSelected: Bool
     let action: () -> Void
     

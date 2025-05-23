@@ -1,5 +1,6 @@
 //
 //
+//
 //  MedicationSettingsView.swift
 //  aura
 //
@@ -247,7 +248,7 @@ struct MedicationSearchSheet: View {
     let onMedicationsSelected: ([Medication]) -> Void
     
     @State private var searchText = ""
-    @State private var searchResults: [MedicationSearchResult] = []
+    @State private var searchResults: [BasicMedicationSearchResult] = []
     @State private var selectedMedications: [Medication] = []
     @State private var isSearching = false
     @State private var errorMessage = ""
@@ -416,7 +417,7 @@ struct MedicationSearchSheet: View {
         }
     }
     
-    private func toggleSelection(_ result: MedicationSearchResult) {
+    private func toggleSelection(_ result: BasicMedicationSearchResult) {
         if isSelected(result) {
             selectedMedications.removeAll { $0.rxcui == result.rxcui }
         } else {
@@ -431,7 +432,7 @@ struct MedicationSearchSheet: View {
         selectedMedications.removeAll { $0.rxcui == medication.rxcui }
     }
     
-    private func isSelected(_ result: MedicationSearchResult) -> Bool {
+    private func isSelected(_ result: BasicMedicationSearchResult) -> Bool {
         selectedMedications.contains { $0.rxcui == result.rxcui }
     }
 }
@@ -581,48 +582,8 @@ struct MedicationEditSheet: View {
 
 // MARK: - Shared Card Components
 
-private struct SelectedMedicationCard: View {
-    let medication: Medication
-    let onRemove: () -> Void
-    
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(medication.displayName)
-                    .font(.body)
-                    .fontWeight(.medium)
-                
-                if let genericName = medication.genericName, genericName != medication.name {
-                    Text("Generic: \(genericName)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Text("RxCUI: \(medication.rxcui)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .opacity(0.7)
-            }
-            
-            Spacer()
-            
-            Button(action: onRemove) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.title3)
-                    .foregroundColor(.red)
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.green.opacity(0.1))
-                .stroke(Color.green.opacity(0.3), lineWidth: 1)
-        )
-    }
-}
-
 private struct SearchResultCard: View {
-    let result: MedicationSearchResult
+    let result: BasicMedicationSearchResult
     let isSelected: Bool
     let action: () -> Void
     
