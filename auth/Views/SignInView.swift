@@ -58,10 +58,7 @@ struct SignInView: View {
                                     .foregroundColor(.black)
                                     .tracking(0.5)
                                 
-                                Text("Sign in to continue")
-                                    .font(.system(size: 16, weight: .regular))
-                                    .foregroundColor(.gray)
-                                    .tracking(0.2)
+                             
                             }
                         }
                         .padding(.bottom, 60)
