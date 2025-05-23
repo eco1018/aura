@@ -4,6 +4,8 @@
 //
 //
 //
+//
+//
 //  MedicationAddingView.swift
 //  aura
 //
@@ -24,38 +26,216 @@ struct MedicationAddingView: View {
     }
     
     var body: some View {
-        VStack(spacing: 24) {
-            // Header
-            headerSection
+        ZStack {
+            // Premium gradient background (exact MainView match)
+            LinearGradient(
+                colors: [
+                    Color(.systemGray6).opacity(0.1),
+                    Color(.systemGray5).opacity(0.2),
+                    Color(.systemGray6).opacity(0.15)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
             
-            // Search Method Selection
-            searchMethodSelector
-            
-            // Selected Medications
-            if !selectedMedications.isEmpty {
-                selectedMedicationsSection
+            VStack(spacing: 60) {
+                // Header (exact MainView typography)
+                VStack(spacing: 20) {
+                    Text("Add Your Medications")
+                        .font(.system(size: 34, weight: .light, design: .default))
+                        .foregroundColor(.primary.opacity(0.9))
+                    
+                    Text("Search from the National Library of Medicine database with detailed medication selection")
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundColor(.secondary.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, 80)
+                
+                // Glassmorphic search method selector
+                VStack(spacing: 24) {
+                    Text("Choose Search Method")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.primary.opacity(0.9))
+                    
+                    HStack(spacing: 24) {
+                        // Enhanced Search Card
+                        Button(action: {
+                            searchMethod = .enhanced
+                        }) {
+                            VStack(spacing: 12) {
+                                Image(systemName: "slider.horizontal.3")
+                                    .font(.system(size: 24, weight: .light))
+                                    .foregroundColor(.primary.opacity(0.8))
+                                    .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+                                    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                                    .frame(width: 56, height: 56)
+                                
+                                VStack(spacing: 4) {
+                                    Text("Detailed")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(.primary.opacity(0.9))
+                                    
+                                    Text("Step-by-step")
+                                        .font(.system(size: 13, weight: .regular))
+                                        .foregroundColor(.secondary.opacity(0.6))
+                                }
+                            }
+                            .padding(20)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color(.systemBackground).opacity(0.8))
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .stroke(searchMethod == .enhanced ? Color.primary.opacity(0.3) : Color.white.opacity(0.2), lineWidth: 1)
+                                    )
+                                    .shadow(color: .black.opacity(0.04), radius: 16, x: 0, y: 6)
+                                    .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        // Basic Search Card
+                        Button(action: {
+                            searchMethod = .basic
+                        }) {
+                            VStack(spacing: 12) {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 24, weight: .light))
+                                    .foregroundColor(.primary.opacity(0.8))
+                                    .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+                                    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                                    .frame(width: 56, height: 56)
+                                
+                                VStack(spacing: 4) {
+                                    Text("Quick")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(.primary.opacity(0.9))
+                                    
+                                    Text("Basic search")
+                                        .font(.system(size: 13, weight: .regular))
+                                        .foregroundColor(.secondary.opacity(0.6))
+                                }
+                            }
+                            .padding(20)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color(.systemBackground).opacity(0.8))
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .stroke(searchMethod == .basic ? Color.primary.opacity(0.3) : Color.white.opacity(0.2), lineWidth: 1)
+                                    )
+                                    .shadow(color: .black.opacity(0.04), radius: 16, x: 0, y: 6)
+                                    .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+                .padding(.horizontal, 28)
+                
+                // Add Medication Button (glassmorphic style)
+                Button(action: {
+                    if searchMethod == .enhanced {
+                        showingMedicationBuilder = true
+                    } else {
+                        showingBasicSearch = true
+                    }
+                }) {
+                    HStack(spacing: 20) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 24, weight: .light))
+                            .foregroundColor(.primary.opacity(0.8))
+                            .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+                            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                            .frame(width: 56, height: 56)
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(searchMethod == .enhanced ? "Add Medication (Detailed)" : "Add Medication (Quick)")
+                                .font(.system(size: 19, weight: .medium))
+                                .foregroundColor(.primary.opacity(0.9))
+                            
+                            Text("Search medications from NLM database")
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(.secondary.opacity(0.6))
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(.secondary.opacity(0.4))
+                    }
+                    .padding(28)
+                    .background(
+                        RoundedRectangle(cornerRadius: 24)
+                            .fill(Color(.systemBackground).opacity(0.8))
+                            .background(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                            )
+                            .shadow(color: .black.opacity(0.04), radius: 20, x: 0, y: 8)
+                            .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.horizontal, 28)
+                
+                // Selected medications (if any)
+                if !selectedMedications.isEmpty {
+                    ScrollView {
+                        VStack(spacing: 16) {
+                            Text("Your Medications (\(selectedMedications.count))")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.primary.opacity(0.9))
+                            
+                            ForEach(selectedMedications) { medication in
+                                SelectedMedicationCard(medication: medication) {
+                                    removeMedication(medication)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 28)
+                    }
+                }
+                
+                Spacer()
+                
+                // Continue Button (exact MainView style)
+                Button(action: saveMedicationsAndContinue) {
+                    HStack(spacing: 12) {
+                        if selectedMedications.isEmpty {
+                            Text("Skip - Add Later in Settings")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.white)
+                        } else {
+                            Text("Continue with \(selectedMedications.count) medication\(selectedMedications.count == 1 ? "" : "s")")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.white)
+                            
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .padding(20)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.primary.opacity(0.9))
+                            .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
+                            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                    )
+                }
+                .padding(.horizontal, 28)
+                .padding(.bottom, 60)
             }
-            
-            // Add Medication Button
-            addMedicationButton
-            
-            // Empty State or Help
-            if selectedMedications.isEmpty {
-                emptyStateView
-            }
-            
-            Spacer()
-            
-            // Continue Button
-            continueButton
         }
-        .padding()
         .onAppear {
-            // Load any existing medications from onboarding VM
             loadExistingMedications()
         }
         .onReceive(onboardingVM.$medications) { medications in
-            // Sync with onboarding VM when medications change
             if selectedMedications != medications {
                 selectedMedications = medications
             }
@@ -74,197 +254,14 @@ struct MedicationAddingView: View {
         }
     }
     
-    // MARK: - Header Section
-    private var headerSection: some View {
-        VStack(spacing: 12) {
-            Text("Add Your Medications")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .multilineTextAlignment(.center)
-            
-            Text("Search from the National Library of Medicine database with detailed medication selection")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .padding(.horizontal)
-    }
-    
-    // MARK: - Search Method Selector
-    private var searchMethodSelector: some View {
-        VStack(spacing: 12) {
-            Text("Choose Search Method")
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundColor(.secondary)
-            
-            HStack(spacing: 12) {
-                // Enhanced Search Button
-                Button(action: {
-                    searchMethod = .enhanced
-                }) {
-                    VStack(spacing: 8) {
-                        Image(systemName: "slider.horizontal.3")
-                            .font(.title2)
-                        
-                        Text("Detailed")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                        
-                        Text("Step-by-step")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(searchMethod == .enhanced ? Color.blue : Color(.systemGray6))
-                    )
-                    .foregroundColor(searchMethod == .enhanced ? .white : .primary)
-                }
-                .buttonStyle(PlainButtonStyle())
-                
-                // Basic Search Button
-                Button(action: {
-                    searchMethod = .basic
-                }) {
-                    VStack(spacing: 8) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.title2)
-                        
-                        Text("Quick")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                        
-                        Text("Basic search")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(searchMethod == .basic ? Color.blue : Color(.systemGray6))
-                    )
-                    .foregroundColor(searchMethod == .basic ? .white : .primary)
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-        }
-    }
-    
-    // MARK: - Selected Medications Section
-    private var selectedMedicationsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("Your Medications")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                
-                Spacer()
-                
-                Text("\(selectedMedications.count) selected")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)
-                    .background(Color.green.opacity(0.1))
-                    .cornerRadius(4)
-            }
-            
-            ForEach(selectedMedications) { medication in
-                SelectedMedicationCard(medication: medication) {
-                    removeMedication(medication)
-                }
-            }
-        }
-    }
-    
-    // MARK: - Add Medication Button
-    private var addMedicationButton: some View {
-        Button(action: {
-            if searchMethod == .enhanced {
-                showingMedicationBuilder = true
-            } else {
-                showingBasicSearch = true
-            }
-        }) {
-            HStack {
-                Image(systemName: "plus.circle.fill")
-                    .font(.title3)
-                
-                Text(searchMethod == .enhanced ? "Add Medication (Detailed)" : "Add Medication (Quick)")
-                    .font(.headline)
-            }
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.blue)
-            .cornerRadius(12)
-        }
-    }
-    
-    // MARK: - Empty State
-    private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "pills.circle")
-                .font(.system(size: 50))
-                .foregroundColor(.gray)
-            
-            Text("No Medications Added Yet")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
-            VStack(spacing: 8) {
-                if searchMethod == .enhanced {
-                    Text("• **Detailed Search**: Step-by-step selection")
-                    Text("• Choose exact formulation (XR, IR, etc.)")
-                    Text("• Select precise strength and dosage")
-                    Text("• Set custom reminder times")
-                } else {
-                    Text("• **Quick Search**: Fast medication lookup")
-                    Text("• Basic medication information")
-                    Text("• Faster for commonly known medications")
-                }
-            }
-            .font(.subheadline)
-            .foregroundColor(.secondary)
-            .multilineTextAlignment(.leading)
-        }
-        .padding(.vertical, 20)
-    }
-    
-    // MARK: - Continue Button
-    private var continueButton: some View {
-        Button(action: saveMedicationsAndContinue) {
-            HStack {
-                if selectedMedications.isEmpty {
-                    Text("Skip - Add Later in Settings")
-                } else {
-                    Text("Continue with \(selectedMedications.count) medication\(selectedMedications.count == 1 ? "" : "s")")
-                    Image(systemName: "checkmark.circle.fill")
-                }
-            }
-            .foregroundColor(.white)
-            .font(.headline)
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.accentColor)
-            .cornerRadius(12)
-        }
-    }
-    
     // MARK: - Helper Methods
     
     private func loadExistingMedications() {
-        // Load any medications that were previously selected in this onboarding session
         selectedMedications = onboardingVM.medications
         print("📦 Loaded \(selectedMedications.count) existing medications from onboarding")
     }
     
     private func addMedication(_ medication: Medication) {
-        // Check if medication already exists (by rxcui)
         if !selectedMedications.contains(where: { $0.rxcui == medication.rxcui }) {
             selectedMedications.append(medication)
             syncWithOnboardingVM()
@@ -281,26 +278,85 @@ struct MedicationAddingView: View {
     }
     
     private func syncWithOnboardingVM() {
-        // Update the onboarding view model with current medications
         onboardingVM.medications = selectedMedications
         onboardingVM.takesMedications = !selectedMedications.isEmpty
     }
     
     private func saveMedicationsAndContinue() {
-        // Ensure onboarding VM is synced before continuing
         syncWithOnboardingVM()
-        
         print("💾 Saved \(selectedMedications.count) medications to onboarding")
         for medication in selectedMedications {
             print("   - \(medication.displayName) (\(medication.rxcui))")
         }
-        
-        // Continue to next step
         onboardingVM.goToNextStep()
     }
 }
 
-// MARK: - Basic Search Sheet (Fallback)
+// MARK: - Supporting Card Views
+
+struct SelectedMedicationCard: View {
+    let medication: Medication
+    let onRemove: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(medication.displayName)
+                    .font(.system(size: 17, weight: .medium))
+                    .foregroundColor(.primary.opacity(0.9))
+                
+                HStack(spacing: 8) {
+                    if let strength = medication.strength {
+                        Text(strength)
+                            .font(.system(size: 12, weight: .regular))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.primary.opacity(0.1))
+                            .cornerRadius(6)
+                    }
+                    
+                    if let form = medication.dosageForm {
+                        Text(form)
+                            .font(.system(size: 12, weight: .regular))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.secondary.opacity(0.1))
+                            .cornerRadius(6)
+                    }
+                    
+                    Text(medication.frequency.displayName)
+                        .font(.system(size: 12, weight: .regular))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.secondary.opacity(0.15))
+                        .cornerRadius(6)
+                }
+                
+                Text("RxCUI: \(medication.rxcui)")
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundColor(.secondary.opacity(0.6))
+            }
+            
+            Spacer()
+            
+            Button(action: onRemove) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 20, weight: .light))
+                    .foregroundColor(.red.opacity(0.7))
+            }
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground).opacity(0.8))
+                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                .shadow(color: .black.opacity(0.03), radius: 8, x: 0, y: 4)
+        )
+    }
+}
+
+// MARK: - Basic Search Sheet (Fallback) - Enhanced to match design system
+
 struct BasicMedicationSearchSheet: View {
     @Environment(\.dismiss) private var dismiss
     let onMedicationsSelected: ([Medication]) -> Void
@@ -315,105 +371,106 @@ struct BasicMedicationSearchSheet: View {
     private let apiService = MedicationAPIServiceFactory.create()
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                // Search Bar
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
-                    
-                    TextField("Search medications (quick search)", text: $searchText)
-                        .textInputAutocapitalization(.words)
-                        .autocorrectionDisabled()
-                        .onSubmit {
-                            performSearch()
+        ZStack {
+            // Same premium gradient background
+            LinearGradient(
+                colors: [
+                    Color(.systemGray6).opacity(0.1),
+                    Color(.systemGray5).opacity(0.2),
+                    Color(.systemGray6).opacity(0.15)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            NavigationView {
+                VStack(spacing: 24) {
+                    // Glassmorphic search bar
+                    HStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 18, weight: .light))
+                            .foregroundColor(.secondary.opacity(0.6))
+                        
+                        TextField("Search medications", text: $searchText)
+                            .font(.system(size: 16, weight: .regular))
+                            .textInputAutocapitalization(.words)
+                            .autocorrectionDisabled()
+                            .onSubmit {
+                                performSearch()
+                            }
+                        
+                        if isSearching {
+                            ProgressView()
+                                .scaleEffect(0.8)
                         }
-                    
-                    if isSearching {
-                        ProgressView()
-                            .scaleEffect(0.8)
                     }
-                }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemGray6))
-                )
-                .padding(.horizontal)
-                
-                // Results
-                ScrollView {
-                    LazyVStack(spacing: 12) {
-                        // Selected medications
-                        if !selectedMedications.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Selected (\(selectedMedications.count))")
-                                    .font(.headline)
-                                    .padding(.horizontal)
-                                
-                                ForEach(selectedMedications) { medication in
-                                    SelectedMedicationCard(medication: medication) {
-                                        removeMedication(medication)
+                    .padding(16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(.systemBackground).opacity(0.8))
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                            .shadow(color: .black.opacity(0.03), radius: 8, x: 0, y: 4)
+                    )
+                    .padding(.horizontal, 20)
+                    
+                    // Results
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            if !selectedMedications.isEmpty {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("Selected (\(selectedMedications.count))")
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundColor(.primary.opacity(0.9))
+                                        .padding(.horizontal, 20)
+                                    
+                                    ForEach(selectedMedications) { medication in
+                                        SelectedMedicationCard(medication: medication) {
+                                            removeMedication(medication)
+                                        }
+                                        .padding(.horizontal, 20)
                                     }
-                                    .padding(.horizontal)
+                                }
+                            }
+                            
+                            if !searchResults.isEmpty {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("Search Results")
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundColor(.primary.opacity(0.9))
+                                        .padding(.horizontal, 20)
+                                    
+                                    ForEach(searchResults) { result in
+                                        BasicSearchResultCard(
+                                            result: result,
+                                            isSelected: isSelected(result)
+                                        ) {
+                                            toggleSelection(result)
+                                        }
+                                        .padding(.horizontal, 20)
+                                    }
                                 }
                             }
                         }
-                        
-                        // Search results
-                        if !searchResults.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Search Results")
-                                    .font(.headline)
-                                    .padding(.horizontal)
-                                
-                                ForEach(searchResults) { result in
-                                    BasicSearchResultCard(
-                                        result: result,
-                                        isSelected: isSelected(result)
-                                    ) {
-                                        toggleSelection(result)
-                                    }
-                                    .padding(.horizontal)
-                                }
-                            }
-                        }
-                        
-                        // Empty state
-                        if searchText.isEmpty && selectedMedications.isEmpty {
-                            VStack(spacing: 16) {
-                                Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(.gray)
-                                
-                                Text("Quick Medication Search")
-                                    .font(.headline)
-                                
-                                Text("Enter medication name for basic search")
-                                    .font(.body)
-                                    .foregroundColor(.secondary)
-                            }
-                            .padding(.vertical, 40)
-                        }
                     }
                 }
-            }
-            .navigationTitle("Quick Search")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
+                .navigationTitle("Quick Search")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            dismiss()
+                        }
                     }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Add (\(selectedMedications.count))") {
-                        onMedicationsSelected(selectedMedications)
-                        dismiss()
+                    
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Add (\(selectedMedications.count))") {
+                            onMedicationsSelected(selectedMedications)
+                            dismiss()
+                        }
+                        .disabled(selectedMedications.isEmpty)
+                        .fontWeight(.semibold)
                     }
-                    .disabled(selectedMedications.isEmpty)
-                    .fontWeight(.semibold)
                 }
             }
         }
@@ -481,8 +538,6 @@ struct BasicMedicationSearchSheet: View {
         } else {
             selectedMedications.append(result.toMedication())
         }
-        
-        // Remove from search results to avoid confusion
         searchResults.removeAll { $0.rxcui == result.rxcui }
     }
     
@@ -495,69 +550,6 @@ struct BasicMedicationSearchSheet: View {
     }
 }
 
-// MARK: - Supporting Card Views
-
-struct SelectedMedicationCard: View {
-    let medication: Medication
-    let onRemove: () -> Void
-    
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(medication.displayName)
-                    .font(.body)
-                    .fontWeight(.medium)
-                
-                HStack {
-                    if let strength = medication.strength {
-                        Text(strength)
-                            .font(.caption)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.blue.opacity(0.1))
-                            .cornerRadius(4)
-                    }
-                    
-                    if let form = medication.dosageForm {
-                        Text(form)
-                            .font(.caption)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.green.opacity(0.1))
-                            .cornerRadius(4)
-                    }
-                    
-                    Text(medication.frequency.displayName)
-                        .font(.caption)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.orange.opacity(0.1))
-                        .cornerRadius(4)
-                }
-                
-                Text("RxCUI: \(medication.rxcui)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .opacity(0.7)
-            }
-            
-            Spacer()
-            
-            Button(action: onRemove) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.title3)
-                    .foregroundColor(.red)
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.green.opacity(0.1))
-                .stroke(Color.green.opacity(0.3), lineWidth: 1)
-        )
-    }
-}
-
 struct BasicSearchResultCard: View {
     let result: BasicMedicationSearchResult
     let isSelected: Bool
@@ -565,36 +557,35 @@ struct BasicSearchResultCard: View {
     
     var body: some View {
         Button(action: action) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(result.displayName)
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.primary.opacity(0.9))
                     
                     if let synonym = result.synonym, synonym != result.name {
                         Text("Also: \(synonym)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(.secondary.opacity(0.7))
                     }
                     
                     Text("RxCUI: \(result.rxcui)")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                        .opacity(0.7)
+                        .font(.system(size: 11, weight: .regular))
+                        .foregroundColor(.secondary.opacity(0.6))
                 }
                 
                 Spacer()
                 
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "plus.circle")
-                    .font(.title3)
-                    .foregroundColor(isSelected ? .green : .blue)
+                    .font(.system(size: 20, weight: .light))
+                    .foregroundColor(isSelected ? .primary.opacity(0.8) : .secondary.opacity(0.6))
             }
-            .padding()
+            .padding(16)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemGray6))
-                    .stroke(isSelected ? Color.green.opacity(0.5) : Color.clear, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.systemBackground).opacity(0.8))
+                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    .shadow(color: .black.opacity(0.02), radius: 4, x: 0, y: 2)
             )
         }
         .buttonStyle(PlainButtonStyle())

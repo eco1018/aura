@@ -12,68 +12,87 @@ struct EmotionsStepView: View {
     @ObservedObject var diaryEntry: DiaryEntryViewModel
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Header section
-                VStack(spacing: 8) {
-                    Image(systemName: DiaryStep.emotions.systemImage)
-                        .font(.largeTitle)
-                        .foregroundColor(.pink)
-                    
-                    Text(DiaryStep.emotions.title)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    
-                    Text(DiaryStep.emotions.description)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.top)
-                
-                // Instruction
-                Text("Rate how intensely you felt each emotion today:")
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                
-                // Emotion rating cards
-                VStack(spacing: 16) {
-                    ForEach(diaryEntry.getAllEmotions(), id: \.key) { emotion in
-                        EmotionRatingCard(
-                            emotion: emotion.title,
-                            currentRating: emotion.value.value,
-                            onRatingChanged: { newValue in
-                                diaryEntry.updateEmotionRating(emotion.key, value: newValue)
-                            }
-                        )
-                    }
-                }
-                
-                // If no emotions, show encouraging message
-                if diaryEntry.getAllEmotions().isEmpty {
-                    VStack(spacing: 16) {
-                        Image(systemName: "heart.circle")
-                            .font(.largeTitle)
-                            .foregroundColor(.gray)
+        ZStack {
+            // Same gradient background as MainView
+            LinearGradient(
+                colors: [
+                    Color(.systemGray6).opacity(0.1),
+                    Color(.systemGray5).opacity(0.2),
+                    Color(.systemGray6).opacity(0.15)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            ScrollView {
+                VStack(spacing: 60) {
+                    // Elegant header (same as MainView style)
+                    VStack(spacing: 20) {
+                        Text(DiaryStep.emotions.title)
+                            .font(.system(size: 34, weight: .light, design: .default))
+                            .foregroundColor(.primary.opacity(0.9))
                         
-                        Text("No emotions selected")
-                            .font(.headline)
-                            .foregroundColor(.secondary)
-                        
-                        Text("You can select emotions to track during onboarding to monitor your emotional patterns here.")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                        Text(DiaryStep.emotions.description)
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(.secondary.opacity(0.7))
                             .multilineTextAlignment(.center)
-                            .padding(.horizontal)
                     }
-                    .padding(.vertical, 40)
+                    .padding(.top, 80)
+                    
+                    Spacer()
+                    
+                    // Emotion cards using RatingCardView
+                    VStack(spacing: 24) {
+                        ForEach(diaryEntry.getAllEmotions(), id: \.key) { emotion in
+                            RatingCardView(
+                                title: emotion.title,
+                                description: getEmotionDescription(emotion.title),
+                                value: Binding(
+                                    get: { Double(emotion.value.value) },
+                                    set: { newValue in
+                                        diaryEntry.updateEmotionRating(emotion.key, value: Int(newValue))
+                                    }
+                                )
+                            )
+                        }
+                        
+                        // If no emotions, show encouraging message
+                        if diaryEntry.getAllEmotions().isEmpty {
+                            VStack(spacing: 20) {
+                                Text("No emotions selected")
+                                    .font(.system(size: 19, weight: .medium))
+                                    .foregroundColor(.primary.opacity(0.9))
+                                
+                                Text("You can select emotions to track during onboarding to monitor your emotional patterns here.")
+                                    .font(.system(size: 15, weight: .regular))
+                                    .foregroundColor(.secondary.opacity(0.6))
+                                    .multilineTextAlignment(.center)
+                            }
+                            .padding(28)
+                            .background(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .fill(Color(.systemBackground).opacity(0.8))
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    )
+                                    .shadow(color: .black.opacity(0.04), radius: 20, x: 0, y: 8)
+                                    .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 28)
+                    
+                    Spacer()
+                    
+                    // Minimal date (same as MainView)
+                    Text("Today is \(Date(), style: .date)")
+                        .font(.system(size: 14, weight: .light))
+                        .foregroundColor(.secondary.opacity(0.5))
+                        .padding(.bottom, 60)
                 }
-                
-                Spacer(minLength: 100)
             }
-            .padding()
         }
         .onAppear {
             print("🎭 EmotionsStepView appeared")
@@ -81,182 +100,36 @@ struct EmotionsStepView: View {
             print("   - Emotions list: \(diaryEntry.getAllEmotions().map { $0.title })")
         }
     }
-}
-
-struct EmotionRatingCard: View {
-    let emotion: String
-    let currentRating: Int
-    let onRatingChanged: (Int) -> Void
     
-    @State private var sliderValue: Double
-    
-    init(emotion: String, currentRating: Int, onRatingChanged: @escaping (Int) -> Void) {
-        self.emotion = emotion
-        self.currentRating = currentRating
-        self.onRatingChanged = onRatingChanged
-        self._sliderValue = State(initialValue: Double(currentRating))
-    }
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Emotion header with emoji
-            HStack {
-                Text(getEmotionEmoji(emotion))
-                    .font(.title2)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(emotion)
-                        .font(.headline)
-                        .fontWeight(.medium)
-                    
-                    Text(getEmotionDescription(emotion))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-            }
-            
-            // Rating controls
-            VStack(spacing: 8) {
-                // Slider with emotion-specific labels
-                HStack {
-                    Text("Not at all")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Slider(value: $sliderValue, in: 0...10, step: 1)
-                        .tint(getEmotionColor(emotion))
-                        .onChange(of: sliderValue) { _, newValue in
-                            onRatingChanged(Int(newValue))
-                        }
-                    
-                    Text("Extremely")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                // Current value display
-                HStack {
-                    Text("Intensity: \(Int(sliderValue))/10")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                    
-                    Text(getIntensityDescription(Int(sliderValue)))
-                        .font(.caption)
-                        .foregroundColor(getEmotionColor(emotion))
-                        .fontWeight(.medium)
-                }
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(getEmotionColor(emotion).opacity(0.05))
-                .stroke(getEmotionColor(emotion).opacity(0.2), lineWidth: 1)
-        )
-    }
-    
-    func getEmotionEmoji(_ emotion: String) -> String {
-        switch emotion.lowercased() {
-        case "happy", "joy", "joyful":
-            return "😊"
-        case "sad", "sadness":
-            return "😢"
-        case "angry", "anger", "mad":
-            return "😠"
-        case "anxious", "anxiety", "worried":
-            return "😰"
-        case "calm", "peaceful", "relaxed":
-            return "😌"
-        case "frustrated", "frustration":
-            return "😤"
-        case "excited", "excitement":
-            return "🤩"
-        case "scared", "fear", "afraid":
-            return "😨"
-        case "grateful", "gratitude", "thankful":
-            return "🙏"
-        case "lonely", "loneliness":
-            return "😔"
-        case "proud", "pride":
-            return "😌"
-        case "ashamed", "shame":
-            return "😳"
-        default:
-            return "💭"
-        }
-    }
-    
-    func getEmotionColor(_ emotion: String) -> Color {
-        switch emotion.lowercased() {
-        case "happy", "joy", "joyful":
-            return .yellow
-        case "sad", "sadness":
-            return .blue
-        case "angry", "anger", "mad":
-            return .red
-        case "anxious", "anxiety", "worried":
-            return .orange
-        case "calm", "peaceful", "relaxed":
-            return .green
-        case "frustrated", "frustration":
-            return .red
-        case "excited", "excitement":
-            return .purple
-        case "scared", "fear", "afraid":
-            return .black
-        case "grateful", "gratitude", "thankful":
-            return .green
-        case "lonely", "loneliness":
-            return .gray
-        case "proud", "pride":
-            return .purple
-        case "ashamed", "shame":
-            return .brown
-        default:
-            return .blue
-        }
-    }
-    
+    // MARK: - Helper Methods
     func getEmotionDescription(_ emotion: String) -> String {
         switch emotion.lowercased() {
         case "happy", "joy", "joyful":
-            return "Feeling cheerful and positive"
+            return "Rate how happy and cheerful you felt today"
         case "sad", "sadness":
-            return "Feeling down or melancholy"
+            return "Rate how sad or down you felt today"
         case "angry", "anger", "mad":
-            return "Feeling irritated or upset"
+            return "Rate how angry or irritated you felt today"
         case "anxious", "anxiety", "worried":
-            return "Feeling nervous or on edge"
+            return "Rate how anxious or nervous you felt today"
         case "calm", "peaceful", "relaxed":
-            return "Feeling at peace and centered"
+            return "Rate how calm and peaceful you felt today"
         case "frustrated", "frustration":
-            return "Feeling blocked or hindered"
+            return "Rate how frustrated you felt today"
+        case "excited", "excitement":
+            return "Rate how excited you felt today"
+        case "scared", "fear", "afraid":
+            return "Rate how scared or fearful you felt today"
+        case "grateful", "gratitude", "thankful":
+            return "Rate how grateful you felt today"
+        case "lonely", "loneliness":
+            return "Rate how lonely you felt today"
+        case "proud", "pride":
+            return "Rate how proud you felt today"
+        case "ashamed", "shame":
+            return "Rate how ashamed you felt today"
         default:
-            return "How intense was this emotion?"
-        }
-    }
-    
-    func getIntensityDescription(_ value: Int) -> String {
-        switch value {
-        case 0:
-            return "Not felt"
-        case 1...2:
-            return "Barely noticeable"
-        case 3...4:
-            return "Mild"
-        case 5...6:
-            return "Moderate"
-        case 7...8:
-            return "Strong"
-        case 9...10:
-            return "Overwhelming"
-        default:
-            return ""
+            return "Rate how intensely you felt this emotion today"
         }
     }
 }

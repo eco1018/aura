@@ -2,6 +2,10 @@
 //
 //
 //
+//
+//
+//
+//
 //  ActionsStepView.swift
 //  aura
 //
@@ -14,99 +18,77 @@ struct ActionsStepView: View {
     @ObservedObject var diaryEntry: DiaryEntryViewModel
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Header section
-                VStack(spacing: 8) {
-                    Image(systemName: DiaryStep.actions.systemImage)
-                        .font(.largeTitle)
-                        .foregroundColor(.orange)
-                    
-                    Text(DiaryStep.actions.title)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    
-                    Text(DiaryStep.actions.description)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.top)
-                
-                // Rating cards for all actions (fixed + custom)
-                VStack(spacing: 16) {
-                    // Fixed actions section
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text("Standard Tracking")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.secondary)
-                            
-                            Spacer()
-                            
-                            Text("Required for all users")
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 2)
-                                .background(Color.orange.opacity(0.1))
-                                .cornerRadius(4)
-                        }
-                        .padding(.horizontal)
+        ZStack {
+            // Same gradient background as MainView
+            LinearGradient(
+                colors: [
+                    Color(.systemGray6).opacity(0.1),
+                    Color(.systemGray5).opacity(0.2),
+                    Color(.systemGray6).opacity(0.15)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            ScrollView {
+                VStack(spacing: 60) {
+                    // Elegant header (same as MainView style)
+                    VStack(spacing: 20) {
+                        Text(DiaryStep.actions.title)
+                            .font(.system(size: 34, weight: .light, design: .default))
+                            .foregroundColor(.primary.opacity(0.9))
                         
-                        // Fixed action cards
+                        Text(DiaryStep.actions.description)
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(.secondary.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.top, 80)
+                    
+                    Spacer()
+                    
+                    // Action cards using RatingCardView
+                    VStack(spacing: 24) {
+                        // Fixed actions
                         ForEach(fixedActions, id: \.key) { action in
-                            ActionRatingCard(
-                                key: action.key,
+                            RatingCardView(
                                 title: action.title,
-                                currentRating: action.value.value,
-                                onRatingChanged: { newValue in
-                                    diaryEntry.updateActionRating(action.key, value: newValue)
-                                }
+                                description: getDescriptionFor(action.key),
+                                value: Binding(
+                                    get: { Double(action.value.value) },
+                                    set: { newValue in
+                                        diaryEntry.updateActionRating(action.key, value: Int(newValue))
+                                    }
+                                )
+                            )
+                        }
+                        
+                        // Custom actions
+                        ForEach(customActions, id: \.key) { action in
+                            RatingCardView(
+                                title: action.title,
+                                description: "Rate how much you engaged in this behavior today",
+                                value: Binding(
+                                    get: { Double(action.value.value) },
+                                    set: { newValue in
+                                        diaryEntry.updateActionRating(action.key, value: Int(newValue))
+                                    }
+                                )
                             )
                         }
                     }
+                    .padding(.horizontal, 28)
                     
-                    // Custom actions section (if any)
-                    if !customActions.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Text("Your Personal Tracking")
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.secondary)
-                                
-                                Spacer()
-                                
-                                Text("From your onboarding")
-                                    .font(.caption)
-                                    .foregroundColor(.blue)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 2)
-                                    .background(Color.blue.opacity(0.1))
-                                    .cornerRadius(4)
-                            }
-                            .padding(.horizontal)
-                            
-                            // Custom action cards
-                            ForEach(customActions, id: \.key) { action in
-                                ActionRatingCard(
-                                    key: action.key,
-                                    title: action.title,
-                                    currentRating: action.value.value,
-                                    onRatingChanged: { newValue in
-                                        diaryEntry.updateActionRating(action.key, value: newValue)
-                                    }
-                                )
-                            }
-                        }
-                    }
+                    Spacer()
+                    
+                    // Minimal date (same as MainView)
+                    Text("Today is \(Date(), style: .date)")
+                        .font(.system(size: 14, weight: .light))
+                        .foregroundColor(.secondary.opacity(0.5))
+                        .padding(.bottom, 60)
                 }
-                
-                Spacer(minLength: 100)
             }
-            .padding()
         }
     }
     
@@ -121,86 +103,6 @@ struct ActionsStepView: View {
     var customActions: [(key: String, title: String, value: IntensityRating)] {
         diaryEntry.diaryEntry.actions.customActions.map { (key: $0.key, title: $0.key, value: $0.value) }
     }
-}
-
-struct ActionRatingCard: View {
-    let key: String
-    let title: String
-    let currentRating: Int
-    let onRatingChanged: (Int) -> Void
-    
-    @State private var sliderValue: Double
-    
-    init(key: String, title: String, currentRating: Int, onRatingChanged: @escaping (Int) -> Void) {
-        self.key = key
-        self.title = title
-        self.currentRating = currentRating
-        self.onRatingChanged = onRatingChanged
-        // Ensure the value is within bounds and not NaN
-        let safeValue = max(0, min(10, currentRating))
-        self._sliderValue = State(initialValue: Double(safeValue))
-    }
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Title and description
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.headline)
-                    .fontWeight(.medium)
-                
-                Text(getDescriptionFor(key))
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            
-            // Rating controls
-            VStack(spacing: 8) {
-                // Slider with labels
-                HStack {
-                    Text("0")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Slider(value: $sliderValue, in: 0...10, step: 1)
-                        .tint(getColorFor(Int(sliderValue.isNaN ? 0 : sliderValue)))
-                        .onChange(of: sliderValue) { _, newValue in
-                            // Ensure the value is valid before updating
-                            let safeValue = newValue.isNaN ? 0 : max(0, min(10, newValue))
-                            if safeValue != sliderValue {
-                                sliderValue = safeValue
-                            }
-                            onRatingChanged(Int(safeValue))
-                        }
-                    
-                    Text("10")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                // Current value display with intensity description
-                HStack {
-                    let displayValue = Int(sliderValue.isNaN ? 0 : sliderValue)
-                    Text("Current rating: \(displayValue)")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                    
-                    Text(getIntensityText(displayValue))
-                        .font(.caption)
-                        .foregroundColor(getColorFor(displayValue))
-                        .fontWeight(.medium)
-                }
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemGray6))
-        )
-    }
     
     func getDescriptionFor(_ key: String) -> String {
         switch key {
@@ -210,40 +112,6 @@ struct ActionRatingCard: View {
             return "Did you attempt suicide or engage in suicidal behaviors today?"
         default:
             return "Rate how much you engaged in this behavior today"
-        }
-    }
-    
-    func getColorFor(_ value: Int) -> Color {
-        switch value {
-        case 0...2:
-            return .green
-        case 3...5:
-            return .yellow
-        case 6...7:
-            return .orange
-        case 8...10:
-            return .red
-        default:
-            return .blue
-        }
-    }
-    
-    func getIntensityText(_ value: Int) -> String {
-        switch value {
-        case 0:
-            return "None"
-        case 1...2:
-            return "Very Low"
-        case 3...4:
-            return "Low"
-        case 5...6:
-            return "Moderate"
-        case 7...8:
-            return "High"
-        case 9...10:
-            return "Very High"
-        default:
-            return ""
         }
     }
 }

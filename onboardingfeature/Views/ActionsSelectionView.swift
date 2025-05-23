@@ -1,5 +1,6 @@
 //
 //
+//
 //  ActionsSelectionView.swift
 //  aura
 //
@@ -30,103 +31,149 @@ struct ActionsSelectionView: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
-            // Header
-            VStack(spacing: 8) {
-                Text("Choose 3 Actions to Track")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .multilineTextAlignment(.center)
-                
-                Text("Selected: \(totalSelected)/3")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.horizontal)
+        ZStack {
+            // Premium gradient background (matching MainView)
+            LinearGradient(
+                colors: [
+                    Color(.systemGray6).opacity(0.1),
+                    Color(.systemGray5).opacity(0.2),
+                    Color(.systemGray6).opacity(0.15)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 40) {
+                // Elegant header (matching MainView style)
+                VStack(spacing: 16) {
+                    Text("Choose 3 Actions to Track")
+                        .font(.system(size: 28, weight: .light, design: .default))
+                        .foregroundColor(.primary.opacity(0.9))
+                        .multilineTextAlignment(.center)
+                    
+                    Text("Selected: \(totalSelected)/3")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundColor(.secondary.opacity(0.7))
+                }
+                .padding(.top, 60)
+                .padding(.horizontal, 24)
 
-            // Actions List
-            ScrollView {
-                LazyVStack(spacing: 12) {
-                    ForEach(actions, id: \.0) { action in
-                        ActionSelectionCard(
-                            title: action.0,
-                            description: action.1,
-                            isSelected: onboardingVM.selectedActions.contains(action.0),
-                            canSelect: totalSelected < 3 || onboardingVM.selectedActions.contains(action.0)
-                        ) {
-                            toggleActionSelection(action.0)
-                        }
-                    }
-                }
-                .padding(.horizontal)
-            }
-            
-            // Custom Action Input
-            if totalSelected < 3 {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Add Custom Action")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                    
-                    HStack {
-                        TextField("Describe your action", text: $customActionInput)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                        
-                        Button(action: addCustomAction) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.title2)
-                                .foregroundColor(.accentColor)
-                        }
-                        .disabled(customActionInput.trimmingCharacters(in: .whitespaces).isEmpty)
-                    }
-                }
-                .padding(.horizontal)
-            }
-            
-            // Custom Actions Display
-            if !onboardingVM.customActions.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Your Custom Actions:")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                    
-                    ForEach(onboardingVM.customActions, id: \.self) { customAction in
-                        HStack {
-                            Text(customAction)
-                                .font(.body)
-                            
-                            Spacer()
-                            
-                            Button(action: {
-                                removeCustomAction(customAction)
-                            }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.red)
+                // Glassmorphic actions list
+                ScrollView {
+                    VStack(spacing: 16) {
+                        ForEach(actions, id: \.0) { action in
+                            ActionSelectionCard(
+                                title: action.0,
+                                description: action.1,
+                                isSelected: onboardingVM.selectedActions.contains(action.0),
+                                canSelect: totalSelected < 3 || onboardingVM.selectedActions.contains(action.0)
+                            ) {
+                                toggleActionSelection(action.0)
                             }
                         }
-                        .padding(.horizontal)
                     }
+                    .padding(.horizontal, 24)
                 }
-                .padding(.horizontal)
-            }
+                
+                // Elegant custom action input
+                if totalSelected < 3 {
+                    VStack(spacing: 16) {
+                        Text("Add Custom Action")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.secondary.opacity(0.8))
+                        
+                        HStack(spacing: 12) {
+                            TextField("Describe your action", text: $customActionInput)
+                                .font(.system(size: 15, weight: .regular))
+                                .padding(16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(Color(.systemBackground).opacity(0.8))
+                                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                        .shadow(color: .black.opacity(0.03), radius: 8, x: 0, y: 4)
+                                )
+                                .foregroundColor(.primary.opacity(0.8))
+                            
+                            Button(action: addCustomAction) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 24, weight: .light))
+                                    .foregroundColor(.primary.opacity(0.8))
+                                    .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
+                            }
+                            .disabled(customActionInput.trimmingCharacters(in: .whitespaces).isEmpty)
+                            .opacity(customActionInput.trimmingCharacters(in: .whitespaces).isEmpty ? 0.4 : 1.0)
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                }
+                
+                // Custom actions display
+                if !onboardingVM.customActions.isEmpty {
+                    VStack(spacing: 12) {
+                        Text("Your Custom Actions")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.secondary.opacity(0.8))
+                        
+                        ForEach(onboardingVM.customActions, id: \.self) { customAction in
+                            HStack(spacing: 16) {
+                                Text(customAction)
+                                    .font(.system(size: 15, weight: .regular))
+                                    .foregroundColor(.primary.opacity(0.8))
+                                
+                                Spacer()
+                                
+                                Button(action: {
+                                    removeCustomAction(customAction)
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.system(size: 18, weight: .light))
+                                        .foregroundColor(.red.opacity(0.7))
+                                }
+                            }
+                            .padding(16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color(.systemBackground).opacity(0.6))
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    .shadow(color: .black.opacity(0.02), radius: 4, x: 0, y: 2)
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                }
 
-            Spacer()
+                Spacer()
 
-            Button(action: {
-                onboardingVM.goToNextStep()
-            }) {
-                Text("Next")
-                    .foregroundColor(.white)
-                    .font(.headline)
-                    .padding()
+                // Standard next button (matching other onboarding views)
+                Button(action: {
+                    onboardingVM.goToNextStep()
+                }) {
+                    HStack(spacing: 12) {
+                        Text("Next")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(.white)
+                        
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white)
+                    }
+                    .padding(20)
                     .frame(maxWidth: .infinity)
-                    .background(totalSelected > 0 ? Color.accentColor : Color.gray)
-                    .cornerRadius(12)
-                    .padding(.horizontal)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.primary.opacity(0.9))
+                            .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
+                            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                    )
+                }
+                .disabled(totalSelected == 0)
+                .opacity(totalSelected == 0 ? 0.4 : 1.0)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 40)
+                .animation(.easeInOut(duration: 0.2), value: totalSelected)
             }
-            .disabled(totalSelected == 0)
         }
-        .padding(.vertical)
     }
     
     private func toggleActionSelection(_ action: String) {
@@ -159,34 +206,47 @@ struct ActionSelectionCard: View {
     
     var body: some View {
         Button(action: onTap) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 20) {
+                // Selection indicator (matching UrgesSelectionView style)
+                Button(action: onTap) {
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .font(.system(size: 22, weight: .light))
+                        .foregroundColor(isSelected ? .primary.opacity(0.8) : .secondary.opacity(0.6))
+                        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                        .frame(width: 32, height: 32)
+                }
+                
+                // Content (matching MainView card style)
+                VStack(alignment: .leading, spacing: 8) {
                     Text(title)
-                        .font(.body)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(.primary.opacity(0.9))
                     
                     Text(description)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.leading)
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(.secondary.opacity(0.7))
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 
                 Spacer()
-                
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(isSelected ? .accentColor : (canSelect ? .gray : .gray.opacity(0.3)))
-                    .font(.title3)
             }
-            .padding()
+            .padding(24)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? Color.accentColor.opacity(0.1) : Color(.systemGray6))
-                    .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(.systemBackground).opacity(0.8))
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
+                    .shadow(color: .black.opacity(0.04), radius: 16, x: 0, y: 6)
+                    .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
             )
         }
         .disabled(!canSelect && !isSelected)
+        .opacity(!canSelect && !isSelected ? 0.5 : 1.0)
         .buttonStyle(PlainButtonStyle())
+        .animation(.easeInOut(duration: 0.2), value: isSelected)
     }
 }
 

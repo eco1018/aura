@@ -24,117 +24,188 @@ struct GoalsSelectionView: View {
         ("Use DBT Skill", "Practice using a DBT skill when feeling overwhelmed."),
         ("Reach Out", "Reach out to someone for support when needed."),
         ("Follow Routine", "Stick to a daily routine to provide structure."),
-        ("Nourish", "Make sure you’re eating and taking care of your physical health."),
+        ("Nourish", "Make sure you're eating and taking care of your physical health."),
         ("Move Body", "Engage in physical activity to take care of your body."),
         ("Get Out of Bed", "Commit to getting out of bed, even on hard days."),
         ("Self-Compassion", "Practice kindness towards yourself, especially in difficult moments."),
         ("Ask for Help", "Be proactive in asking for support when you need it."),
-        ("Do For Me", "Set aside time to do something that’s just for you."),
+        ("Do For Me", "Set aside time to do something that's just for you."),
         ("Align with Values", "Make choices that align with your core values."),
         ("Other", "Something else you want to track — write it in.")
     ]
     
     var body: some View {
-        VStack(spacing: 32) {
-            Spacer()
+        ZStack {
+            // Premium gradient background (matching MainView)
+            LinearGradient(
+                colors: [
+                    Color(.systemGray6).opacity(0.1),
+                    Color(.systemGray5).opacity(0.2),
+                    Color(.systemGray6).opacity(0.15)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 40) {
+                // Elegant header (matching design system)
+                VStack(spacing: 16) {
+                    Text("Choose 3 Goals to Track")
+                        .font(.system(size: 28, weight: .light, design: .default))
+                        .foregroundColor(.primary.opacity(0.9))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, 60)
+                .padding(.horizontal, 24)
 
-            // MARK: - Title
-            Text("Choose 3 Goals to Track")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            // MARK: - Goals List
-            List(goals, id: \.0) { goal in
-                HStack {
-                    Text(goal.0)
-                        .font(.body)
-                        .fontWeight(.semibold)
-                        .padding(.trailing, 8)
-                    Spacer()
-                    Text(goal.1)
-                        .font(.body)
-                        .foregroundColor(.gray)
-                        .lineLimit(3)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    if goal.0 == "Other" {
-                        TextField("Describe your goal", text: $customGoal1)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.trailing)
-                            .padding(.vertical, 8) // Add more vertical space for custom input
-                    } else {
-                        Button(action: {
-                            if selectedGoals.contains(goal.0) {
-                                selectedGoals.remove(goal.0)
-                            } else {
-                                if selectedGoals.count < 3 {
-                                    selectedGoals.insert(goal.0)
+                // Glassmorphic goals list
+                ScrollView {
+                    VStack(spacing: 16) {
+                        ForEach(goals, id: \.0) { goal in
+                            // Individual goal card
+                            HStack(spacing: 20) {
+                                // Selection indicator
+                                Button(action: {
+                                    if goal.0 != "Other" {
+                                        if selectedGoals.contains(goal.0) {
+                                            selectedGoals.remove(goal.0)
+                                        } else {
+                                            if selectedGoals.count < 3 {
+                                                selectedGoals.insert(goal.0)
+                                            }
+                                        }
+                                    }
+                                }) {
+                                    Image(systemName: selectedGoals.contains(goal.0) ? "checkmark.circle.fill" : "circle")
+                                        .font(.system(size: 22, weight: .light))
+                                        .foregroundColor(selectedGoals.contains(goal.0) ? .primary.opacity(0.8) : .secondary.opacity(0.6))
+                                        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                                        .frame(width: 32, height: 32)
                                 }
+                                .disabled(goal.0 == "Other")
+                                
+                                // Content
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(goal.0)
+                                        .font(.system(size: 17, weight: .medium))
+                                        .foregroundColor(.primary.opacity(0.9))
+                                    
+                                    Text(goal.1)
+                                        .font(.system(size: 14, weight: .regular))
+                                        .foregroundColor(.secondary.opacity(0.7))
+                                        .lineLimit(3)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    
+                                    // Custom input for "Other"
+                                    if goal.0 == "Other" {
+                                        TextField("Describe your goal", text: $customGoal1)
+                                            .font(.system(size: 15, weight: .regular))
+                                            .padding(12)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .fill(Color(.systemBackground).opacity(0.6))
+                                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                            )
+                                            .foregroundColor(.primary.opacity(0.8))
+                                    }
+                                }
+                                
+                                Spacer()
                             }
-                        }) {
-                            Image(systemName: selectedGoals.contains(goal.0) ? "checkmark.circle.fill" : "circle")
-                                .foregroundColor(selectedGoals.contains(goal.0) ? .accentColor : .gray)
+                            .padding(24)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color(.systemBackground).opacity(0.8))
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    )
+                                    .shadow(color: .black.opacity(0.04), radius: 16, x: 0, y: 6)
+                                    .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
+                            )
                         }
-                        .padding(.vertical, 8) // Added space around the selection button
+                    }
+                    .padding(.horizontal, 24)
+                }
+                
+                // Custom goal inputs section
+                VStack(spacing: 16) {
+                    if selectedGoals.count >= 1 && !customGoal1.isEmpty {
+                        CustomGoalInput(
+                            title: "Custom Goal 1",
+                            text: $customGoal1
+                        )
+                    }
+                    
+                    if selectedGoals.count >= 2 && !customGoal2.isEmpty {
+                        CustomGoalInput(
+                            title: "Custom Goal 2",
+                            text: $customGoal2
+                        )
+                    }
+                    
+                    if selectedGoals.count >= 3 && !customGoal3.isEmpty {
+                        CustomGoalInput(
+                            title: "Custom Goal 3",
+                            text: $customGoal3
+                        )
                     }
                 }
-                .padding(.vertical, 12) // Increased space between each list item
-            }
-            .frame(height: 350) // Limit list height
+                .padding(.horizontal, 24)
 
-            // MARK: - Custom Goal Input Section (if needed)
-            if selectedGoals.count == 1 {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Custom Goal 1")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                    TextField("Describe your goal", text: $customGoal1)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                }
-                .padding(.vertical, 12)
-            }
-            if selectedGoals.count == 2 {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Custom Goal 2")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                    TextField("Describe your goal", text: $customGoal2)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                }
-                .padding(.vertical, 12)
-            }
-            if selectedGoals.count == 3 {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Custom Goal 3")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                    TextField("Describe your goal", text: $customGoal3)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                }
-                .padding(.vertical, 12)
-            }
+                Spacer()
 
-            Spacer()
-
-            Button(action: {
-                OnboardingViewModel.shared.goToNextStep()
-            }) {
-                Text("Next")
-                    .foregroundColor(.white)
-                    .font(.headline)
-                    .padding()
+                // Standard next button (matching other onboarding views)
+                Button(action: {
+                    OnboardingViewModel.shared.goToNextStep()
+                }) {
+                    HStack(spacing: 12) {
+                        Text("Next")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(.white)
+                        
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white)
+                    }
+                    .padding(20)
                     .frame(maxWidth: .infinity)
-                    .background(Color.accentColor)
-                    .cornerRadius(12)
-                    .padding(.horizontal)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.primary.opacity(0.9))
+                            .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
+                            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                    )
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 40)
             }
         }
-        .padding(.horizontal)
+    }
+}
+
+struct CustomGoalInput: View {
+    let title: String
+    @Binding var text: String
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            Text(title)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.secondary.opacity(0.8))
+            
+            TextField("Describe your goal", text: $text)
+                .font(.system(size: 15, weight: .regular))
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color(.systemBackground).opacity(0.8))
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        .shadow(color: .black.opacity(0.03), radius: 8, x: 0, y: 4)
+                )
+                .foregroundColor(.primary.opacity(0.8))
+        }
     }
 }
 

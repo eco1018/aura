@@ -5,12 +5,11 @@
 //  Created by Ella A. Sadduq on 5/22/25.
 //
 
-
 //
 //  RatingCardView.swift
 //  aura
 //
-//  Created by Ella A. Sadduq on 3/28/25.
+//  Created by Ella A. Sadduq on 5/22/25.
 //
 
 import SwiftUI
@@ -21,45 +20,55 @@ struct RatingCardView: View {
     @Binding var value: Double
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Title and description
-            VStack(alignment: .leading, spacing: 4) {
+        HStack(spacing: 20) {
+            // Elegant 3D icon (same as MainView)
+            Image(systemName: "heart.text.square")
+                .font(.system(size: 28, weight: .light))
+                .foregroundColor(.primary.opacity(0.8))
+                .shadow(color: .primary.opacity(0.1), radius: 2, x: 1, y: 1)
+                .shadow(color: .white.opacity(0.8), radius: 1, x: -0.5, y: -0.5)
+            
+            VStack(alignment: .leading, spacing: 8) {
                 Text(title)
-                    .font(.headline)
-                    .fontWeight(.medium)
+                    .font(.system(size: 19, weight: .medium))
+                    .foregroundColor(.primary.opacity(0.9))
                 
                 Text(description)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundColor(.secondary.opacity(0.6))
+                
+                // Rating slider
+                VStack(spacing: 6) {
+                    HStack {
+                        Text("0")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(.secondary.opacity(0.5))
+                        
+                        Slider(value: $value, in: 0...10, step: 1)
+                        
+                        Text("10")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(.secondary.opacity(0.5))
+                    }
+                    
+                    Text("Rating: \(Int(value))")
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(.secondary.opacity(0.6))
+                }
             }
             
-            // Rating controls
-            VStack(spacing: 8) {
-                // Slider with labels
-                HStack {
-                    Text("0")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Slider(value: $value, in: 0...10, step: 1)
-                        .tint(.blue)
-                    
-                    Text("10")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                // Current value display
-                Text("Current rating: \(Int(value))")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
-            }
+            Spacer()
         }
-        .padding()
+        .padding(28)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemGray6))
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color(.systemBackground).opacity(0.8))
+                .background(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.04), radius: 20, x: 0, y: 8)
+                .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
         )
     }
 }

@@ -158,11 +158,6 @@
 			path = Notifications;
 			sourceTree = "<group>";
 		};
-		C8FD92982DBFFE3C00F8488C /* TestUIViews */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = TestUIViews;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -257,7 +252,6 @@
 		C83BF0E82D98B66800538904 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				C8FD92982DBFFE3C00F8488C /* TestUIViews */,
 				C83BF0FF2D98C96400538904 /* EveningDiaryReminderTimeView.swift */,
 				C83BF0FD2D98C93500538904 /* MorningDiaryReminderTimeView.swift */,
 				C83BF0BA2D98AC6700538904 /* DiaryCardReminderTimeView.swift */,
@@ -365,7 +359,6 @@
 				C84F27362DDF4F1600E1D280 /* Settings */,
 				C84F27D02DDF625300E1D280 /* Medications */,
 				C8A66E282DE0D3090053DA0C /* Notifications */,
-				C8FD92982DBFFE3C00F8488C /* TestUIViews */,
 			);
 			name = aura;
 			packageProductDependencies = (

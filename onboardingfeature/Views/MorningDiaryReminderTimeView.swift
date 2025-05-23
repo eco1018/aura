@@ -5,7 +5,6 @@
 //  Created by Ella A. Sadduq on 3/30/25.
 //
 
-//
 //  MorningDiaryReminderTimeView.swift
 //  aura
 //
@@ -18,47 +17,96 @@ struct MorningDiaryReminderTimeView: View {
     @State private var morningReminder: Date = Date()
 
     var body: some View {
-        VStack(spacing: 32) {
-            Spacer()
-
-            // MARK: - Title
-            Text("Set Morning Reminder Time")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            Text("Choose a time to be reminded to complete your morning Diary Card.")
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            // MARK: - Time Picker
-            DatePicker("Morning Reminder", selection: $morningReminder, displayedComponents: .hourAndMinute)
-                .labelsHidden()
-                .padding(.horizontal)
-
-            Spacer()
-
-            Button(action: {
-                // Save morningReminder if needed
-                if OnboardingViewModel.shared.reminderFrequency == .once {
-                    OnboardingViewModel.shared.goToNextStep() // skip evening
-                } else {
-                    OnboardingViewModel.shared.onboardingStep = .diaryReminderTimeEvening
+        ZStack {
+            // Premium gradient background (matching design system)
+            LinearGradient(
+                colors: [
+                    Color(.systemGray6).opacity(0.1),
+                    Color(.systemGray5).opacity(0.2),
+                    Color(.systemGray6).opacity(0.15)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 50) {
+                // Elegant header
+                VStack(spacing: 20) {
+                    Text("Set Morning Reminder Time")
+                        .font(.system(size: 28, weight: .light, design: .default))
+                        .foregroundColor(.primary.opacity(0.9))
+                        .multilineTextAlignment(.center)
+                    
+                    Text("Choose a time to be reminded to complete your morning Diary Card.")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundColor(.secondary.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
                 }
-            }) {
-                Text("Next")
-                    .foregroundColor(.white)
-                    .font(.headline)
-                    .padding()
+                .padding(.top, 80)
+                .padding(.horizontal, 24)
+                
+                Spacer()
+                
+                // Glassmorphic time picker card
+                VStack(spacing: 24) {
+                    Text("Morning Reminder")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.primary.opacity(0.9))
+                    
+                    DatePicker("Morning Reminder", selection: $morningReminder, displayedComponents: .hourAndMinute)
+                        .labelsHidden()
+                        .datePickerStyle(WheelDatePickerStyle())
+                        .frame(height: 120)
+                        .clipped()
+                }
+                .padding(28)
+                .background(
+                    RoundedRectangle(cornerRadius: 24)
+                        .fill(Color(.systemBackground).opacity(0.8))
+                        .background(
+                            RoundedRectangle(cornerRadius: 24)
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        )
+                        .shadow(color: .black.opacity(0.04), radius: 16, x: 0, y: 6)
+                        .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
+                )
+                .padding(.horizontal, 24)
+                
+                Spacer()
+                
+                // Standard next button (matching other onboarding views)
+                Button(action: {
+                    // Save morningReminder if needed
+                    if OnboardingViewModel.shared.reminderFrequency == .once {
+                        OnboardingViewModel.shared.goToNextStep() // skip evening
+                    } else {
+                        OnboardingViewModel.shared.onboardingStep = .diaryReminderTimeEvening
+                    }
+                }) {
+                    HStack(spacing: 12) {
+                        Text("Next")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(.white)
+                        
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white)
+                    }
+                    .padding(20)
                     .frame(maxWidth: .infinity)
-                    .background(Color.accentColor)
-                    .cornerRadius(12)
-                    .padding(.horizontal)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.primary.opacity(0.9))
+                            .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
+                            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                    )
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 40)
             }
         }
-        .padding()
     }
 }
 
