@@ -12,6 +12,7 @@ struct MainView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @State private var showingDiaryCard = false
     @State private var showingSettings = false
+    @State private var diarySession: DiarySession = .manual
     
     var body: some View {
         NavigationView {
@@ -47,6 +48,7 @@ struct MainView: View {
                     VStack(spacing: 24) {
                         // Daily Diary Card - Premium glass effect
                         Button(action: {
+                            diarySession = determineSession()
                             showingDiaryCard = true
                         }) {
                             HStack(spacing: 20) {
@@ -143,11 +145,19 @@ struct MainView: View {
             .navigationBarHidden(true)
         }
         .sheet(isPresented: $showingDiaryCard) {
-            DiaryCardFlowView(session: determineSession())
+            DiaryCardFlowView(session: diarySession)
         }
         .sheet(isPresented: $showingSettings) {
             EnhancedSettingsView()
                 .environmentObject(authVM)
+        }
+        // 🔔 NOTIFICATION DEEP LINK HANDLING
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("OpenDiaryCard"))) { notification in
+            if let sessionString = notification.userInfo?["session"] as? String {
+                diarySession = sessionString == "morning" ? .morning : .evening
+                showingDiaryCard = true
+                print("📱 Opened diary card from notification: \(sessionString)")
+            }
         }
     }
     

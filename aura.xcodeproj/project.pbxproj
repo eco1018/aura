@@ -153,6 +153,11 @@
 			path = Medications;
 			sourceTree = "<group>";
 		};
+		C8A66E282DE0D3090053DA0C /* Notifications */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Notifications;
+			sourceTree = "<group>";
+		};
 		C8FD92982DBFFE3C00F8488C /* TestUIViews */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = TestUIViews;
@@ -212,6 +217,7 @@
 		C82400972D95C935004AE981 = {
 			isa = PBXGroup;
 			children = (
+				C8A66E282DE0D3090053DA0C /* Notifications */,
 				C84F27D02DDF625300E1D280 /* Medications */,
 				C84F27362DDF4F1600E1D280 /* Settings */,
 				C84F26B92DDF3AFA00E1D280 /* SkillsStepView.swift */,
@@ -358,6 +364,7 @@
 				C82400A22D95C935004AE981 /* aura */,
 				C84F27362DDF4F1600E1D280 /* Settings */,
 				C84F27D02DDF625300E1D280 /* Medications */,
+				C8A66E282DE0D3090053DA0C /* Notifications */,
 				C8FD92982DBFFE3C00F8488C /* TestUIViews */,
 			);
 			name = aura;
