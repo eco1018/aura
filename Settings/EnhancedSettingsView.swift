@@ -3,6 +3,11 @@
 //
 //
 //
+//
+///
+//
+//  EnhancedSettingsView - Style 2 (Profile Header)
+//
 //  EnhancedSettingsView.swift
 //  aura
 //
@@ -27,10 +32,10 @@ struct EnhancedSettingsView: View {
                     // Profile Header
                     profileHeader
                     
-                    // Main Options
-                    VStack(spacing: 16) {
+                    // Main Options with floating style
+                    VStack(spacing: 12) {
                         // Diary History
-                        SettingsOptionCard(
+                        FloatingSettingsCard(
                             icon: "chart.line.uptrend.xyaxis",
                             title: "Diary History",
                             subtitle: "View your past diary card submissions",
@@ -40,7 +45,7 @@ struct EnhancedSettingsView: View {
                         }
                         
                         // Medications
-                        SettingsOptionCard(
+                        FloatingSettingsCard(
                             icon: "pills",
                             title: "Medications",
                             subtitle: "Manage your medication list",
@@ -50,7 +55,7 @@ struct EnhancedSettingsView: View {
                         }
                         
                         // Notifications
-                        SettingsOptionCard(
+                        FloatingSettingsCard(
                             icon: "bell",
                             title: "Notifications",
                             subtitle: "Manage reminders and alerts",
@@ -60,7 +65,7 @@ struct EnhancedSettingsView: View {
                         }
                         
                         // Edit Personal Info
-                        SettingsOptionCard(
+                        FloatingSettingsCard(
                             icon: "person.circle",
                             title: "Personal Information",
                             subtitle: "Update your name, age, and details",
@@ -70,7 +75,7 @@ struct EnhancedSettingsView: View {
                         }
                         
                         // Edit Tracking Preferences
-                        SettingsOptionCard(
+                        FloatingSettingsCard(
                             icon: "slider.horizontal.3",
                             title: "Tracking Preferences",
                             subtitle: "Update your diary card preferences",
@@ -88,10 +93,10 @@ struct EnhancedSettingsView: View {
                                 .foregroundColor(.secondary)
                             Spacer()
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 16)
                         
                         // Sign Out
-                        SettingsOptionCard(
+                        FloatingSettingsCard(
                             icon: "rectangle.portrait.and.arrow.right",
                             title: "Sign Out",
                             subtitle: "Sign out of your account",
@@ -103,8 +108,10 @@ struct EnhancedSettingsView: View {
                         }
                     }
                 }
-                .padding()
+                .padding(.horizontal, 16)
+                .padding(.vertical, 20)
             }
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
@@ -184,7 +191,7 @@ struct EnhancedSettingsView: View {
     }
 }
 
-struct SettingsOptionCard: View {
+struct FloatingSettingsCard: View {
     let icon: String
     let title: String
     let subtitle: String
@@ -222,13 +229,16 @@ struct SettingsOptionCard: View {
                         .foregroundColor(.secondary)
                 }
             }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemGray6))
-            )
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
         }
         .buttonStyle(PlainButtonStyle())
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 2)
+                .shadow(color: .black.opacity(0.04), radius: 1, x: 0, y: 1)
+        )
     }
 }
 

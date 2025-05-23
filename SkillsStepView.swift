@@ -6,6 +6,12 @@
 //  Created by Ella A. Sadduq on 5/22/25.
 //
 
+//  SkillsStepView.swift
+//  aura
+//
+//  Created by Ella A. Sadduq on 5/22/25.
+//
+
 import SwiftUI
 
 struct SkillsStepView: View {
@@ -13,123 +19,97 @@ struct SkillsStepView: View {
     @State private var skillEffectiveness: Double = 5.0
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Header section
-                VStack(spacing: 8) {
-                    Image(systemName: DiaryStep.skills.systemImage)
-                        .font(.largeTitle)
-                        .foregroundColor(.blue)
-                    
-                    Text(DiaryStep.skills.title)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    
-                    Text("Rate how effective your coping skills were today")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.top)
+        NavigationView {
+            ZStack {
+                // Premium gradient background
+                LinearGradient(
+                    colors: [
+                        Color(.systemGray6).opacity(0.1),
+                        Color(.systemGray5).opacity(0.2),
+                        Color(.systemGray6).opacity(0.15)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
-                // Skills effectiveness rating card
-                VStack(alignment: .leading, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 8) {
+                VStack(spacing: 60) {
+                    // Elegant header
+                    VStack(spacing: 20) {
                         Text("Skills Effectiveness")
-                            .font(.headline)
-                            .fontWeight(.medium)
+                            .font(.system(size: 34, weight: .light, design: .default))
+                            .foregroundColor(.primary.opacity(0.9))
                         
-                        Text("How well did your DBT skills and coping strategies work for you today?")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                        Text("How helpful were your skills today?")
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(.secondary.opacity(0.7))
                     }
+                    .padding(.top, 80)
                     
-                    // Rating controls
-                    VStack(spacing: 12) {
-                        // Slider with labels
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("1")
-                                    .font(.caption)
-                                    .fontWeight(.medium)
-                                Text("Not effective")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                            }
+                    Spacer()
+                    
+                    // Glassmorphic rating card
+                    VStack(spacing: 32) {
+                        // Current rating display
+                        VStack(spacing: 8) {
+                            Text("\(Int(skillEffectiveness))")
+                                .font(.system(size: 72, weight: .ultraLight))
+                                .foregroundColor(.primary.opacity(0.9))
                             
-                            Spacer()
-                            
+                            Text(getEffectivenessDescription(Int(skillEffectiveness)))
+                                .font(.system(size: 17, weight: .regular))
+                                .foregroundColor(.secondary.opacity(0.7))
+                        }
+                        
+                        // Clean slider
+                        VStack(spacing: 16) {
                             Slider(value: $skillEffectiveness, in: 1...10, step: 1)
-                                .tint(getEffectivenessColor(Int(skillEffectiveness)))
+                                .tint(.primary.opacity(0.8))
                                 .onChange(of: skillEffectiveness) { _, newValue in
                                     diaryEntry.updateSkillEffectiveness(Int(newValue))
                                 }
                             
-                            Spacer()
-                            
-                            VStack(alignment: .trailing, spacing: 2) {
-                                Text("10")
-                                    .font(.caption)
-                                    .fontWeight(.medium)
-                                Text("Very effective")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        
-                        // Current value display with description
-                        VStack(spacing: 8) {
                             HStack {
-                                Text("Current rating: \(Int(skillEffectiveness))")
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.primary)
+                                Text("1")
+                                    .font(.system(size: 15, weight: .regular))
+                                    .foregroundColor(.secondary.opacity(0.6))
                                 
                                 Spacer()
                                 
-                                Text(getEffectivenessDescription(Int(skillEffectiveness)))
-                                    .font(.caption)
-                                    .foregroundColor(getEffectivenessColor(Int(skillEffectiveness)))
-                                    .fontWeight(.medium)
+                                Text("10")
+                                    .font(.system(size: 15, weight: .regular))
+                                    .foregroundColor(.secondary.opacity(0.6))
                             }
-                            
-                            // Encouraging message based on rating
-                            Text(getEncouragingMessage(Int(skillEffectiveness)))
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.top, 4)
                         }
+                        
+                        // Encouraging message
+                        Text(getEncouragingMessage(Int(skillEffectiveness)))
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(.secondary.opacity(0.6))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
                     }
+                    .padding(40)
+                    .background(
+                        RoundedRectangle(cornerRadius: 24)
+                            .fill(Color(.systemBackground).opacity(0.8))
+                            .background(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                            )
+                            .shadow(color: .black.opacity(0.04), radius: 20, x: 0, y: 8)
+                            .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
+                    )
+                    .padding(.horizontal, 28)
+                    
+                    Spacer()
                 }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemGray6))
-                )
-                
-                Spacer(minLength: 100)
             }
-            .padding()
+            .navigationBarHidden(true)
         }
         .onAppear {
             // Load existing value if any
             skillEffectiveness = Double(diaryEntry.getSkillEffectiveness())
-        }
-    }
-    
-    func getEffectivenessColor(_ value: Int) -> Color {
-        switch value {
-        case 1...3:
-            return .red
-        case 4...5:
-            return .orange
-        case 6...7:
-            return .yellow
-        case 8...10:
-            return .green
-        default:
-            return .blue
         }
     }
     

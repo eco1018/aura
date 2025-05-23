@@ -5,7 +5,6 @@
 //  Created by Ella A. Sadduq on 5/22/25.
 //
 
-
 //
 //  MedicationsStepView.swift
 //  aura
@@ -21,145 +20,116 @@ struct MedicationsStepView: View {
     @State private var additionalNotes: String = ""
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Header section
-                VStack(spacing: 8) {
-                    Image(systemName: DiaryStep.medications.systemImage)
-                        .font(.largeTitle)
-                        .foregroundColor(.blue)
-                    
-                    Text(DiaryStep.medications.title)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    
-                    Text(DiaryStep.medications.description)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.top)
+        NavigationView {
+            ZStack {
+                // Premium gradient background
+                LinearGradient(
+                    colors: [
+                        Color(.systemGray6).opacity(0.1),
+                        Color(.systemGray5).opacity(0.2),
+                        Color(.systemGray6).opacity(0.15)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
-                // Main question
-                VStack(spacing: 20) {
-                    Text("Did you take your medications as prescribed today?")
-                        .font(.headline)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
+                VStack(spacing: 60) {
+                    // Elegant header
+                    VStack(spacing: 20) {
+                        Text("Medications")
+                            .font(.system(size: 34, weight: .light, design: .default))
+                            .foregroundColor(.primary.opacity(0.9))
+                        
+                        Text("Did you take your medications as prescribed today?")
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(.secondary.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.top, 80)
                     
-                    // Yes/No buttons
-                    HStack(spacing: 20) {
+                    Spacer()
+                    
+                    // Glassmorphic Yes/No cards
+                    HStack(spacing: 24) {
                         // No button
                         Button(action: {
-                            tookMedication = false
-                            diaryEntry.updateMedicationCompliance(took: false, notes: additionalNotes)
+                            withAnimation(.spring(response: 0.4)) {
+                                tookMedication = false
+                                diaryEntry.updateMedicationCompliance(took: false, notes: additionalNotes)
+                            }
                         }) {
-                            VStack(spacing: 8) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .font(.title)
-                                    .foregroundColor(tookMedication ? .gray : .red)
+                            VStack(spacing: 16) {
+                                Image(systemName: "xmark.circle")
+                                    .font(.system(size: 32, weight: .light))
+                                    .foregroundColor(.primary.opacity(0.8))
+                                    .shadow(color: .primary.opacity(0.1), radius: 2, x: 1, y: 1)
+                                    .shadow(color: .white.opacity(0.8), radius: 1, x: -0.5, y: -0.5)
                                 
                                 Text("No")
-                                    .font(.headline)
-                                    .fontWeight(.medium)
+                                    .font(.system(size: 19, weight: .medium))
+                                    .foregroundColor(.primary.opacity(0.9))
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 20)
+                            .padding(.vertical, 32)
+                            .padding(.horizontal, 20)
                             .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(tookMedication ? Color(.systemGray6) : Color.red.opacity(0.1))
-                                    .stroke(tookMedication ? Color.clear : Color.red.opacity(0.3), lineWidth: 2)
+                                RoundedRectangle(cornerRadius: 24)
+                                    .fill(Color(.systemBackground).opacity(tookMedication ? 0.5 : 0.8))
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    )
+                                    .shadow(color: .black.opacity(tookMedication ? 0.02 : 0.04), radius: tookMedication ? 10 : 20, x: 0, y: tookMedication ? 4 : 8)
+                                    .shadow(color: .black.opacity(tookMedication ? 0.01 : 0.02), radius: 1, x: 0, y: 1)
                             )
                         }
                         .buttonStyle(PlainButtonStyle())
+                        .scaleEffect(!tookMedication ? 1.0 : 0.95)
+                        .animation(.spring(response: 0.4), value: tookMedication)
                         
                         // Yes button
                         Button(action: {
-                            tookMedication = true
-                            diaryEntry.updateMedicationCompliance(took: true, notes: additionalNotes)
+                            withAnimation(.spring(response: 0.4)) {
+                                tookMedication = true
+                                diaryEntry.updateMedicationCompliance(took: true, notes: additionalNotes)
+                            }
                         }) {
-                            VStack(spacing: 8) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.title)
-                                    .foregroundColor(tookMedication ? .green : .gray)
+                            VStack(spacing: 16) {
+                                Image(systemName: "checkmark.circle")
+                                    .font(.system(size: 32, weight: .light))
+                                    .foregroundColor(.primary.opacity(0.8))
+                                    .shadow(color: .primary.opacity(0.1), radius: 2, x: 1, y: 1)
+                                    .shadow(color: .white.opacity(0.8), radius: 1, x: -0.5, y: -0.5)
                                 
                                 Text("Yes")
-                                    .font(.headline)
-                                    .fontWeight(.medium)
+                                    .font(.system(size: 19, weight: .medium))
+                                    .foregroundColor(.primary.opacity(0.9))
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 20)
+                            .padding(.vertical, 32)
+                            .padding(.horizontal, 20)
                             .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(tookMedication ? Color.green.opacity(0.1) : Color(.systemGray6))
-                                    .stroke(tookMedication ? Color.green.opacity(0.3) : Color.clear, lineWidth: 2)
+                                RoundedRectangle(cornerRadius: 24)
+                                    .fill(Color(.systemBackground).opacity(tookMedication ? 0.8 : 0.5))
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    )
+                                    .shadow(color: .black.opacity(tookMedication ? 0.04 : 0.02), radius: tookMedication ? 20 : 10, x: 0, y: tookMedication ? 8 : 4)
+                                    .shadow(color: .black.opacity(tookMedication ? 0.02 : 0.01), radius: 1, x: 0, y: 1)
                             )
                         }
                         .buttonStyle(PlainButtonStyle())
+                        .scaleEffect(tookMedication ? 1.0 : 0.95)
+                        .animation(.spring(response: 0.4), value: tookMedication)
                     }
-                    .padding(.horizontal)
-                }
-                
-                // Status message
-                if tookMedication {
-                    HStack {
-                        Image(systemName: "star.fill")
-                            .foregroundColor(.green)
-                        Text("Great job staying consistent with your medication routine!")
-                            .font(.subheadline)
-                            .foregroundColor(.green)
-                            .fontWeight(.medium)
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.green.opacity(0.1))
-                    )
-                } else {
-                    VStack(spacing: 8) {
-                        HStack {
-                            Image(systemName: "info.circle.fill")
-                                .foregroundColor(.orange)
-                            Text("That's okay - consistency takes time to build.")
-                                .font(.subheadline)
-                                .foregroundColor(.orange)
-                                .fontWeight(.medium)
-                        }
-                        
-                        Text("Consider setting a daily reminder or talking to your healthcare provider about any challenges.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.orange.opacity(0.1))
-                    )
-                }
-                
-                // Optional notes section
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Additional Notes (Optional)")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
+                    .padding(.horizontal, 28)
                     
-                    Text("Any thoughts about your medication today?")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    TextField("Side effects, timing, reminders needed, etc.", text: $additionalNotes, axis: .vertical)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .lineLimit(3...6)
-                        .onChange(of: additionalNotes) { _, newValue in
-                            diaryEntry.updateMedicationCompliance(took: tookMedication, notes: newValue)
-                        }
+                    Spacer()
                 }
-                .padding(.horizontal)
-                
-                Spacer(minLength: 100)
             }
-            .padding()
+            .navigationBarHidden(true)
         }
         .onAppear {
             // Load existing values if any

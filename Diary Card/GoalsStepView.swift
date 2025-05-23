@@ -4,9 +4,6 @@
 //
 //  Created by Ella A. Sadduq on 5/22/25.
 //
-
-
-//
 //  GoalsStepView.swift
 //  aura
 //
@@ -19,114 +16,116 @@ struct GoalsStepView: View {
     @ObservedObject var diaryEntry: DiaryEntryViewModel
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Header section
-                VStack(spacing: 8) {
-                    Image(systemName: DiaryStep.goals.systemImage)
-                        .font(.largeTitle)
-                        .foregroundColor(.green)
-                    
-                    Text(DiaryStep.goals.title)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    
-                    Text(DiaryStep.goals.description)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.top)
+        NavigationView {
+            ZStack {
+                // Premium gradient background
+                LinearGradient(
+                    colors: [
+                        Color(.systemGray6).opacity(0.1),
+                        Color(.systemGray5).opacity(0.2),
+                        Color(.systemGray6).opacity(0.15)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
-                // Instruction
-                Text("Check off the goals you accomplished today:")
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                
-                // Goal cards
-                VStack(spacing: 12) {
-                    ForEach(diaryEntry.getAllGoals(), id: \.key) { goal in
-                        GoalCard(
-                            title: goal.title,
-                            isCompleted: goal.completed,
-                            onToggle: { completed in
-                                diaryEntry.updateGoalCompletion(goal.key, completed: completed)
+                VStack(spacing: 40) {
+                    // Elegant header
+                    VStack(spacing: 20) {
+                        Text("Today's Goals")
+                            .font(.system(size: 34, weight: .light, design: .default))
+                            .foregroundColor(.primary.opacity(0.9))
+                        
+                        Text("Track your daily progress")
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
+                    .padding(.top, 80)
+                    
+                    // Goals content
+                    ScrollView {
+                        VStack(spacing: 24) {
+                            // Goal cards with glassmorphic design
+                            ForEach(diaryEntry.getAllGoals(), id: \.key) { goal in
+                                GlassmorphicGoalCard(
+                                    title: goal.title,
+                                    isCompleted: goal.completed,
+                                    onToggle: { completed in
+                                        diaryEntry.updateGoalCompletion(goal.key, completed: completed)
+                                    }
+                                )
                             }
-                        )
+                            
+                            // If no goals, show elegant empty state
+                            if diaryEntry.getAllGoals().isEmpty {
+                                GlassmorphicEmptyState()
+                            }
+                        }
+                        .padding(.horizontal, 28)
+                        .padding(.bottom, 100)
                     }
+                    
+                    Spacer()
                 }
-                
-                // If no goals, show encouraging message
-                if diaryEntry.getAllGoals().isEmpty {
-                    VStack(spacing: 16) {
-                        Image(systemName: "star.circle")
-                            .font(.largeTitle)
-                            .foregroundColor(.gray)
-                        
-                        Text("No goals set yet")
-                            .font(.headline)
-                            .foregroundColor(.secondary)
-                        
-                        Text("You can add personal goals during onboarding to track your daily progress here.")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    }
-                    .padding(.vertical, 40)
-                }
-                
-                Spacer(minLength: 100)
             }
-            .padding()
+            .navigationBarHidden(true)
         }
     }
 }
 
-struct GoalCard: View {
+struct GlassmorphicGoalCard: View {
     let title: String
     let isCompleted: Bool
     let onToggle: (Bool) -> Void
     
     var body: some View {
         Button(action: {
-            onToggle(!isCompleted)
+            withAnimation(.spring(response: 0.4)) {
+                onToggle(!isCompleted)
+            }
         }) {
-            HStack(spacing: 16) {
-                // Checkmark
-                Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
-                    .font(.title2)
-                    .foregroundColor(isCompleted ? .green : .gray)
+            HStack(spacing: 20) {
+                // Subtle checkmark
+                ZStack {
+                    Circle()
+                        .fill(isCompleted ? Color.primary.opacity(0.8) : Color(.systemGray5))
+                        .frame(width: 28, height: 28)
+                        .shadow(color: .primary.opacity(0.1), radius: 2, x: 1, y: 1)
+                        .shadow(color: .white.opacity(0.8), radius: 1, x: -0.5, y: -0.5)
+                    
+                    if isCompleted {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white)
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                }
+                .animation(.spring(response: 0.4), value: isCompleted)
                 
-                // Goal text
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(title)
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                        .strikethrough(isCompleted)
+                        .font(.system(size: 19, weight: .medium))
+                        .foregroundColor(.primary.opacity(0.9))
                     
                     Text(getMotivationalText(for: title))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(.secondary.opacity(0.6))
+                        .lineLimit(2)
                 }
                 
                 Spacer()
-                
-                // Status indicator
-                if isCompleted {
-                    Image(systemName: "star.fill")
-                        .font(.caption)
-                        .foregroundColor(.yellow)
-                }
             }
-            .padding()
+            .padding(28)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(isCompleted ? Color.green.opacity(0.1) : Color(.systemGray6))
-                    .stroke(isCompleted ? Color.green.opacity(0.3) : Color.clear, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(Color(.systemBackground).opacity(0.8))
+                    .background(
+                        RoundedRectangle(cornerRadius: 24)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
+                    .shadow(color: .black.opacity(0.04), radius: 20, x: 0, y: 8)
+                    .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
             )
         }
         .buttonStyle(PlainButtonStyle())
@@ -171,6 +170,42 @@ struct GoalCard: View {
         default:
             return "Every step forward matters, no matter how small"
         }
+    }
+}
+
+struct GlassmorphicEmptyState: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            // Elegant 3D icon
+            Image(systemName: "star.circle")
+                .font(.system(size: 48, weight: .light))
+                .foregroundColor(.primary.opacity(0.8))
+                .shadow(color: .primary.opacity(0.1), radius: 2, x: 1, y: 1)
+                .shadow(color: .white.opacity(0.8), radius: 1, x: -0.5, y: -0.5)
+            
+            VStack(spacing: 12) {
+                Text("No goals set yet")
+                    .font(.system(size: 19, weight: .medium))
+                    .foregroundColor(.primary.opacity(0.9))
+                
+                Text("You can add personal goals during onboarding to track your daily progress here.")
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundColor(.secondary.opacity(0.6))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+        }
+        .padding(40)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color(.systemBackground).opacity(0.8))
+                .background(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.04), radius: 20, x: 0, y: 8)
+                .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
+        )
     }
 }
 
