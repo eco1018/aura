@@ -3,11 +3,11 @@
 //
 //
 //
-//
 //  OnboardingViewModel.swift
 //  aura
 //
 //  Created by Ella A. Sadduq on 3/30/25.
+//
 
 import Foundation
 import FirebaseAuth
@@ -322,9 +322,16 @@ final class OnboardingViewModel: ObservableObject {
                 if success {
                     print("🎉 SUCCESS! Profile saved successfully")
                     self?.hasCompletedOnboarding = true
+                    
                     // Update AuthViewModel with the new profile
                     AuthViewModel.shared.userProfile = updatedProfile
                     print("✅ AuthViewModel updated with new profile")
+                    
+                    // 🔔 Setup notifications after successful save
+                    Task {
+                        await SimpleNotificationService.shared.setupNotifications(for: updatedProfile)
+                    }
+                    
                 } else {
                     print("❌ FAILED to save profile")
                     self?.errorMessage = "Failed to save profile. Please try again."

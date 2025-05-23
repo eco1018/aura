@@ -1,6 +1,7 @@
 //
 //
 //
+//
 //  MedicationSettingsView.swift
 //  aura
 //
@@ -176,6 +177,12 @@ struct MedicationSettingsView: View {
                     authVM.userProfile = updatedProfile
                     showingSaveConfirmation = true
                     print("✅ Medications updated successfully")
+                    
+                    // 🔔 Update medication notifications
+                    Task {
+                        await SimpleNotificationService.shared.setupNotifications(for: updatedProfile)
+                    }
+                    
                 } else {
                     print("❌ Failed to save medications")
                 }

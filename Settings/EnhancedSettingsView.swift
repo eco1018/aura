@@ -1,6 +1,8 @@
 //
 //
 //
+//
+//
 //  EnhancedSettingsView.swift
 //  aura
 //
@@ -16,6 +18,7 @@ struct EnhancedSettingsView: View {
     @State private var showingPersonalInfoEdit = false
     @State private var showingTrackingPreferencesEdit = false
     @State private var showingMedicationSettings = false
+    @State private var showingNotificationSettings = false
     
     var body: some View {
         NavigationView {
@@ -46,6 +49,16 @@ struct EnhancedSettingsView: View {
                             showingMedicationSettings = true
                         }
                         
+                        // Notifications
+                        SettingsOptionCard(
+                            icon: "bell",
+                            title: "Notifications",
+                            subtitle: "Manage reminders and alerts",
+                            iconColor: .orange
+                        ) {
+                            showingNotificationSettings = true
+                        }
+                        
                         // Edit Personal Info
                         SettingsOptionCard(
                             icon: "person.circle",
@@ -61,7 +74,7 @@ struct EnhancedSettingsView: View {
                             icon: "slider.horizontal.3",
                             title: "Tracking Preferences",
                             subtitle: "Update your diary card preferences",
-                            iconColor: .orange
+                            iconColor: .indigo
                         ) {
                             showingTrackingPreferencesEdit = true
                         }
@@ -107,6 +120,10 @@ struct EnhancedSettingsView: View {
         }
         .sheet(isPresented: $showingMedicationSettings) {
             MedicationSettingsView()
+                .environmentObject(authVM)
+        }
+        .sheet(isPresented: $showingNotificationSettings) {
+            NotificationSettingsView()
                 .environmentObject(authVM)
         }
         .sheet(isPresented: $showingPersonalInfoEdit) {
