@@ -7,6 +7,10 @@
 //  Created by Ella A. Sadduq on 3/27/25.
 //
 
+//
+// Updated auraApp.swift - Fixed AppDelegate Notification Handling
+//
+
 import SwiftUI
 import FirebaseCore
 import UserNotifications
@@ -46,46 +50,87 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
-// MARK: - Simple Notification Handling
+// MARK: - Enhanced Notification Handling
 extension AppDelegate: UNUserNotificationCenterDelegate {
     
     // Show notifications even when app is open
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                               willPresent notification: UNNotification,
                               withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.alert, .sound])
+        // Show notifications even when app is in foreground
+        completionHandler([.alert, .sound, .badge])
     }
     
-    // Handle notification taps
+    // FIXED: Handle notification taps with better debugging
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                               didReceive response: UNNotificationResponse,
                               withCompletionHandler completionHandler: @escaping () -> Void) {
         
         let userInfo = response.notification.request.content.userInfo
+        let notificationId = response.notification.request.identifier
         
-        // Check if it's a diary notification
-        if userInfo["openDiary"] as? Bool == true {
-            let session = userInfo["session"] as? String ?? "manual"
-            
-            // Post notification to open diary
+        print("🔔 Notification tapped:")
+        print("   - ID: \(notificationId)")
+        print("   - UserInfo: \(userInfo)")
+        
+        // FIXED: Better diary notification handling
+        if let notificationType = userInfo["type"] as? String {
+            switch notificationType {
+            case "diary":
+                handleDiaryNotification(userInfo: userInfo)
+            case "medication":
+                handleMedicationNotification(userInfo: userInfo)
+            default:
+                print("⚠️ Unknown notification type: \(notificationType)")
+            }
+        } else {
+            print("⚠️ No notification type found in userInfo")
+        }
+        
+        // Clear the notification badge
+        DispatchQueue.main.async {
+            UIApplication.shared.applicationIconBadgeNumber = 0
+        }
+        
+        completionHandler()
+    }
+    
+    // MARK: - Specific Notification Handlers
+    
+    private func handleDiaryNotification(userInfo: [AnyHashable: Any]) {
+        guard let openDiary = userInfo["openDiary"] as? Bool, openDiary == true else {
+            print("⚠️ Diary notification doesn't have openDiary flag")
+            return
+        }
+        
+        let session = userInfo["session"] as? String ?? "manual"
+        
+        print("📔 Handling diary notification:")
+        print("   - Session: \(session)")
+        print("   - Posting NotificationCenter event...")
+        
+        // Post to NotificationCenter with delay to ensure app is ready
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             NotificationCenter.default.post(
                 name: NSNotification.Name("OpenDiaryCard"),
                 object: nil,
                 userInfo: ["session": session]
             )
+            print("✅ Posted OpenDiaryCard notification to NotificationCenter")
         }
+    }
+    
+    private func handleMedicationNotification(userInfo: [AnyHashable: Any]) {
+        let medicationName = userInfo["medicationName"] as? String ?? "your medication"
+        let medicationId = userInfo["medicationId"] as? String ?? "unknown"
         
-        // Check if it's a medication notification
-        if userInfo["type"] as? String == "medication" {
-            let medicationName = userInfo["medicationName"] as? String ?? "your medication"
-            print("💊 User tapped medication reminder for: \(medicationName)")
-            
-            // You can add specific medication reminder handling here later
-            // For now, just clear the badge
-            NotificationHelper.clearBadge()
-        }
+        print("💊 Handling medication notification:")
+        print("   - Medication: \(medicationName)")
+        print("   - ID: \(medicationId)")
         
-        completionHandler()
+        // You can add specific medication reminder handling here later
+        // For now, just clear the badge
+        NotificationHelper.clearBadge()
     }
 }
 

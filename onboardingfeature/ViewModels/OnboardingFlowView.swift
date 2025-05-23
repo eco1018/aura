@@ -6,33 +6,18 @@ struct OnboardingFlowView: View {
     @ObservedObject var onboardingVM = OnboardingViewModel.shared
 
     var body: some View {
-        VStack(spacing: 0) {
-            // 🌿 Simple top progress bar
-            ProgressView(value: progress)
-                .progressViewStyle(LinearProgressViewStyle(tint: Color.accentColor))
-                .frame(height: 4)
-                .padding(.top, 4)
-
-            // Show current view
-            currentOnboardingView()
-        }
-        .onAppear {
-            print("📱 OnboardingFlowView appeared")
-            print("   - Current step: \(onboardingVM.onboardingStep)")
-            print("   - Has completed: \(onboardingVM.hasCompletedOnboarding)")
-        }
-        .onChange(of: onboardingVM.hasCompletedOnboarding) { _, completed in
-            if completed {
-                print("🎯 Onboarding completed! Should transition to main app.")
+        // Show current view directly without progress bar
+        currentOnboardingView()
+            .onAppear {
+                print("📱 OnboardingFlowView appeared")
+                print("   - Current step: \(onboardingVM.onboardingStep)")
+                print("   - Has completed: \(onboardingVM.hasCompletedOnboarding)")
             }
-        }
-    }
-
-    private var progress: Double {
-        guard let index = OnboardingStep.allCases.firstIndex(of: onboardingVM.onboardingStep) else {
-            return 0.0
-        }
-        return Double(index + 1) / Double(OnboardingStep.allCases.count)
+            .onChange(of: onboardingVM.hasCompletedOnboarding) { _, completed in
+                if completed {
+                    print("🎯 Onboarding completed! Should transition to main app.")
+                }
+            }
     }
 
     @ViewBuilder

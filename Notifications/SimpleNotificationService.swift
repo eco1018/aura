@@ -1,10 +1,8 @@
 //
 //
 //
-//  SimpleNotificationService.swift
-//  aura
 //
-//  Created by Ella A. Sadduq on 5/23/25.
+// Updated SimpleNotificationService.swift - Fixed Diary Notifications
 //
 
 import Foundation
@@ -93,7 +91,7 @@ class SimpleNotificationService {
         }
     }
     
-    // MARK: - Diary Card Reminders
+    // MARK: - Diary Card Reminders (FIXED)
     private func scheduleDiaryReminders(for profile: UserProfile) {
         // Morning reminder
         if let morningTime = profile.morningReminderTime {
@@ -125,11 +123,12 @@ class SimpleNotificationService {
         content.sound = .default
         content.badge = 1
         
-        // Add diary-specific data for deep linking
+        // FIXED: Add diary-specific data for deep linking
         content.userInfo = [
             "type": "diary",
             "openDiary": true,
-            "session": session
+            "session": session,
+            "action": "openDiaryCard" // Added this for clearer handling
         ]
         
         // Create daily repeating trigger
@@ -184,6 +183,7 @@ class SimpleNotificationService {
                 let trigger = request.trigger as? UNCalendarNotificationTrigger
                 let time = trigger?.dateComponents
                 print("   - \(request.identifier): \(request.content.title) at \(time?.hour ?? 0):\(String(format: "%02d", time?.minute ?? 0))")
+                print("     UserInfo: \(request.content.userInfo)")
             }
         }
     }
