@@ -1,5 +1,6 @@
 //
 //
+//
 //  WrapUpView.swift
 //  aura
 //
@@ -12,80 +13,89 @@ struct WrapUpView: View {
     @ObservedObject var onboardingVM = OnboardingViewModel.shared
     
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-
-            // MARK: - Message
-            Text("You're all set!")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .multilineTextAlignment(.center)
-
-            Text("Let's begin your journey toward greater self-awareness and emotional well-being.")
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
+        ZStack {
+            // Premium gradient background
+            LinearGradient(
+                colors: [
+                    Color(.systemGray6).opacity(0.1),
+                    Color(.systemGray5).opacity(0.2),
+                    Color(.systemGray6).opacity(0.15)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
             
-            // Show collected data for debugging
-            if !onboardingVM.firstName.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Your Information:")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
+            VStack(spacing: 60) {
+                Spacer()
+                
+                // Elegant congratulations header
+                VStack(spacing: 24) {
+                    Text("You're all set!")
+                        .font(.system(size: 34, weight: .light, design: .default))
+                        .foregroundColor(.primary.opacity(0.9))
+                        .multilineTextAlignment(.center)
                     
-                    Text("Name: \(onboardingVM.firstName) \(onboardingVM.lastName)")
-                    Text("Age: \(onboardingVM.age)")
-                    
-                    if !onboardingVM.customActions.isEmpty {
-                        Text("Custom Actions: \(onboardingVM.customActions.joined(separator: ", "))")
-                    }
-                    
-                    if !onboardingVM.customGoals.isEmpty {
-                        Text("Custom Goals: \(onboardingVM.customGoals.joined(separator: ", "))")
-                    }
+                    Text("Let's begin your journey toward greater self-awareness and emotional well-being.")
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundColor(.secondary.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
                 }
-                .font(.caption)
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(8)
-                .padding(.horizontal)
-            }
-            
-            // Show any error messages
-            if !onboardingVM.errorMessage.isEmpty {
-                Text(onboardingVM.errorMessage)
-                    .font(.caption)
-                    .foregroundColor(.red)
-                    .padding(.horizontal)
-            }
-
-            Spacer()
-
-            // MARK: - Finish Button
-            Button(action: {
-                print("🎯 Finish button tapped")
-                onboardingVM.completeOnboarding()
-            }) {
-                HStack {
-                    if onboardingVM.isLoading {
-                        ProgressView()
-                            .scaleEffect(0.8)
+                .padding(.horizontal, 24)
+                
+               
+                     
+                
+                Spacer()
+                
+                // Elegant finish button with loading state
+                Button(action: {
+                    print("🎯 Finish button tapped")
+                    onboardingVM.completeOnboarding()
+                }) {
+                    HStack(spacing: 12) {
+                        if onboardingVM.isLoading {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                                .foregroundColor(.white)
+                        }
+                        
+                        Text(onboardingVM.isLoading ? "Saving..." : "Finish")
+                            .font(.system(size: 18, weight: .medium))
                             .foregroundColor(.white)
+                        
+                        if !onboardingVM.isLoading {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.white)
+                        }
                     }
-                    
-                    Text(onboardingVM.isLoading ? "Saving..." : "Finish")
+                    .padding(20)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(onboardingVM.isLoading ? Color.secondary.opacity(0.4) : Color.primary.opacity(0.9))
+                            .shadow(
+                                color: onboardingVM.isLoading ? .clear : .black.opacity(0.15),
+                                radius: onboardingVM.isLoading ? 0 : 12,
+                                x: 0,
+                                y: onboardingVM.isLoading ? 0 : 6
+                            )
+                            .shadow(
+                                color: onboardingVM.isLoading ? .clear : .black.opacity(0.05),
+                                radius: onboardingVM.isLoading ? 0 : 2,
+                                x: 0,
+                                y: onboardingVM.isLoading ? 0 : 1
+                            )
+                    )
                 }
-                .foregroundColor(.white)
-                .font(.headline)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(onboardingVM.isLoading ? Color.gray : Color.accentColor)
-                .cornerRadius(12)
-                .padding(.horizontal)
+                .disabled(onboardingVM.isLoading)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 40)
+                .animation(.easeInOut(duration: 0.2), value: onboardingVM.isLoading)
             }
-            .disabled(onboardingVM.isLoading)
         }
-        .padding()
     }
 }
 

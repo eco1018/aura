@@ -1,6 +1,7 @@
 
 
 //
+//
 //  AuthViewModel.swift
 //  aura
 //
@@ -34,21 +35,43 @@ final class AuthViewModel: ObservableObject {
     private func listenToAuthChanges() {
         authHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             guard let self = self else { return }
-            self.user = user
-            self.isAuthenticated = (user != nil)
             
-            if let uid = user?.uid {
-                self.loadUserProfile(uid: uid)
-                // Let RootView decide what to show next
-            } else {
-                self.userProfile = nil
-                self.authFlow = .signIn
+            DispatchQueue.main.async {
+                let previousUserId = self.user?.uid
+                let newUserId = user?.uid
+                
+                self.user = user
+                self.isAuthenticated = (user != nil)
+                
+                if let uid = newUserId {
+                    print("🔐 Auth state changed - User: \(uid)")
+                    
+                    // If this is a different user, clear previous profile
+                    if previousUserId != newUserId {
+                        print("👤 User changed from \(previousUserId ?? "nil") to \(uid)")
+                        self.userProfile = nil
+                        
+                        // Reset onboarding for new user
+                        OnboardingViewModel.shared.startFreshOnboarding()
+                    }
+                    
+                    self.loadUserProfile(uid: uid)
+                } else {
+                    print("🚪 User signed out")
+                    self.userProfile = nil
+                    self.authFlow = .signIn
+                    
+                    // Reset onboarding when signing out
+                    OnboardingViewModel.shared.startFreshOnboarding()
+                }
             }
         }
     }
     
     // MARK: - Sign In
     func signIn(email: String, password: String) {
+        print("🔐 Attempting sign in for: \(email)")
+        
         Auth.auth().signIn(withEmail: email, password: password) { [weak self] result, error in
             if let error = error {
                 print("❌ Sign in failed: \(error.localizedDescription)")
@@ -56,17 +79,20 @@ final class AuthViewModel: ObservableObject {
             }
             
             guard let user = result?.user else { return }
+            print("✅ Sign in successful for: \(user.uid)")
+            
             DispatchQueue.main.async {
                 self?.user = user
                 self?.isAuthenticated = true
                 self?.loadUserProfile(uid: user.uid)
-                // Let RootView decide
             }
         }
     }
     
     // MARK: - Sign Up
     func signUp(name: String, email: String, password: String) {
+        print("📝 Attempting sign up for: \(email)")
+        
         Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
             if let error = error {
                 print("❌ Sign up failed: \(error.localizedDescription)")
@@ -74,16 +100,23 @@ final class AuthViewModel: ObservableObject {
             }
             
             guard let user = result?.user else { return }
-            let newUser = UserProfile(uid: user.uid, name: name, email: email)
+            print("✅ Sign up successful for: \(user.uid)")
+            
+            // Create initial user profile for new user
+            let newUser = UserProfile(uid: user.uid, name: name, email: email, hasCompletedOnboarding: false)
             
             newUser.save { success in
-                if success {
-                    DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    if success {
+                        print("💾 Initial profile created for new user")
                         self?.user = user
                         self?.userProfile = newUser
                         self?.isAuthenticated = true
-                        OnboardingViewModel.shared.hasCompletedOnboarding = false
-                        // Don't set authFlow = .main
+                        
+                        // Ensure onboarding starts fresh for new user
+                        OnboardingViewModel.shared.startFreshOnboarding()
+                    } else {
+                        print("❌ Failed to create initial profile")
                     }
                 }
             }
@@ -92,9 +125,24 @@ final class AuthViewModel: ObservableObject {
     
     // MARK: - Load Profile
     func loadUserProfile(uid: String) {
+        print("🔍 Loading profile for user: \(uid)")
+        
         UserProfile.fetch(uid: uid) { [weak self] profile in
             DispatchQueue.main.async {
-                self?.userProfile = profile
+                if let profile = profile {
+                    // Verify the profile belongs to the correct user
+                    if profile.uid == uid {
+                        self?.userProfile = profile
+                        print("✅ Profile loaded for: \(profile.name) (UID: \(profile.uid))")
+                        print("   - Completed onboarding: \(profile.hasCompletedOnboarding)")
+                    } else {
+                        print("⚠️ Profile UID mismatch! Expected: \(uid), Got: \(profile.uid)")
+                        self?.userProfile = nil
+                    }
+                } else {
+                    print("⚠️ No profile found for user: \(uid)")
+                    self?.userProfile = nil
+                }
             }
         }
     }
@@ -104,18 +152,30 @@ final class AuthViewModel: ObservableObject {
         Auth.auth().sendPasswordReset(withEmail: email) { error in
             if let error = error {
                 print("❌ Password reset failed: \(error.localizedDescription)")
+            } else {
+                print("✅ Password reset email sent")
             }
         }
     }
     
     // MARK: - Sign Out
     func signOut() {
+        print("🚪 Signing out user")
+        
         do {
             try Auth.auth().signOut()
-            self.user = nil
-            self.userProfile = nil
-            self.isAuthenticated = false
-            self.authFlow = .signIn
+            
+            DispatchQueue.main.async {
+                self.user = nil
+                self.userProfile = nil
+                self.isAuthenticated = false
+                self.authFlow = .signIn
+                
+                // Reset onboarding state
+                OnboardingViewModel.shared.startFreshOnboarding()
+            }
+            
+            print("✅ Sign out successful")
         } catch {
             print("❌ Sign out failed: \(error.localizedDescription)")
         }

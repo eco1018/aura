@@ -1,6 +1,9 @@
 
 //
 //
+//
+//
+//
 //  OnboardingViewModel.swift
 //  aura
 //
@@ -48,8 +51,82 @@ final class OnboardingViewModel: ObservableObject {
     @Published var morningReminderTime: Date = Calendar.current.date(bySettingHour: 8, minute: 30, second: 0, of: Date()) ?? Date()
     @Published var eveningReminderTime: Date = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: Date()) ?? Date()
     
+    // Track the current user to detect user changes
+    private var currentUserId: String?
+    
     private init() {
-        loadExistingProfile()
+        // Don't automatically load profile - wait for explicit call
+        setupAuthListener()
+    }
+    
+    // MARK: - Auth State Management
+    private func setupAuthListener() {
+        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            DispatchQueue.main.async {
+                self?.handleAuthStateChange(user: user)
+            }
+        }
+    }
+    
+    private func handleAuthStateChange(user: User?) {
+        let newUserId = user?.uid
+        
+        // If user changed, reset everything
+        if newUserId != currentUserId {
+            currentUserId = newUserId
+            
+            if let userId = newUserId {
+                print("🔄 User changed to: \(userId)")
+                resetOnboardingData()
+                loadExistingProfile(for: userId)
+            } else {
+                print("🔄 User signed out")
+                resetOnboardingData()
+            }
+        }
+    }
+    
+    // MARK: - Data Reset
+    private func resetOnboardingData() {
+        print("🔄 Resetting onboarding data")
+        
+        DispatchQueue.main.async {
+            self.onboardingStep = .welcome
+            self.hasCompletedOnboarding = false
+            self.reminderFrequency = .once
+            self.isLoading = false
+            self.errorMessage = ""
+            
+            // Reset user data
+            self.firstName = ""
+            self.lastName = ""
+            self.age = 25
+            self.gender = ""
+            
+            // Reset diary card customizations
+            self.selectedActions = []
+            self.customActions = []
+            self.selectedUrges = []
+            self.customUrges = []
+            self.selectedGoals = []
+            self.customGoals = []
+            self.selectedEmotions = []
+            self.selectedMedications = []
+            
+            // Reset medication support
+            self.takesMedications = false
+            self.medications = []
+            
+            // Reset reminder times to defaults
+            self.morningReminderTime = Calendar.current.date(bySettingHour: 8, minute: 30, second: 0, of: Date()) ?? Date()
+            self.eveningReminderTime = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: Date()) ?? Date()
+        }
+    }
+    
+    // MARK: - Public Methods for Fresh Start
+    func startFreshOnboarding() {
+        print("🆕 Starting fresh onboarding")
+        resetOnboardingData()
     }
 
     // MARK: - Step Control
@@ -124,23 +201,25 @@ final class OnboardingViewModel: ObservableObject {
         print("💊 Set takes medications: \(taking)")
     }
     
-    // MARK: - Load Existing Profile
-    private func loadExistingProfile() {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            print("⚠️ No authenticated user found during profile load")
-            return
-        }
-        
+    // MARK: - Load Existing Profile (Only for specific user)
+    private func loadExistingProfile(for userId: String) {
         print("🔍 Loading existing profile for user: \(userId)")
         
         UserProfile.fetch(uid: userId) { [weak self] profile in
             guard let self = self, let profile = profile else {
-                print("⚠️ No existing profile found")
+                print("⚠️ No existing profile found for user: \(userId)")
+                return
+            }
+            
+            // Double-check the profile belongs to the correct user
+            guard profile.uid == userId else {
+                print("⚠️ Profile UID mismatch! Expected: \(userId), Got: \(profile.uid)")
                 return
             }
             
             DispatchQueue.main.async {
-                print("✅ Existing profile loaded: \(profile.name)")
+                print("✅ Existing profile loaded for \(profile.name) (UID: \(profile.uid))")
+                
                 // If user has completed onboarding, load their data
                 if profile.hasCompletedOnboarding {
                     self.hasCompletedOnboarding = true
@@ -159,6 +238,15 @@ final class OnboardingViewModel: ObservableObject {
                     
                     self.morningReminderTime = profile.morningReminderTime ?? self.morningReminderTime
                     self.eveningReminderTime = profile.eveningReminderTime ?? self.eveningReminderTime
+                    
+                    print("📊 Loaded profile data:")
+                    print("   - Has completed onboarding: \(profile.hasCompletedOnboarding)")
+                    print("   - Name: \(profile.name)")
+                    print("   - Custom Actions: \(profile.customActions)")
+                    print("   - Takes Medications: \(profile.takesMedications)")
+                } else {
+                    print("📝 User has profile but hasn't completed onboarding yet")
+                    self.hasCompletedOnboarding = false
                 }
             }
         }
@@ -174,7 +262,14 @@ final class OnboardingViewModel: ObservableObject {
             return
         }
         
-        print("👤 Current user: \(user.uid)")
+        // Double-check we're working with the right user
+        guard user.uid == currentUserId else {
+            print("❌ User ID mismatch during completion!")
+            errorMessage = "User authentication error"
+            return
+        }
+        
+        print("👤 Completing onboarding for user: \(user.uid)")
         print("📝 Collected data:")
         print("   Name: \(firstName) \(lastName)")
         print("   Age: \(age)")

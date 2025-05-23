@@ -15,98 +15,130 @@ struct MainView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 32) {
-                // Header with user greeting
-                VStack(spacing: 8) {
-                    Text("Hello, \(authVM.userProfile?.name ?? "Friend")")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    
-                    Text("How are you feeling today?")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.top, 40)
+            ZStack {
+                // Premium gradient background
+                LinearGradient(
+                    colors: [
+                        Color(.systemGray6).opacity(0.1),
+                        Color(.systemGray5).opacity(0.2),
+                        Color(.systemGray6).opacity(0.15)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
-                Spacer()
-                
-                // Main action buttons
-                VStack(spacing: 20) {
-                    // Daily Diary Card button
-                    Button(action: {
-                        showingDiaryCard = true
-                    }) {
-                        HStack {
-                            Image(systemName: "heart.text.square.fill")
-                                .font(.title2)
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Daily Diary Card")
-                                    .font(.headline)
-                                    .fontWeight(.semibold)
-                                
-                                Text("Track your emotions and skills")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                            
-                            Spacer()
-                            
-                            Image(systemName: "chevron.right")
-                                .font(.title3)
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(20)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color.blue.opacity(0.1))
-                                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
-                        )
+                VStack(spacing: 60) {
+                    // Elegant header
+                    VStack(spacing: 20) {
+                        Text("Hello, \(authVM.userProfile?.name ?? "Friend")")
+                            .font(.system(size: 34, weight: .light, design: .default))
+                            .foregroundColor(.primary.opacity(0.9))
+                        
+                        Text("How are you feeling today?")
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(.secondary.opacity(0.7))
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .padding(.top, 80)
                     
-                    // Settings button
-                    Button(action: {
-                        showingSettings = true
-                    }) {
-                        HStack {
-                            Image(systemName: "gearshape.fill")
-                                .font(.title2)
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Settings")
-                                    .font(.headline)
-                                    .fontWeight(.semibold)
+                    Spacer()
+                    
+                    // Glassmorphic cards
+                    VStack(spacing: 24) {
+                        // Daily Diary Card - Premium glass effect
+                        Button(action: {
+                            showingDiaryCard = true
+                        }) {
+                            HStack(spacing: 20) {
+                                // Elegant 3D icon
+                                Image(systemName: "heart.text.square")
+                                    .font(.system(size: 28, weight: .light))
+                                    .foregroundColor(.primary.opacity(0.8))
+                                    .shadow(color: .primary.opacity(0.1), radius: 2, x: 1, y: 1)
+                                    .shadow(color: .white.opacity(0.8), radius: 1, x: -0.5, y: -0.5)
                                 
-                                Text("Manage your preferences")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Daily Diary Card")
+                                        .font(.system(size: 19, weight: .medium))
+                                        .foregroundColor(.primary.opacity(0.9))
+                                    
+                                    Text("Track your emotions and skills")
+                                        .font(.system(size: 15, weight: .regular))
+                                        .foregroundColor(.secondary.opacity(0.6))
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundColor(.secondary.opacity(0.4))
                             }
-                            
-                            Spacer()
-                            
-                            Image(systemName: "chevron.right")
-                                .font(.title3)
-                                .foregroundColor(.secondary)
+                            .padding(28)
+                            .background(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .fill(Color(.systemBackground).opacity(0.8))
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    )
+                                    .shadow(color: .black.opacity(0.04), radius: 20, x: 0, y: 8)
+                                    .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
+                            )
                         }
-                        .padding(20)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color.gray.opacity(0.1))
-                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                        )
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        // Settings Card - Matching glass effect
+                        Button(action: {
+                            showingSettings = true
+                        }) {
+                            HStack(spacing: 20) {
+                                // Elegant 3D icon
+                                Image(systemName: "gearshape")
+                                    .font(.system(size: 28, weight: .light))
+                                    .foregroundColor(.primary.opacity(0.8))
+                                    .shadow(color: .primary.opacity(0.1), radius: 2, x: 1, y: 1)
+                                    .shadow(color: .white.opacity(0.8), radius: 1, x: -0.5, y: -0.5)
+                                
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Settings")
+                                        .font(.system(size: 19, weight: .medium))
+                                        .foregroundColor(.primary.opacity(0.9))
+                                    
+                                    Text("Manage your preferences")
+                                        .font(.system(size: 15, weight: .regular))
+                                        .foregroundColor(.secondary.opacity(0.6))
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundColor(.secondary.opacity(0.4))
+                            }
+                            .padding(28)
+                            .background(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .fill(Color(.systemBackground).opacity(0.8))
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    )
+                                    .shadow(color: .black.opacity(0.04), radius: 20, x: 0, y: 8)
+                                    .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .padding(.horizontal, 28)
+                    
+                    Spacer()
+                    
+                    // Minimal date
+                    Text("Today is \(Date(), style: .date)")
+                        .font(.system(size: 14, weight: .light))
+                        .foregroundColor(.secondary.opacity(0.5))
+                        .padding(.bottom, 60)
                 }
-                .padding(.horizontal)
-                
-                Spacer()
-                
-                // Today's date
-                Text("Today is \(Date(), style: .date)")
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-                    .padding(.bottom, 40)
             }
             .navigationBarHidden(true)
         }

@@ -1,6 +1,7 @@
 
 
 //
+//
 //  UrgesSelectionView.swift
 //  aura
 //
@@ -27,96 +28,148 @@ struct UrgesSelectionView: View {
     ]
     
     var body: some View {
-        VStack(spacing: 32) {
-            Spacer()
-
-            // MARK: - Title
-            Text("Choose 2 Urges to Track")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            // MARK: - Urges List
-            List(urges, id: \.0) { urge in
-                HStack {
-                    Text(urge.0)
-                        .font(.body)
-                        .fontWeight(.semibold)
-                        .padding(.trailing, 8)
-                    Spacer()
-                    Text(urge.1)
-                        .font(.body)
-                        .foregroundColor(.gray)
-                        .lineLimit(3)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    if urge.0 == "Other" {
-                        TextField("Describe your urge", text: $customUrge1)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.trailing)
-                            .padding(.vertical, 8) // Add more vertical space for custom input
-                    } else {
-                        Button(action: {
-                            if selectedUrges.contains(urge.0) {
-                                selectedUrges.remove(urge.0)
-                            } else {
-                                if selectedUrges.count < 2 {
-                                    selectedUrges.insert(urge.0)
+        ZStack {
+            // Premium gradient background
+            LinearGradient(
+                colors: [
+                    Color(.systemGray6).opacity(0.1),
+                    Color(.systemGray5).opacity(0.2),
+                    Color(.systemGray6).opacity(0.15)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 40) {
+                // Elegant header
+                VStack(spacing: 16) {
+                    Text("Choose 2 Urges to Track")
+                        .font(.system(size: 28, weight: .light, design: .default))
+                        .foregroundColor(.primary.opacity(0.9))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, 60)
+                
+                // Glassmorphic urges list
+                ScrollView {
+                    VStack(spacing: 16) {
+                        ForEach(urges, id: \.0) { urge in
+                            // Individual urge card
+                            HStack(spacing: 20) {
+                                // Selection indicator
+                                Button(action: {
+                                    if urge.0 != "Other" {
+                                        if selectedUrges.contains(urge.0) {
+                                            selectedUrges.remove(urge.0)
+                                        } else {
+                                            if selectedUrges.count < 2 {
+                                                selectedUrges.insert(urge.0)
+                                            }
+                                        }
+                                    }
+                                }) {
+                                    Image(systemName: selectedUrges.contains(urge.0) ? "checkmark.circle.fill" : "circle")
+                                        .font(.system(size: 22, weight: .light))
+                                        .foregroundColor(selectedUrges.contains(urge.0) ? .primary.opacity(0.8) : .secondary.opacity(0.6))
+                                        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                                        .frame(width: 32, height: 32)
                                 }
+                                .disabled(urge.0 == "Other")
+                                
+                                // Content
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(urge.0)
+                                        .font(.system(size: 17, weight: .medium))
+                                        .foregroundColor(.primary.opacity(0.9))
+                                    
+                                    Text(urge.1)
+                                        .font(.system(size: 14, weight: .regular))
+                                        .foregroundColor(.secondary.opacity(0.7))
+                                        .lineLimit(3)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    
+                                    // Custom input for "Other"
+                                    if urge.0 == "Other" {
+                                        TextField("Describe your urge", text: $customUrge1)
+                                            .font(.system(size: 15, weight: .regular))
+                                            .padding(12)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .fill(Color(.systemBackground).opacity(0.6))
+                                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                            )
+                                            .foregroundColor(.primary.opacity(0.8))
+                                    }
+                                }
+                                
+                                Spacer()
                             }
-                        }) {
-                            Image(systemName: selectedUrges.contains(urge.0) ? "checkmark.circle.fill" : "circle")
-                                .foregroundColor(selectedUrges.contains(urge.0) ? .accentColor : .gray)
+                            .padding(24)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color(.systemBackground).opacity(0.8))
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    )
+                                    .shadow(color: .black.opacity(0.04), radius: 16, x: 0, y: 6)
+                                    .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
+                            )
                         }
-                        .padding(.vertical, 8) // Added space around the selection button
                     }
+                    .padding(.horizontal, 24)
                 }
-                .padding(.vertical, 12) // Increased space between each list item
-            }
-            .frame(height: 350) // Limit list height
-
-            // MARK: - Custom Urge Input Section (if needed)
-            if selectedUrges.count == 1 {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Custom Urge 1")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                    TextField("Describe your urge", text: $customUrge1)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
+                
+                // Custom urge inputs section
+                if selectedUrges.count >= 1 && !customUrge1.isEmpty {
+                    VStack(spacing: 16) {
+                        Text("Additional Custom Urge")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.secondary.opacity(0.8))
+                        
+                        TextField("Describe another urge", text: $customUrge2)
+                            .font(.system(size: 15, weight: .regular))
+                            .padding(16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color(.systemBackground).opacity(0.8))
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    .shadow(color: .black.opacity(0.03), radius: 8, x: 0, y: 4)
+                            )
+                            .foregroundColor(.primary.opacity(0.8))
+                    }
+                    .padding(.horizontal, 24)
                 }
-                .padding(.vertical, 12)
-            }
-            if selectedUrges.count == 2 {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Custom Urge 2")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                    TextField("Describe your urge", text: $customUrge2)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                }
-                .padding(.vertical, 12)
-            }
-
-            Spacer()
-
-            // MARK: - Continue Button (UI only)
-            Button(action: {
-                OnboardingViewModel.shared.goToNextStep()
-            }) {
-                Text("Next")
-                    .foregroundColor(.white)
-                    .font(.headline)
-                    .padding()
+                
+                Spacer()
+                
+                // Elegant continue button
+                Button(action: {
+                    OnboardingViewModel.shared.goToNextStep()
+                }) {
+                    HStack(spacing: 12) {
+                        Text("Next")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(.white)
+                        
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white)
+                    }
+                    .padding(20)
                     .frame(maxWidth: .infinity)
-                    .background(Color.accentColor)
-                    .cornerRadius(12)
-                    .padding(.horizontal)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.primary.opacity(0.9))
+                            .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
+                            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                    )
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 40)
             }
         }
-        .padding(.horizontal)
     }
 }
 

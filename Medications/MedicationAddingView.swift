@@ -4,20 +4,6 @@
 //
 //
 //
-///
-//
-//
-//
-//
-//
-//
-//
-//
-///
-//
-//
-//
-//
 //  MedicationAddingView.swift
 //  aura
 //
@@ -64,6 +50,16 @@ struct MedicationAddingView: View {
             continueButton
         }
         .padding()
+        .onAppear {
+            // Load any existing medications from onboarding VM
+            loadExistingMedications()
+        }
+        .onReceive(onboardingVM.$medications) { medications in
+            // Sync with onboarding VM when medications change
+            if selectedMedications != medications {
+                selectedMedications = medications
+            }
+        }
         .sheet(isPresented: $showingMedicationBuilder) {
             MedicationBuilderFlow { medication in
                 addMedication(medication)
@@ -260,25 +256,44 @@ struct MedicationAddingView: View {
     }
     
     // MARK: - Helper Methods
+    
+    private func loadExistingMedications() {
+        // Load any medications that were previously selected in this onboarding session
+        selectedMedications = onboardingVM.medications
+        print("📦 Loaded \(selectedMedications.count) existing medications from onboarding")
+    }
+    
     private func addMedication(_ medication: Medication) {
         // Check if medication already exists (by rxcui)
         if !selectedMedications.contains(where: { $0.rxcui == medication.rxcui }) {
             selectedMedications.append(medication)
+            syncWithOnboardingVM()
             print("✅ Added medication: \(medication.displayName)")
+        } else {
+            print("⚠️ Medication already exists: \(medication.displayName)")
         }
     }
     
     private func removeMedication(_ medication: Medication) {
         selectedMedications.removeAll { $0.rxcui == medication.rxcui }
+        syncWithOnboardingVM()
         print("🗑️ Removed medication: \(medication.displayName)")
     }
     
-    private func saveMedicationsAndContinue() {
-        // Save medications to onboarding view model
+    private func syncWithOnboardingVM() {
+        // Update the onboarding view model with current medications
         onboardingVM.medications = selectedMedications
         onboardingVM.takesMedications = !selectedMedications.isEmpty
+    }
+    
+    private func saveMedicationsAndContinue() {
+        // Ensure onboarding VM is synced before continuing
+        syncWithOnboardingVM()
         
         print("💾 Saved \(selectedMedications.count) medications to onboarding")
+        for medication in selectedMedications {
+            print("   - \(medication.displayName) (\(medication.rxcui))")
+        }
         
         // Continue to next step
         onboardingVM.goToNextStep()
