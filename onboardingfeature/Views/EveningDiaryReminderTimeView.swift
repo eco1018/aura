@@ -6,15 +6,17 @@
 //
 //  Created by Ella A. Sadduq on 3/30/25.
 //
+// Fixed EveningDiaryReminderTimeView.swift - Only Evening View
 
 import SwiftUI
 
 struct EveningDiaryReminderTimeView: View {
-    @State private var eveningReminder: Date = Date()
+    @ObservedObject var onboardingVM = OnboardingViewModel.shared
+    @State private var selectedTime: Date = Date()
 
     var body: some View {
         ZStack {
-            // Premium gradient background (matching design system)
+            // Premium gradient background
             LinearGradient(
                 colors: [
                     Color(.systemGray6).opacity(0.1),
@@ -51,11 +53,15 @@ struct EveningDiaryReminderTimeView: View {
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.primary.opacity(0.9))
                     
-                    DatePicker("Evening Reminder", selection: $eveningReminder, displayedComponents: .hourAndMinute)
+                    DatePicker("Evening Reminder", selection: $selectedTime, displayedComponents: .hourAndMinute)
                         .labelsHidden()
                         .datePickerStyle(WheelDatePickerStyle())
                         .frame(height: 120)
                         .clipped()
+                        .onChange(of: selectedTime) { _, newTime in
+                            // FIXED: Actually save the selected time
+                            onboardingVM.updateEveningReminderTime(newTime)
+                        }
                 }
                 .padding(28)
                 .background(
@@ -72,10 +78,14 @@ struct EveningDiaryReminderTimeView: View {
                 
                 Spacer()
                 
-                // Elegant finish button (using checkmark instead of arrow)
+                // Finish button
                 Button(action: {
-                    // Save eveningReminder if needed
-                    OnboardingViewModel.shared.goToNextStep()
+                    // Save the final time and complete onboarding
+                    onboardingVM.updateEveningReminderTime(selectedTime)
+                    print("⏰ Saved evening reminder time: \(selectedTime.formatted(date: .omitted, time: .shortened))")
+                    
+                    // Go to wrap up
+                    onboardingVM.goToNextStep()
                 }) {
                     HStack(spacing: 12) {
                         Text("Finish")
@@ -98,6 +108,11 @@ struct EveningDiaryReminderTimeView: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 40)
             }
+        }
+        .onAppear {
+            // Initialize with the current value from onboarding
+            selectedTime = onboardingVM.eveningReminderTime
+            print("📱 Evening reminder view appeared - current time: \(selectedTime.formatted(date: .omitted, time: .shortened))")
         }
     }
 }

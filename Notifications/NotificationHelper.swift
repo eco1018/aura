@@ -3,6 +3,11 @@
 // Enhanced NotificationHelper.swift - Better Deep Link Testing
 //
 
+//
+//
+// Enhanced NotificationHelper.swift - Better Deep Link Testing
+//
+
 import Foundation
 import UserNotifications
 import UIKit
@@ -59,7 +64,7 @@ struct NotificationHelper {
             if hasPermission {
                 let content = UNMutableNotificationContent()
                 content.title = "🧪 Test: Diary Reminder"
-                content.body = "Tap to test deep link to diary card!"
+                content.body = "Time to begin diary card"
                 content.sound = .default
                 content.badge = 1
                 

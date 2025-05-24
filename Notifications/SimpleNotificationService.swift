@@ -3,6 +3,10 @@
 //
 //
 //
+//
+//
+//
+//
 // Enhanced SimpleNotificationService.swift - Fixed Deep Link Notifications
 //
 
@@ -115,7 +119,7 @@ class SimpleNotificationService {
             scheduleDiaryReminder(
                 identifier: "diary_morning",
                 title: "Morning Check-in",
-                body: "Good morning! Time to reflect on how you're feeling",
+                body: "Time to begin diary card",
                 time: morningTime,
                 session: "morning"
             )
@@ -129,7 +133,7 @@ class SimpleNotificationService {
             scheduleDiaryReminder(
                 identifier: "diary_evening",
                 title: "Evening Reflection",
-                body: "How was your day? Take a moment to check in with yourself",
+                body: "Time to begin diary card",
                 time: eveningTime,
                 session: "evening"
             )
@@ -144,6 +148,7 @@ class SimpleNotificationService {
         print("📝 Creating diary reminder:")
         print("   - ID: \(identifier)")
         print("   - Title: \(title)")
+        print("   - Body: \(body)")
         print("   - Session: \(session)")
         print("   - Time: \(formatTime(time))")
         
@@ -196,7 +201,7 @@ class SimpleNotificationService {
             if hasPermission {
                 let content = UNMutableNotificationContent()
                 content.title = "Test Diary Reminder"
-                content.body = "Testing diary card deep link - tap to open!"
+                content.body = "Time to begin diary card"
                 content.sound = .default
                 content.badge = 1
                 
