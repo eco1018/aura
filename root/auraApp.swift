@@ -1,14 +1,8 @@
 //
 //
 //
-//  auraApp.swift
-//  aura
 //
-//  Created by Ella A. Sadduq on 3/27/25.
-//
-
-//
-// Updated auraApp.swift - Fixed AppDelegate Notification Handling
+// Enhanced auraApp.swift - Fixed Deep Link Notification Handling
 //
 
 import SwiftUI
@@ -23,6 +17,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Set up notification handling
         UNUserNotificationCenter.current().delegate = self
         
+        // Check if app was launched from notification
+        if let notificationResponse = launchOptions?[.remoteNotification] as? [AnyHashable: Any] {
+            print("🚀 App launched from notification: \(notificationResponse)")
+            handleLaunchFromNotification(userInfo: notificationResponse)
+        }
+        
         return true
     }
     
@@ -31,22 +31,26 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Clear badge when app becomes active
         application.applicationIconBadgeNumber = 0
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+        print("📱 App became active - cleared notifications")
     }
     
-    func applicationWillResignActive(_ application: UIApplication) {
-        // You can add any cleanup here if needed
-    }
-    
-    // MARK: - Background Notification Handling
-    func application(_ application: UIApplication,
-                    didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        // If you ever want to add push notifications later
-        print("📱 Registered for remote notifications")
-    }
-    
-    func application(_ application: UIApplication,
-                    didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("❌ Failed to register for remote notifications: \(error)")
+    // MARK: - Launch from Notification Handler
+    private func handleLaunchFromNotification(userInfo: [AnyHashable: Any]) {
+        // Handle when app is launched from notification (cold start)
+        if let type = userInfo["type"] as? String, type == "diary" {
+            let session = userInfo["session"] as? String ?? "manual"
+            print("🚀 App launched from diary notification - session: \(session)")
+            
+            // Delay to ensure app is fully loaded
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("OpenDiaryCard"),
+                    object: nil,
+                    userInfo: ["session": session]
+                )
+                print("✅ Posted delayed OpenDiaryCard notification")
+            }
+        }
     }
 }
 
@@ -57,24 +61,38 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                               willPresent notification: UNNotification,
                               withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        
+        let userInfo = notification.request.content.userInfo
+        print("🔔 Will present notification while app is open:")
+        print("   - Title: \(notification.request.content.title)")
+        print("   - Body: \(notification.request.content.body)")
+        print("   - UserInfo: \(userInfo)")
+        
         // Show notifications even when app is in foreground
         completionHandler([.alert, .sound, .badge])
     }
     
-    // FIXED: Handle notification taps with better debugging
+    // ENHANCED: Handle notification taps with comprehensive debugging
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                               didReceive response: UNNotificationResponse,
                               withCompletionHandler completionHandler: @escaping () -> Void) {
         
         let userInfo = response.notification.request.content.userInfo
         let notificationId = response.notification.request.identifier
+        let actionId = response.actionIdentifier
         
-        print("🔔 Notification tapped:")
-        print("   - ID: \(notificationId)")
+        print("🔔 === NOTIFICATION TAP DEBUG ===")
+        print("   - Notification ID: \(notificationId)")
+        print("   - Action ID: \(actionId)")
+        print("   - Title: \(response.notification.request.content.title)")
+        print("   - Body: \(response.notification.request.content.body)")
         print("   - UserInfo: \(userInfo)")
+        print("   - UserInfo Keys: \(userInfo.keys)")
         
-        // FIXED: Better diary notification handling
+        // Check for diary notification specifically
         if let notificationType = userInfo["type"] as? String {
+            print("   - Notification Type: \(notificationType)")
+            
             switch notificationType {
             case "diary":
                 handleDiaryNotification(userInfo: userInfo)
@@ -84,7 +102,14 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 print("⚠️ Unknown notification type: \(notificationType)")
             }
         } else {
-            print("⚠️ No notification type found in userInfo")
+            print("❌ CRITICAL: No 'type' key found in userInfo!")
+            print("   - Available keys: \(Array(userInfo.keys))")
+            
+            // Fallback: Check for any diary-related keys
+            if userInfo["openDiary"] != nil || userInfo["session"] != nil {
+                print("🔄 Fallback: Found diary-related keys, treating as diary notification")
+                handleDiaryNotification(userInfo: userInfo)
+            }
         }
         
         // Clear the notification badge
@@ -92,32 +117,49 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             UIApplication.shared.applicationIconBadgeNumber = 0
         }
         
+        print("=== END NOTIFICATION DEBUG ===")
         completionHandler()
     }
     
     // MARK: - Specific Notification Handlers
     
     private func handleDiaryNotification(userInfo: [AnyHashable: Any]) {
-        guard let openDiary = userInfo["openDiary"] as? Bool, openDiary == true else {
-            print("⚠️ Diary notification doesn't have openDiary flag")
+        print("📔 === DIARY NOTIFICATION HANDLER ===")
+        
+        // Check multiple possible keys for diary notifications
+        let openDiary = userInfo["openDiary"] as? Bool ??
+                       (userInfo["action"] as? String == "openDiaryCard") ??
+                       (userInfo["type"] as? String == "diary")
+        
+        guard openDiary else {
+            print("❌ Diary notification validation failed:")
+            print("   - openDiary: \(userInfo["openDiary"] ?? "nil")")
+            print("   - action: \(userInfo["action"] ?? "nil")")
+            print("   - type: \(userInfo["type"] ?? "nil")")
             return
         }
         
         let session = userInfo["session"] as? String ?? "manual"
         
-        print("📔 Handling diary notification:")
+        print("✅ Diary notification validated:")
         print("   - Session: \(session)")
         print("   - Posting NotificationCenter event...")
         
-        // Post to NotificationCenter with delay to ensure app is ready
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            NotificationCenter.default.post(
-                name: NSNotification.Name("OpenDiaryCard"),
-                object: nil,
-                userInfo: ["session": session]
-            )
-            print("✅ Posted OpenDiaryCard notification to NotificationCenter")
+        // Multiple attempts with different delays to ensure delivery
+        let delays: [Double] = [0.1, 0.5, 1.0]
+        
+        for (index, delay) in delays.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("OpenDiaryCard"),
+                    object: nil,
+                    userInfo: ["session": session, "attempt": index + 1]
+                )
+                print("📬 Posted OpenDiaryCard notification (attempt \(index + 1)) with delay \(delay)s")
+            }
         }
+        
+        print("=== END DIARY HANDLER ===")
     }
     
     private func handleMedicationNotification(userInfo: [AnyHashable: Any]) {
@@ -128,8 +170,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         print("   - Medication: \(medicationName)")
         print("   - ID: \(medicationId)")
         
-        // You can add specific medication reminder handling here later
-        // For now, just clear the badge
+        // Clear the badge for medication notifications
         NotificationHelper.clearBadge()
     }
 }
