@@ -4,13 +4,20 @@
 //
 //  Created by Ella A. Sadduq on 3/29/25.
 //
+//
+//
+//  BirthdateView.swift
+//  aura
+//
+//  Created by Ella A. Sadduq on 3/29/25.
+//
 
 import SwiftUI
 
 struct BirthdateView: View {
-    @State private var selectedAge: Int = 25
+    @ObservedObject var onboardingVM = OnboardingViewModel.shared
 
-    let ageRange = Array(10...100) // Customize min/max age if needed
+    let ageRange = Array(13...100) // Age range from 13 to 100
 
     var body: some View {
         ZStack {
@@ -38,9 +45,9 @@ struct BirthdateView: View {
                 }
                 .padding(.horizontal, 24)
                 
-                // Glassmorphic picker card
+                // Glassmorphic picker card - NOW CONNECTED TO VIEW MODEL
                 VStack(spacing: 24) {
-                    Picker(selection: $selectedAge, label: Text("Age")) {
+                    Picker(selection: $onboardingVM.age, label: Text("Age")) {
                         ForEach(ageRange, id: \.self) { age in
                             Text("\(age)")
                                 .font(.system(size: 20, weight: .regular))
@@ -69,8 +76,8 @@ struct BirthdateView: View {
                 
                 // Standard next button (exact match to other onboarding views)
                 Button(action: {
-                    // 🚀 Save age to profile later if needed
-                    OnboardingViewModel.shared.goToNextStep()
+                    print("📝 Age selected: \(onboardingVM.age)")
+                    onboardingVM.goToNextStep()
                 }) {
                     HStack(spacing: 12) {
                         Text("Next")

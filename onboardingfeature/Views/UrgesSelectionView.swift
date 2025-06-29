@@ -2,6 +2,10 @@
 
 //
 //
+//
+//  UrgesSelectionView.swift
+//  aura
+//
 //  UrgesSelectionView.swift
 //  aura
 //
@@ -11,9 +15,8 @@
 import SwiftUI
 
 struct UrgesSelectionView: View {
-    @State private var selectedUrges = Set<String>()
-    @State private var customUrge1: String = ""
-    @State private var customUrge2: String = ""
+    @ObservedObject var onboardingVM = OnboardingViewModel.shared
+    @State private var customUrgeInput: String = ""
 
     let urges = [
         ("Substance Use", "The desire to use drugs or alcohol to cope with pain."),
@@ -23,9 +26,12 @@ struct UrgesSelectionView: View {
         ("Impulsive Sex", "A desire to engage in sexual behavior impulsively."),
         ("Impulsive Spending", "The urge to spend money recklessly."),
         ("Ending Relationships", "An urge to break up or end relationships impulsively."),
-        ("Dropping Out", "The urge to quit or give up on commitments or responsibilities."),
-        ("Other", "Something else you want to track — write it in.")
+        ("Dropping Out", "The urge to quit or give up on commitments or responsibilities.")
     ]
+    
+    var totalSelected: Int {
+        return onboardingVM.selectedUrges.count + onboardingVM.customUrges.count
+    }
     
     var body: some View {
         ZStack {
@@ -48,6 +54,10 @@ struct UrgesSelectionView: View {
                         .font(.system(size: 28, weight: .light, design: .default))
                         .foregroundColor(.primary.opacity(0.9))
                         .multilineTextAlignment(.center)
+                    
+                    Text("Selected: \(totalSelected)/2")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundColor(.secondary.opacity(0.7))
                 }
                 .padding(.top, 60)
                 
@@ -55,89 +65,82 @@ struct UrgesSelectionView: View {
                 ScrollView {
                     VStack(spacing: 16) {
                         ForEach(urges, id: \.0) { urge in
-                            // Individual urge card
-                            HStack(spacing: 20) {
-                                // Selection indicator
-                                Button(action: {
-                                    if urge.0 != "Other" {
-                                        if selectedUrges.contains(urge.0) {
-                                            selectedUrges.remove(urge.0)
-                                        } else {
-                                            if selectedUrges.count < 2 {
-                                                selectedUrges.insert(urge.0)
-                                            }
-                                        }
-                                    }
-                                }) {
-                                    Image(systemName: selectedUrges.contains(urge.0) ? "checkmark.circle.fill" : "circle")
-                                        .font(.system(size: 22, weight: .light))
-                                        .foregroundColor(selectedUrges.contains(urge.0) ? .primary.opacity(0.8) : .secondary.opacity(0.6))
-                                        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-                                        .frame(width: 32, height: 32)
-                                }
-                                .disabled(urge.0 == "Other")
-                                
-                                // Content
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text(urge.0)
-                                        .font(.system(size: 17, weight: .medium))
-                                        .foregroundColor(.primary.opacity(0.9))
-                                    
-                                    Text(urge.1)
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.secondary.opacity(0.7))
-                                        .lineLimit(3)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                    
-                                    // Custom input for "Other"
-                                    if urge.0 == "Other" {
-                                        TextField("Describe your urge", text: $customUrge1)
-                                            .font(.system(size: 15, weight: .regular))
-                                            .padding(12)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 12)
-                                                    .fill(Color(.systemBackground).opacity(0.6))
-                                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                                            )
-                                            .foregroundColor(.primary.opacity(0.8))
-                                    }
-                                }
-                                
-                                Spacer()
+                            UrgeSelectionCard(
+                                title: urge.0,
+                                description: urge.1,
+                                isSelected: onboardingVM.selectedUrges.contains(urge.0),
+                                canSelect: totalSelected < 2 || onboardingVM.selectedUrges.contains(urge.0)
+                            ) {
+                                toggleUrgeSelection(urge.0)
                             }
-                            .padding(24)
-                            .background(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(Color(.systemBackground).opacity(0.8))
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                                    )
-                                    .shadow(color: .black.opacity(0.04), radius: 16, x: 0, y: 6)
-                                    .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
-                            )
                         }
                     }
                     .padding(.horizontal, 24)
                 }
                 
-                // Custom urge inputs section
-                if selectedUrges.count >= 1 && !customUrge1.isEmpty {
+                // Custom urge input
+                if totalSelected < 2 {
                     VStack(spacing: 16) {
-                        Text("Additional Custom Urge")
+                        Text("Add Custom Urge")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.secondary.opacity(0.8))
                         
-                        TextField("Describe another urge", text: $customUrge2)
-                            .font(.system(size: 15, weight: .regular))
+                        HStack(spacing: 12) {
+                            TextField("Describe your urge", text: $customUrgeInput)
+                                .font(.system(size: 15, weight: .regular))
+                                .padding(16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(Color(.systemBackground).opacity(0.8))
+                                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                        .shadow(color: .black.opacity(0.03), radius: 8, x: 0, y: 4)
+                                )
+                                .foregroundColor(.primary.opacity(0.8))
+                            
+                            Button(action: addCustomUrge) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 24, weight: .light))
+                                    .foregroundColor(.primary.opacity(0.8))
+                                    .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
+                            }
+                            .disabled(customUrgeInput.trimmingCharacters(in: .whitespaces).isEmpty)
+                            .opacity(customUrgeInput.trimmingCharacters(in: .whitespaces).isEmpty ? 0.4 : 1.0)
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                }
+                
+                // Custom urges display
+                if !onboardingVM.customUrges.isEmpty {
+                    VStack(spacing: 12) {
+                        Text("Your Custom Urges")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.secondary.opacity(0.8))
+                        
+                        ForEach(onboardingVM.customUrges, id: \.self) { customUrge in
+                            HStack(spacing: 16) {
+                                Text(customUrge)
+                                    .font(.system(size: 15, weight: .regular))
+                                    .foregroundColor(.primary.opacity(0.8))
+                                
+                                Spacer()
+                                
+                                Button(action: {
+                                    removeCustomUrge(customUrge)
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.system(size: 18, weight: .light))
+                                        .foregroundColor(.red.opacity(0.7))
+                                }
+                            }
                             .padding(16)
                             .background(
                                 RoundedRectangle(cornerRadius: 16)
-                                    .fill(Color(.systemBackground).opacity(0.8))
+                                    .fill(Color(.systemBackground).opacity(0.6))
                                     .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                                    .shadow(color: .black.opacity(0.03), radius: 8, x: 0, y: 4)
+                                    .shadow(color: .black.opacity(0.02), radius: 4, x: 0, y: 2)
                             )
-                            .foregroundColor(.primary.opacity(0.8))
+                        }
                     }
                     .padding(.horizontal, 24)
                 }
@@ -146,7 +149,9 @@ struct UrgesSelectionView: View {
                 
                 // Elegant continue button
                 Button(action: {
-                    OnboardingViewModel.shared.goToNextStep()
+                    print("📝 Urges selected: \(onboardingVM.selectedUrges)")
+                    print("📝 Custom urges: \(onboardingVM.customUrges)")
+                    onboardingVM.goToNextStep()
                 }) {
                     HStack(spacing: 12) {
                         Text("Next")
@@ -161,15 +166,90 @@ struct UrgesSelectionView: View {
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.primary.opacity(0.9))
-                            .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
-                            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                            .fill(totalSelected > 0 ? Color.primary.opacity(0.9) : Color.secondary.opacity(0.4))
+                            .shadow(color: .black.opacity(totalSelected > 0 ? 0.15 : 0), radius: 12, x: 0, y: 6)
+                            .shadow(color: .black.opacity(totalSelected > 0 ? 0.05 : 0), radius: 2, x: 0, y: 1)
                     )
                 }
+                .disabled(totalSelected == 0)
+                .animation(.easeInOut(duration: 0.2), value: totalSelected)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 40)
             }
         }
+    }
+    
+    private func toggleUrgeSelection(_ urge: String) {
+        if onboardingVM.selectedUrges.contains(urge) {
+            onboardingVM.selectedUrges.removeAll { $0 == urge }
+        } else if totalSelected < 2 {
+            onboardingVM.selectedUrges.append(urge)
+        }
+    }
+    
+    private func addCustomUrge() {
+        let trimmedInput = customUrgeInput.trimmingCharacters(in: .whitespaces)
+        if !trimmedInput.isEmpty && totalSelected < 2 {
+            onboardingVM.addCustomUrge(trimmedInput)
+            customUrgeInput = ""
+        }
+    }
+    
+    private func removeCustomUrge(_ urge: String) {
+        onboardingVM.customUrges.removeAll { $0 == urge }
+    }
+}
+
+struct UrgeSelectionCard: View {
+    let title: String
+    let description: String
+    let isSelected: Bool
+    let canSelect: Bool
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 20) {
+                // Selection indicator
+                Button(action: onTap) {
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .font(.system(size: 22, weight: .light))
+                        .foregroundColor(isSelected ? .primary.opacity(0.8) : .secondary.opacity(0.6))
+                        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                        .frame(width: 32, height: 32)
+                }
+                
+                // Content
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(title)
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(.primary.opacity(0.9))
+                    
+                    Text(description)
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(.secondary.opacity(0.7))
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                
+                Spacer()
+            }
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(.systemBackground).opacity(0.8))
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
+                    .shadow(color: .black.opacity(0.04), radius: 16, x: 0, y: 6)
+                    .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 1)
+            )
+        }
+        .disabled(!canSelect && !isSelected)
+        .opacity(!canSelect && !isSelected ? 0.5 : 1.0)
+        .buttonStyle(PlainButtonStyle())
+        .animation(.easeInOut(duration: 0.2), value: isSelected)
     }
 }
 

@@ -5,10 +5,17 @@
 //  Created by Ella A. Sadduq on 3/29/25.
 //
 
+//
+//  LastNameView.swift
+//  aura
+//
+//  Created by Ella A. Sadduq on 3/29/25.
+//
+
 import SwiftUI
 
 struct LastNameView: View {
-    @State private var lastNameInput: String = ""
+    @ObservedObject var onboardingVM = OnboardingViewModel.shared
 
     var body: some View {
         ZStack {
@@ -36,9 +43,9 @@ struct LastNameView: View {
                 }
                 .padding(.horizontal, 24)
                 
-                // Glassmorphic input card
+                // Glassmorphic input card - NOW CONNECTED TO VIEW MODEL
                 VStack(spacing: 24) {
-                    TextField("Enter your last name", text: $lastNameInput)
+                    TextField("Enter your last name", text: $onboardingVM.lastName)
                         .font(.system(size: 18, weight: .regular))
                         .foregroundColor(.primary.opacity(0.9))
                         .padding(20)
@@ -61,8 +68,7 @@ struct LastNameView: View {
                 
                 // Standard next button (exact match to other onboarding views)
                 Button(action: {
-                    // 🚀 Save last name to profile later if needed
-                    OnboardingViewModel.shared.goToNextStep()
+                    onboardingVM.goToNextStep()
                 }) {
                     HStack(spacing: 12) {
                         Text("Next")

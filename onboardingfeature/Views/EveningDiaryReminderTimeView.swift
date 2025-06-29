@@ -4,13 +4,17 @@
 //  EveningDiaryReminderTimeView.swift
 //  aura
 //
+//
+//  EveningDiaryReminderTimeView.swift
+//  aura
+//
 //  Created by Ella A. Sadduq on 3/30/25.
 //
 
 import SwiftUI
 
 struct EveningDiaryReminderTimeView: View {
-    @State private var eveningReminder: Date = Date()
+    @ObservedObject var onboardingVM = OnboardingViewModel.shared
 
     var body: some View {
         ZStack {
@@ -45,13 +49,13 @@ struct EveningDiaryReminderTimeView: View {
                 
                 Spacer()
                 
-                // Glassmorphic time picker card
+                // Glassmorphic time picker card - NOW CONNECTED TO VIEW MODEL
                 VStack(spacing: 24) {
                     Text("Evening Reminder")
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.primary.opacity(0.9))
                     
-                    DatePicker("Evening Reminder", selection: $eveningReminder, displayedComponents: .hourAndMinute)
+                    DatePicker("Evening Reminder", selection: $onboardingVM.eveningReminderTime, displayedComponents: .hourAndMinute)
                         .labelsHidden()
                         .datePickerStyle(WheelDatePickerStyle())
                         .frame(height: 120)
@@ -72,17 +76,17 @@ struct EveningDiaryReminderTimeView: View {
                 
                 Spacer()
                 
-                // Elegant finish button (using checkmark instead of arrow)
+                // Elegant finish button (using checkmark since this might be the last step before wrap up)
                 Button(action: {
-                    // Save eveningReminder if needed
-                    OnboardingViewModel.shared.goToNextStep()
+                    print("📝 Evening reminder time set: \(onboardingVM.eveningReminderTime.formatted(date: .omitted, time: .shortened))")
+                    onboardingVM.goToNextStep()
                 }) {
                     HStack(spacing: 12) {
-                        Text("Finish")
+                        Text("Next")
                             .font(.system(size: 18, weight: .medium))
                             .foregroundColor(.white)
                         
-                        Image(systemName: "checkmark")
+                        Image(systemName: "arrow.right")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.white)
                     }

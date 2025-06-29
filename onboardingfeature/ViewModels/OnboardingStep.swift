@@ -4,6 +4,10 @@
 //  OnboardingStep.swift
 //  aura
 //
+//
+//  OnboardingStep.swift
+//  aura
+//
 //  Created by Ella A. Sadduq on 3/30/25.
 //
 
@@ -15,6 +19,8 @@ enum OnboardingStep: Int, CaseIterable {
     case firstName
     case lastName
     case birthdate
+    case genderSelection    // NEW: Gender selection step
+    case emotionsSelection  // NEW: Emotions selection step
     case diaryIntro
     case actionsIntro
     case actionsSelection

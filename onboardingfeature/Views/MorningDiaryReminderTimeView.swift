@@ -2,9 +2,7 @@
 //  MorningDiaryReminderTimeView.swift
 //  aura
 //
-//  Created by Ella A. Sadduq on 3/30/25.
 //
-
 //  MorningDiaryReminderTimeView.swift
 //  aura
 //
@@ -14,7 +12,7 @@
 import SwiftUI
 
 struct MorningDiaryReminderTimeView: View {
-    @State private var morningReminder: Date = Date()
+    @ObservedObject var onboardingVM = OnboardingViewModel.shared
 
     var body: some View {
         ZStack {
@@ -49,13 +47,13 @@ struct MorningDiaryReminderTimeView: View {
                 
                 Spacer()
                 
-                // Glassmorphic time picker card
+                // Glassmorphic time picker card - NOW CONNECTED TO VIEW MODEL
                 VStack(spacing: 24) {
                     Text("Morning Reminder")
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.primary.opacity(0.9))
                     
-                    DatePicker("Morning Reminder", selection: $morningReminder, displayedComponents: .hourAndMinute)
+                    DatePicker("Morning Reminder", selection: $onboardingVM.morningReminderTime, displayedComponents: .hourAndMinute)
                         .labelsHidden()
                         .datePickerStyle(WheelDatePickerStyle())
                         .frame(height: 120)
@@ -78,11 +76,13 @@ struct MorningDiaryReminderTimeView: View {
                 
                 // Standard next button (matching other onboarding views)
                 Button(action: {
-                    // Save morningReminder if needed
-                    if OnboardingViewModel.shared.reminderFrequency == .once {
-                        OnboardingViewModel.shared.goToNextStep() // skip evening
+                    print("📝 Morning reminder time set: \(onboardingVM.morningReminderTime.formatted(date: .omitted, time: .shortened))")
+                    
+                    // Navigate based on reminder frequency
+                    if onboardingVM.reminderFrequency == .twice {
+                        onboardingVM.onboardingStep = .diaryReminderTimeEvening
                     } else {
-                        OnboardingViewModel.shared.onboardingStep = .diaryReminderTimeEvening
+                        onboardingVM.goToNextStep() // Skip evening reminder
                     }
                 }) {
                     HStack(spacing: 12) {
