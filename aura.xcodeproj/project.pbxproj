@@ -158,6 +158,11 @@
 			path = Notifications;
 			sourceTree = "<group>";
 		};
+		C8FF0A962E10FB5E00EA863D /* Coordinators */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Coordinators;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -212,6 +217,7 @@
 		C82400972D95C935004AE981 = {
 			isa = PBXGroup;
 			children = (
+				C8FF0A962E10FB5E00EA863D /* Coordinators */,
 				C8A66E282DE0D3090053DA0C /* Notifications */,
 				C84F27D02DDF625300E1D280 /* Medications */,
 				C84F27362DDF4F1600E1D280 /* Settings */,
@@ -359,6 +365,7 @@
 				C84F27362DDF4F1600E1D280 /* Settings */,
 				C84F27D02DDF625300E1D280 /* Medications */,
 				C8A66E282DE0D3090053DA0C /* Notifications */,
+				C8FF0A962E10FB5E00EA863D /* Coordinators */,
 			);
 			name = aura;
 			packageProductDependencies = (

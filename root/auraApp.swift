@@ -1,9 +1,3 @@
-//
-//
-//
-//
-// Enhanced auraApp.swift - Fixed Deep Link Notification Handling
-//
 
 //
 // Enhanced auraApp.swift - FIXED Deep Link Notification Handling
@@ -168,12 +162,15 @@ struct AuraApp: App {
 
     @StateObject private var authVM = AuthViewModel.shared
     @StateObject private var authSettings = AuthSettings()
+    @StateObject private var appCoordinator = AppCoordinator()
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            // 🔄 CHANGED: Use wrapper instead of RootView directly
+            CoordinatorWrapperView()
                 .environmentObject(authVM)
                 .environmentObject(authSettings)
+                .environmentObject(appCoordinator)
         }
     }
 }
