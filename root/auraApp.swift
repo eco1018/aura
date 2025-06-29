@@ -2,6 +2,9 @@
 //
 // Enhanced auraApp.swift - FIXED Deep Link Notification Handling
 //
+//
+// Enhanced auraApp.swift - FIXED Deep Link Notification Handling
+//
 
 import SwiftUI
 import FirebaseCore
@@ -72,50 +75,46 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     
     private func handleDiaryNotificationAction(userInfo: [String: Any]) {
         let session = userInfo["session"] as? String ?? "manual"
+        print("📔 Processing diary notification for session: \(session)")
         
-        print("📔 Processing diary notification:")
-        print("   - Session: \(session)")
-        
-        // Post notification for MainView to pick up
+        // Post notification to trigger diary card opening
         NotificationCenter.default.post(
-            name: NSNotification.Name("OpenDiaryCard"),
+            name: .openDiaryCard,
             object: nil,
-            userInfo: ["session": session]
+            userInfo: ["session": session, "source": "notification"]
         )
-        
-        print("✅ Posted OpenDiaryCard notification")
     }
     
     private func handleMedicationNotificationAction(userInfo: [String: Any]) {
-        let medicationName = userInfo["medicationName"] as? String ?? "your medication"
+        let medicationId = userInfo["medicationId"] as? String ?? ""
+        print("💊 Processing medication notification for: \(medicationId)")
         
-        print("💊 Processing medication notification:")
-        print("   - Medication: \(medicationName)")
-        
-        // TODO: Open medication tracking view or show reminder
-        // For now, just clear badge
-        NotificationHelper.clearBadge()
+        // Post notification to trigger medication tracking
+        NotificationCenter.default.post(
+            name: .openMedicationTracking,
+            object: nil,
+            userInfo: ["medicationId": medicationId, "source": "notification"]
+        )
     }
 }
 
-// MARK: - Enhanced Notification Handling
+// MARK: - UNUserNotificationCenterDelegate for reliable processing
 extension AppDelegate: UNUserNotificationCenterDelegate {
     
-    // Show notifications even when app is open
+    // Handle notifications when app is in foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                               willPresent notification: UNNotification,
                               withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         
-        let userInfo = notification.request.content.userInfo
-        print("🔔 Will present notification while app is open:")
+        print("🔔 Notification received while app is active")
         print("   - Title: \(notification.request.content.title)")
-        print("   - UserInfo: \(userInfo)")
+        print("   - Body: \(notification.request.content.body)")
         
-        // Show notifications even when app is in foreground
+        // Show notification even when app is active
         completionHandler([.alert, .sound, .badge])
     }
     
-    // ENHANCED: Handle notification taps with reliable processing
+    // Handle notification taps with reliable processing
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                               didReceive response: UNNotificationResponse,
                               withCompletionHandler completionHandler: @escaping () -> Void) {
@@ -161,7 +160,7 @@ struct AuraApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     @StateObject private var authVM = AuthViewModel.shared
-    @StateObject private var authSettings = AuthSettings()
+    // @StateObject private var authSettings = AuthSettings()
     @StateObject private var appCoordinator = AppCoordinator()
 
     var body: some Scene {
@@ -169,8 +168,14 @@ struct AuraApp: App {
             // 🔄 CHANGED: Use wrapper instead of RootView directly
             CoordinatorWrapperView()
                 .environmentObject(authVM)
-                .environmentObject(authSettings)
+                // .environmentObject(authSettings)
                 .environmentObject(appCoordinator)
         }
     }
+}
+
+// MARK: - Notification Extensions
+extension Notification.Name {
+    static let openDiaryCard = Notification.Name("openDiaryCard")
+    static let openMedicationTracking = Notification.Name("openMedicationTracking")
 }
