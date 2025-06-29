@@ -8,6 +8,12 @@
 //
 //  Created by Ella A. Sadduq on 3/30/25.
 //
+//
+//  OnboardingViewModel.swift
+//  aura
+//
+//  Created by Ella A. Sadduq on 3/30/25.
+//
 
 import Foundation
 import FirebaseAuth
@@ -28,34 +34,92 @@ final class OnboardingViewModel: ObservableObject {
     @Published var errorMessage: String = ""
     
     // MARK: - Collected User Data
-    @Published var firstName: String = ""
-    @Published var lastName: String = ""
-    @Published var age: Int = 25
-    @Published var gender: String = ""
+    @Published var firstName: String = "" {
+        didSet {
+            print("📝 FirstName updated: \(firstName)")
+        }
+    }
+    @Published var lastName: String = "" {
+        didSet {
+            print("📝 LastName updated: \(lastName)")
+        }
+    }
+    @Published var age: Int = 25 {
+        didSet {
+            print("📝 Age updated: \(age)")
+        }
+    }
+    @Published var gender: String = "" {
+        didSet {
+            print("📝 Gender updated: \(gender)")
+        }
+    }
     
     // Diary Card Customizations
-    @Published var selectedActions: [String] = []
-    @Published var customActions: [String] = []
-    @Published var selectedUrges: [String] = []
-    @Published var customUrges: [String] = []
-    @Published var selectedGoals: [String] = []
-    @Published var customGoals: [String] = []
-    @Published var selectedEmotions: [String] = []
-    @Published var selectedMedications: [String] = []
+    @Published var selectedActions: [String] = [] {
+        didSet {
+            print("📝 Selected actions updated: \(selectedActions)")
+        }
+    }
+    @Published var customActions: [String] = [] {
+        didSet {
+            print("📝 Custom actions updated: \(customActions)")
+        }
+    }
+    @Published var selectedUrges: [String] = [] {
+        didSet {
+            print("📝 Selected urges updated: \(selectedUrges)")
+        }
+    }
+    @Published var customUrges: [String] = [] {
+        didSet {
+            print("📝 Custom urges updated: \(customUrges)")
+        }
+    }
+    @Published var selectedGoals: [String] = [] {
+        didSet {
+            print("📝 Selected goals updated: \(selectedGoals)")
+        }
+    }
+    @Published var customGoals: [String] = [] {
+        didSet {
+            print("📝 Custom goals updated: \(customGoals)")
+        }
+    }
+    @Published var selectedEmotions: [String] = [] {
+        didSet {
+            print("📝 Selected emotions updated: \(selectedEmotions)")
+        }
+    }
     
     // Medication Support
-    @Published var takesMedications: Bool = false
-    @Published var medications: [Medication] = []
+    @Published var takesMedications: Bool = false {
+        didSet {
+            print("📝 Takes medications updated: \(takesMedications)")
+        }
+    }
+    @Published var medications: [Medication] = [] {
+        didSet {
+            print("📝 Medications updated: \(medications.count) medications")
+        }
+    }
     
     // Reminder Times
-    @Published var morningReminderTime: Date = Calendar.current.date(bySettingHour: 8, minute: 30, second: 0, of: Date()) ?? Date()
-    @Published var eveningReminderTime: Date = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: Date()) ?? Date()
+    @Published var morningReminderTime: Date = Calendar.current.date(bySettingHour: 8, minute: 30, second: 0, of: Date()) ?? Date() {
+        didSet {
+            print("📝 Morning reminder time updated: \(formatTime(morningReminderTime))")
+        }
+    }
+    @Published var eveningReminderTime: Date = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: Date()) ?? Date() {
+        didSet {
+            print("📝 Evening reminder time updated: \(formatTime(eveningReminderTime))")
+        }
+    }
     
     // Track the current user to detect user changes
     private var currentUserId: String?
     
     private init() {
-        // Don't automatically load profile - wait for explicit call
         setupAuthListener()
     }
     
@@ -111,7 +175,6 @@ final class OnboardingViewModel: ObservableObject {
             self.selectedGoals = []
             self.customGoals = []
             self.selectedEmotions = []
-            self.selectedMedications = []
             
             // Reset medication support
             self.takesMedications = false
@@ -131,6 +194,9 @@ final class OnboardingViewModel: ObservableObject {
 
     // MARK: - Step Control
     func goToNextStep() {
+        // Print current data state before proceeding
+        printCurrentDataState()
+        
         guard let currentIndex = OnboardingStep.allCases.firstIndex(of: onboardingStep),
               currentIndex + 1 < OnboardingStep.allCases.count else {
             completeOnboarding()
@@ -147,34 +213,75 @@ final class OnboardingViewModel: ObservableObject {
         onboardingStep = OnboardingStep.allCases[currentIndex - 1]
     }
     
-    // MARK: - Data Management
-    func updatePersonalInfo(firstName: String? = nil, lastName: String? = nil, age: Int? = nil, gender: String? = nil) {
-        if let firstName = firstName { self.firstName = firstName }
-        if let lastName = lastName { self.lastName = lastName }
-        if let age = age { self.age = age }
-        if let gender = gender { self.gender = gender }
-        
-        print("📝 Updated personal info: \(firstName ?? self.firstName) \(lastName ?? self.lastName), age: \(age ?? self.age)")
+    // MARK: - Helper Methods for Data Management
+    func addCustomAction(_ action: String) {
+        let trimmedAction = action.trimmingCharacters(in: .whitespaces)
+        if !trimmedAction.isEmpty && !customActions.contains(trimmedAction) && customActions.count < 3 {
+            customActions.append(trimmedAction)
+            print("📝 Added custom action: \(trimmedAction). Total: \(customActions)")
+        }
     }
     
-    func addCustomAction(_ action: String) {
-        if !customActions.contains(action) && customActions.count < 3 {
-            customActions.append(action)
-            print("📝 Added custom action: \(action). Total: \(customActions)")
-        }
+    func removeCustomAction(_ action: String) {
+        customActions.removeAll { $0 == action }
+        print("🗑️ Removed custom action: \(action)")
     }
     
     func addCustomUrge(_ urge: String) {
-        if !customUrges.contains(urge) && customUrges.count < 2 {
-            customUrges.append(urge)
-            print("📝 Added custom urge: \(urge). Total: \(customUrges)")
+        let trimmedUrge = urge.trimmingCharacters(in: .whitespaces)
+        if !trimmedUrge.isEmpty && !customUrges.contains(trimmedUrge) && customUrges.count < 2 {
+            customUrges.append(trimmedUrge)
+            print("📝 Added custom urge: \(trimmedUrge). Total: \(customUrges)")
         }
     }
     
+    func removeCustomUrge(_ urge: String) {
+        customUrges.removeAll { $0 == urge }
+        print("🗑️ Removed custom urge: \(urge)")
+    }
+    
     func addCustomGoal(_ goal: String) {
-        if !customGoals.contains(goal) && customGoals.count < 3 {
-            customGoals.append(goal)
-            print("📝 Added custom goal: \(goal). Total: \(customGoals)")
+        let trimmedGoal = goal.trimmingCharacters(in: .whitespaces)
+        if !trimmedGoal.isEmpty && !customGoals.contains(trimmedGoal) && customGoals.count < 3 {
+            customGoals.append(trimmedGoal)
+            print("📝 Added custom goal: \(trimmedGoal). Total: \(customGoals)")
+        }
+    }
+    
+    func removeCustomGoal(_ goal: String) {
+        customGoals.removeAll { $0 == goal }
+        print("🗑️ Removed custom goal: \(goal)")
+    }
+    
+    func toggleActionSelection(_ action: String) {
+        if selectedActions.contains(action) {
+            selectedActions.removeAll { $0 == action }
+        } else if (selectedActions.count + customActions.count) < 3 {
+            selectedActions.append(action)
+        }
+    }
+    
+    func toggleUrgeSelection(_ urge: String) {
+        if selectedUrges.contains(urge) {
+            selectedUrges.removeAll { $0 == urge }
+        } else if (selectedUrges.count + customUrges.count) < 2 {
+            selectedUrges.append(urge)
+        }
+    }
+    
+    func toggleGoalSelection(_ goal: String) {
+        if selectedGoals.contains(goal) {
+            selectedGoals.removeAll { $0 == goal }
+        } else if (selectedGoals.count + customGoals.count) < 3 {
+            selectedGoals.append(goal)
+        }
+    }
+    
+    func toggleEmotionSelection(_ emotion: String) {
+        if selectedEmotions.contains(emotion) {
+            selectedEmotions.removeAll { $0 == emotion }
+        } else if selectedEmotions.count < 6 {
+            selectedEmotions.append(emotion)
         }
     }
     
@@ -201,6 +308,25 @@ final class OnboardingViewModel: ObservableObject {
         print("💊 Set takes medications: \(taking)")
     }
     
+    // MARK: - Data State Debugging
+    private func printCurrentDataState() {
+        print("📊 Current Onboarding Data State:")
+        print("   - Step: \(onboardingStep)")
+        print("   - Name: '\(firstName)' '\(lastName)'")
+        print("   - Age: \(age)")
+        print("   - Gender: '\(gender)'")
+        print("   - Selected Actions: \(selectedActions)")
+        print("   - Custom Actions: \(customActions)")
+        print("   - Selected Urges: \(selectedUrges)")
+        print("   - Custom Urges: \(customUrges)")
+        print("   - Selected Goals: \(selectedGoals)")
+        print("   - Custom Goals: \(customGoals)")
+        print("   - Selected Emotions: \(selectedEmotions)")
+        print("   - Takes Medications: \(takesMedications)")
+        print("   - Medications: \(medications.count)")
+        print("   - Reminder Frequency: \(reminderFrequency)")
+    }
+    
     // MARK: - Load Existing Profile (Only for specific user)
     private func loadExistingProfile(for userId: String) {
         print("🔍 Loading existing profile for user: \(userId)")
@@ -223,8 +349,12 @@ final class OnboardingViewModel: ObservableObject {
                 // If user has completed onboarding, load their data
                 if profile.hasCompletedOnboarding {
                     self.hasCompletedOnboarding = true
-                    self.firstName = profile.name.components(separatedBy: " ").first ?? ""
-                    self.lastName = profile.name.components(separatedBy: " ").dropFirst().joined(separator: " ")
+                    
+                    // Parse name components
+                    let nameComponents = profile.name.components(separatedBy: " ")
+                    self.firstName = nameComponents.first ?? ""
+                    self.lastName = nameComponents.dropFirst().joined(separator: " ")
+                    
                     self.age = profile.age
                     self.gender = profile.gender
                     self.customActions = profile.customActions
@@ -269,17 +399,10 @@ final class OnboardingViewModel: ObservableObject {
             return
         }
         
+        // Print final data state before saving
+        printCurrentDataState()
+        
         print("👤 Completing onboarding for user: \(user.uid)")
-        print("📝 Collected data:")
-        print("   Name: \(firstName) \(lastName)")
-        print("   Age: \(age)")
-        print("   Gender: \(gender)")
-        print("   Custom Actions: \(customActions)")
-        print("   Selected Actions: \(selectedActions)")
-        print("   Custom Urges: \(customUrges)")
-        print("   Custom Goals: \(customGoals)")
-        print("   Takes Medications: \(takesMedications)")
-        print("   Medications Count: \(medications.count)")
         
         isLoading = true
         errorMessage = ""
@@ -289,6 +412,14 @@ final class OnboardingViewModel: ObservableObject {
         let allActions = Array(Set(selectedActions + customActions)).prefix(5).map { $0 }
         let allUrges = Array(Set(selectedUrges + customUrges)).prefix(5).map { $0 }
         let allGoals = Array(Set(selectedGoals + customGoals)).prefix(5).map { $0 }
+        
+        // Validate required fields
+        if fullName.isEmpty {
+            print("❌ Name is empty!")
+            isLoading = false
+            errorMessage = "Please enter your name"
+            return
+        }
         
         let updatedProfile = UserProfile(
             uid: user.uid,
@@ -308,11 +439,17 @@ final class OnboardingViewModel: ObservableObject {
             hasCompletedOnboarding: true
         )
         
-        print("💾 Attempting to save profile...")
+        print("💾 Final profile to save:")
         print("   Profile UID: \(updatedProfile.uid)")
-        print("   Profile Name: \(updatedProfile.name)")
+        print("   Profile Name: '\(updatedProfile.name)'")
+        print("   Profile Age: \(updatedProfile.age)")
+        print("   Profile Gender: '\(updatedProfile.gender)'")
         print("   Profile Actions: \(updatedProfile.customActions)")
+        print("   Profile Urges: \(updatedProfile.customUrges)")
+        print("   Profile Goals: \(updatedProfile.customGoals)")
+        print("   Profile Emotions: \(updatedProfile.selectedEmotions)")
         print("   Profile Medications: \(updatedProfile.medications.count)")
+        print("   Profile Takes Meds: \(updatedProfile.takesMedications)")
         
         // Save to Firestore
         updatedProfile.save { [weak self] success in
@@ -340,11 +477,19 @@ final class OnboardingViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Utility Methods
+    private func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+    
     // MARK: - Manual Save Test (for debugging)
     func testSave() {
         print("🧪 Testing manual save...")
         firstName = "Test"
         lastName = "User"
+        age = 30
         customActions = ["Test Action 1", "Test Action 2"]
         completeOnboarding()
     }
