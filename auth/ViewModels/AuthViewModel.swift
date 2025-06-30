@@ -5,6 +5,9 @@
 //  AuthViewModel.swift
 //  aura
 //
+//  AuthViewModel.swift
+//  aura
+//
 //  Created by Ella A. Sadduq on 3/27/25.
 //
 
@@ -22,7 +25,6 @@ final class AuthViewModel: ObservableObject {
     @Published var user: User?
     @Published var userProfile: UserProfile? = nil
     @Published var isAuthenticated: Bool = false
-    @Published var authFlow: AuthFlowStep = .signIn
     
     private var authHandle: AuthStateDidChangeListenerHandle?
     
@@ -59,7 +61,6 @@ final class AuthViewModel: ObservableObject {
                 } else {
                     print("🚪 User signed out")
                     self.userProfile = nil
-                    self.authFlow = .signIn
                     
                     // Reset onboarding when signing out
                     OnboardingViewModel.shared.startFreshOnboarding()
@@ -80,18 +81,12 @@ final class AuthViewModel: ObservableObject {
             
             guard let user = result?.user else { return }
             print("✅ Sign in successful for: \(user.uid)")
-            
-            DispatchQueue.main.async {
-                self?.user = user
-                self?.isAuthenticated = true
-                self?.loadUserProfile(uid: user.uid)
-            }
         }
     }
     
     // MARK: - Sign Up
     func signUp(name: String, email: String, password: String) {
-        print("📝 Attempting sign up for: \(email)")
+        print("🔐 Attempting sign up for: \(email)")
         
         Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
             if let error = error {
@@ -102,45 +97,77 @@ final class AuthViewModel: ObservableObject {
             guard let user = result?.user else { return }
             print("✅ Sign up successful for: \(user.uid)")
             
-            // Create initial user profile for new user
-            let newUser = UserProfile(uid: user.uid, name: name, email: email, hasCompletedOnboarding: false)
-            
-            newUser.save { success in
-                DispatchQueue.main.async {
-                    if success {
-                        print("💾 Initial profile created for new user")
-                        self?.user = user
-                        self?.userProfile = newUser
-                        self?.isAuthenticated = true
-                        
-                        // Ensure onboarding starts fresh for new user
-                        OnboardingViewModel.shared.startFreshOnboarding()
-                    } else {
-                        print("❌ Failed to create initial profile")
-                    }
-                }
-            }
+            // Create user profile in Firestore
+            self?.createUserProfile(uid: user.uid, name: name, email: email)
         }
     }
     
-    // MARK: - Load Profile
-    func loadUserProfile(uid: String) {
-        print("🔍 Loading profile for user: \(uid)")
+    // MARK: - Create User Profile
+    private func createUserProfile(uid: String, name: String, email: String) {
+        print("👤 Creating user profile for: \(uid)")
         
-        UserProfile.fetch(uid: uid) { [weak self] profile in
-            DispatchQueue.main.async {
-                if let profile = profile {
-                    // Verify the profile belongs to the correct user
+        let userProfile = UserProfile(
+            uid: uid,
+            name: name,
+            email: email,
+            hasCompletedOnboarding: false
+        )
+        
+        let db = Firestore.firestore()
+        
+        do {
+            try db.collection("users").document(uid).setData(from: userProfile) { [weak self] error in
+                if let error = error {
+                    print("❌ Failed to create user profile: \(error.localizedDescription)")
+                } else {
+                    print("✅ User profile created successfully")
+                    
+                    DispatchQueue.main.async {
+                        self?.userProfile = userProfile
+                    }
+                }
+            }
+        } catch {
+            print("❌ Failed to encode user profile: \(error.localizedDescription)")
+        }
+    }
+    
+    // MARK: - Load User Profile
+    private func loadUserProfile(uid: String) {
+        print("👤 Loading user profile for: \(uid)")
+        
+        let db = Firestore.firestore()
+        
+        db.collection("users").document(uid).getDocument { [weak self] document, error in
+            if let error = error {
+                print("❌ Failed to load user profile: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let document = document, document.exists else {
+                print("⚠️ No profile found for user: \(uid)")
+                DispatchQueue.main.async {
+                    self?.userProfile = nil
+                }
+                return
+            }
+            
+            do {
+                let profile = try document.data(as: UserProfile.self)
+                print("✅ User profile loaded: \(profile.name)")
+                
+                DispatchQueue.main.async {
+                    // Verify the profile belongs to the current user
                     if profile.uid == uid {
                         self?.userProfile = profile
-                        print("✅ Profile loaded for: \(profile.name) (UID: \(profile.uid))")
-                        print("   - Completed onboarding: \(profile.hasCompletedOnboarding)")
                     } else {
-                        print("⚠️ Profile UID mismatch! Expected: \(uid), Got: \(profile.uid)")
+                        print("⚠️ Profile UID mismatch. Expected: \(uid), Got: \(profile.uid)")
                         self?.userProfile = nil
                     }
-                } else {
-                    print("⚠️ No profile found for user: \(uid)")
+                }
+            } catch {
+                print("❌ Failed to decode user profile: \(error.localizedDescription)")
+                DispatchQueue.main.async {
                     self?.userProfile = nil
                 }
             }
@@ -149,6 +176,8 @@ final class AuthViewModel: ObservableObject {
     
     // MARK: - Reset Password
     func resetPassword(email: String) {
+        print("🔑 Attempting password reset for: \(email)")
+        
         Auth.auth().sendPasswordReset(withEmail: email) { error in
             if let error = error {
                 print("❌ Password reset failed: \(error.localizedDescription)")
@@ -169,7 +198,6 @@ final class AuthViewModel: ObservableObject {
                 self.user = nil
                 self.userProfile = nil
                 self.isAuthenticated = false
-                self.authFlow = .signIn
                 
                 // Reset onboarding state
                 OnboardingViewModel.shared.startFreshOnboarding()

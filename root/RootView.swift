@@ -5,8 +5,6 @@
 //
 //
 //  RootView.swift
-//
-//  RootView.swift
 //  aura
 //
 //  Created by Ella A. Sadduq on 3/27/25.
@@ -15,19 +13,20 @@
 import SwiftUI
 
 struct RootView: View {
-    @StateObject private var authVM = AuthViewModel.shared
+    @StateObject private var authCoordinator = AuthCoordinator()
     @StateObject private var onboardingVM = OnboardingViewModel.shared
-
+    
     var body: some View {
         Group {
-            if !authVM.isAuthenticated {
-                authFlowView(for: authVM.authFlow)
+            if !authCoordinator.authViewModel.isAuthenticated {
+                AuthCoordinatorMainView()
+                    .environmentObject(authCoordinator)
             } else if !onboardingVM.hasCompletedOnboarding {
                 OnboardingFlowView()
                     .environmentObject(onboardingVM)
             } else {
                 MainView()
-                    .environmentObject(authVM)
+                    .environmentObject(authCoordinator.authViewModel)
             }
         }
         .onReceive(onboardingVM.$hasCompletedOnboarding) { completed in
@@ -37,24 +36,9 @@ struct RootView: View {
         }
         .onAppear {
             print("📱 RootView appeared")
-            print("   - Authenticated: \(authVM.isAuthenticated)")
+            print("   - Authenticated: \(authCoordinator.authViewModel.isAuthenticated)")
             print("   - Onboarding Complete: \(onboardingVM.hasCompletedOnboarding)")
-            print("   - User Profile: \(authVM.userProfile?.name ?? "nil")")
-        }
-    }
-
-    @ViewBuilder
-    private func authFlowView(for step: AuthFlowStep) -> some View {
-        switch step {
-        case .signIn:
-            SignInView()
-                .environmentObject(authVM)
-        case .signUp:
-            SignUpView()
-                .environmentObject(authVM)
-        case .forgotPassword:
-            ForgotPasswordView()
-                .environmentObject(authVM)
+            print("   - User Profile: \(authCoordinator.authViewModel.userProfile?.name ?? "nil")")
         }
     }
 }

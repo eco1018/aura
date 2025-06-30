@@ -1,6 +1,9 @@
 //
 //
 //  ForgotPasswordView.swift
+//
+//
+//  ForgotPasswordView.swift
 //  aura
 //
 //  Created by Ella A. Sadduq on 3/27/25.
@@ -9,7 +12,7 @@
 import SwiftUI
 
 struct ForgotPasswordView: View {
-    @EnvironmentObject var authVM: AuthViewModel
+    @EnvironmentObject var coordinator: AuthCoordinator
     @State private var email: String = ""
     @State private var isEmailFocused: Bool = false
     
@@ -24,18 +27,18 @@ struct ForgotPasswordView: View {
                 Circle()
                     .fill(Color.gray.opacity(0.03))
                     .frame(width: 320, height: 320)
-                    .offset(x: 100, y: -150)
+                    .offset(x: -100, y: -150)
                     .blur(radius: 40)
                 
                 Circle()
-                    .fill(Color.orange.opacity(0.02))
+                    .fill(Color.blue.opacity(0.02))
                     .frame(width: 250, height: 250)
-                    .offset(x: -90, y: 200)
+                    .offset(x: 120, y: 200)
                     .blur(radius: 30)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
-                        Spacer(minLength: 120)
+                        Spacer(minLength: 100)
                         
                         // Header Section
                         VStack(spacing: 32) {
@@ -46,8 +49,8 @@ struct ForgotPasswordView: View {
                                     .frame(width: 60, height: 60)
                                     .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 8)
                                 
-                                Image(systemName: "lock.rotation")
-                                    .font(.system(size: 24, weight: .medium))
+                                Image(systemName: "key.fill")
+                                    .font(.system(size: 22, weight: .medium))
                                     .foregroundColor(.white)
                             }
                             
@@ -66,6 +69,7 @@ struct ForgotPasswordView: View {
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                         }
+                        .padding(.horizontal, 40)
                         .padding(.bottom, 60)
                         
                         // Form Container
@@ -106,7 +110,7 @@ struct ForgotPasswordView: View {
                         VStack(spacing: 24) {
                             // Send Reset Link Button
                             Button(action: {
-                                authVM.resetPassword(email: email)
+                                coordinator.resetPassword(email: email)
                             }) {
                                 Text("Send Reset Link")
                                     .font(.system(size: 16, weight: .medium))
@@ -118,10 +122,11 @@ struct ForgotPasswordView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 26))
                                     .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 8)
                             }
+                            .disabled(coordinator.isLoading || email.isEmpty)
                             
                             // Return to Sign In Link
                             Button(action: {
-                                authVM.authFlow = .signIn
+                                coordinator.navigateTo(.signIn)
                             }) {
                                 HStack(spacing: 6) {
                                     Image(systemName: "arrow.left")
@@ -141,6 +146,11 @@ struct ForgotPasswordView: View {
                         Spacer(minLength: 40)
                     }
                 }
+                
+                // Loading overlay
+                if coordinator.isLoading {
+                    AuthLoadingOverlay()
+                }
             }
         }
     }
@@ -148,5 +158,5 @@ struct ForgotPasswordView: View {
 
 #Preview {
     ForgotPasswordView()
-        .environmentObject(AuthViewModel.shared)
+        .environmentObject(AuthCoordinator())
 }

@@ -23,7 +23,6 @@
 		C83BF0DA2D98AC6700538904 /* UrgesSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C62D98AC6700538904 /* UrgesSelectionView.swift */; };
 		C83BF0DB2D98AC6700538904 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C72D98AC6700538904 /* WelcomeView.swift */; };
 		C83BF0DC2D98AC6700538904 /* WrapUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0C82D98AC6700538904 /* WrapUpView.swift */; };
-		C83BF0E42D98ACE900538904 /* AuthFlowStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0E32D98ACE700538904 /* AuthFlowStep.swift */; };
 		C83BF0E62D98ADE100538904 /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0E52D98ADE100538904 /* OnboardingStep.swift */; };
 		C83BF0ED2D98B8A100538904 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0EC2D98B89E00538904 /* OnboardingFlowView.swift */; };
 		C83BF0EF2D98B92900538904 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83BF0EE2D98B92600538904 /* OnboardingViewModel.swift */; };
@@ -66,6 +65,7 @@
 		C8DFCCE72D95D25A00F5D20C /* FirebaseVertexAI in Frameworks */ = {isa = PBXBuildFile; productRef = C8DFCCE62D95D25A00F5D20C /* FirebaseVertexAI */; };
 		C8FF0D662E11E8C600EA863D /* GenderSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8FF0D652E11E8C600EA863D /* GenderSelectionView.swift */; };
 		C8FF0D682E11E8D300EA863D /* EmotionsSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8FF0D672E11E8D300EA863D /* EmotionsSelectionView.swift */; };
+		C8FF0E082E12111F00EA863D /* AuthCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8FF0E072E12110700EA863D /* AuthCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -105,7 +105,6 @@
 		C83BF0C62D98AC6700538904 /* UrgesSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgesSelectionView.swift; sourceTree = "<group>"; };
 		C83BF0C72D98AC6700538904 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		C83BF0C82D98AC6700538904 /* WrapUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WrapUpView.swift; sourceTree = "<group>"; };
-		C83BF0E32D98ACE700538904 /* AuthFlowStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFlowStep.swift; sourceTree = "<group>"; };
 		C83BF0E52D98ADE100538904 /* OnboardingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep.swift; sourceTree = "<group>"; };
 		C83BF0EC2D98B89E00538904 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
 		C83BF0EE2D98B92600538904 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
@@ -124,6 +123,7 @@
 		C8BB14C02D95E3B200E3D1AF /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		C8FF0D652E11E8C600EA863D /* GenderSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenderSelectionView.swift; sourceTree = "<group>"; };
 		C8FF0D672E11E8D300EA863D /* EmotionsSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionsSelectionView.swift; sourceTree = "<group>"; };
+		C8FF0E072E12110700EA863D /* AuthCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthCoordinator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -160,6 +160,11 @@
 		C8A66E282DE0D3090053DA0C /* Notifications */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Notifications;
+			sourceTree = "<group>";
+		};
+		C8FF0E002E120B6A00EA863D /* NavigationFoundation */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NavigationFoundation;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -216,6 +221,7 @@
 		C82400972D95C935004AE981 = {
 			isa = PBXGroup;
 			children = (
+				C8FF0E002E120B6A00EA863D /* NavigationFoundation */,
 				C8A66E282DE0D3090053DA0C /* Notifications */,
 				C84F27D02DDF625300E1D280 /* Medications */,
 				C84F27362DDF4F1600E1D280 /* Settings */,
@@ -311,7 +317,6 @@
 			isa = PBXGroup;
 			children = (
 				C85F82BF2D961BC3008583F3 /* AuthSettings.swift */,
-				C83BF0E32D98ACE700538904 /* AuthFlowStep.swift */,
 				C8BB14232D95D46500E3D1AF /* AuthViewModel.swift */,
 			);
 			path = ViewModels;
@@ -330,6 +335,7 @@
 		C8BB14402D95DC0300E3D1AF /* auth */ = {
 			isa = PBXGroup;
 			children = (
+				C8FF0E072E12110700EA863D /* AuthCoordinator.swift */,
 				C83BF1022D99541C00538904 /* ViewModels */,
 				C83BF0EB2D98B70300538904 /* Views */,
 			);
@@ -365,6 +371,7 @@
 				C84F27362DDF4F1600E1D280 /* Settings */,
 				C84F27D02DDF625300E1D280 /* Medications */,
 				C8A66E282DE0D3090053DA0C /* Notifications */,
+				C8FF0E002E120B6A00EA863D /* NavigationFoundation */,
 			);
 			name = aura;
 			packageProductDependencies = (
@@ -525,7 +532,6 @@
 				C83BF0CE2D98AC6700538904 /* BirthdateView.swift in Sources */,
 				C83BF0CF2D98AC6700538904 /* DiaryCardReminderTimeView.swift in Sources */,
 				C83BF0D02D98AC6700538904 /* DiaryCardReminderView.swift in Sources */,
-				C83BF0E42D98ACE900538904 /* AuthFlowStep.swift in Sources */,
 				C83BF0FE2D98C93800538904 /* MorningDiaryReminderTimeView.swift in Sources */,
 				C83BF0D12D98AC6700538904 /* DiaryIntroView.swift in Sources */,
 				C84F26BA2DDF3AFA00E1D280 /* SkillsStepView.swift in Sources */,
@@ -539,6 +545,7 @@
 				C83BF0D72D98AC6700538904 /* MedicationIntroView.swift in Sources */,
 				C83BF0D82D98AC6700538904 /* MedicationReminderView.swift in Sources */,
 				C83BF0D92D98AC6700538904 /* UrgesIntroView.swift in Sources */,
+				C8FF0E082E12111F00EA863D /* AuthCoordinator.swift in Sources */,
 				C83BF0DA2D98AC6700538904 /* UrgesSelectionView.swift in Sources */,
 				C83BF0DB2D98AC6700538904 /* WelcomeView.swift in Sources */,
 				C83BF0DC2D98AC6700538904 /* WrapUpView.swift in Sources */,

@@ -3,6 +3,9 @@
 //
 //
 //  SignUpView.swift
+//
+//
+//  SignUpView.swift
 //  aura
 //
 //  Created by Ella A. Sadduq on 3/27/25.
@@ -11,11 +14,13 @@
 import SwiftUI
 
 struct SignUpView: View {
-    @EnvironmentObject var authVM: AuthViewModel
+    @EnvironmentObject var coordinator: AuthCoordinator
+    @State private var name: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
     @State private var showPasswordMismatch: Bool = false
+    @State private var isNameFocused: Bool = false
     @State private var isEmailFocused: Bool = false
     @State private var isPasswordFocused: Bool = false
     @State private var isConfirmPasswordFocused: Bool = false
@@ -74,6 +79,34 @@ struct SignUpView: View {
                         
                         // Form Container
                         VStack(spacing: 32) {
+                            // Name Field
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Full Name")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.black.opacity(0.7))
+                                    .tracking(0.3)
+                                
+                                TextField("Enter your full name", text: $name, onEditingChanged: { focused in
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        isNameFocused = focused
+                                    }
+                                })
+                                .autocapitalization(.words)
+                                .textContentType(.name)
+                                .font(.system(size: 16, weight: .regular))
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 0)
+                                .padding(.vertical, 16)
+                                .background(Color.clear)
+                                .overlay(
+                                    Rectangle()
+                                        .frame(height: 1)
+                                        .foregroundColor(isNameFocused ? .black : .gray.opacity(0.3))
+                                        .animation(.easeInOut(duration: 0.2), value: isNameFocused),
+                                    alignment: .bottom
+                                )
+                            }
+                            
                             // Email Field
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Email")
@@ -110,29 +143,28 @@ struct SignUpView: View {
                                     .foregroundColor(.black.opacity(0.7))
                                     .tracking(0.3)
                                 
-                                SecureField("Create a secure password", text: $password, onCommit: {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        isPasswordFocused = false
+                                SecureField("Enter your password", text: $password)
+                                    .textContentType(.newPassword)
+                                    .font(.system(size: 16, weight: .regular))
+                                    .foregroundColor(.black)
+                                    .padding(.horizontal, 0)
+                                    .padding(.vertical, 16)
+                                    .background(Color.clear)
+                                    .overlay(
+                                        Rectangle()
+                                            .frame(height: 1)
+                                            .foregroundColor(isPasswordFocused ? .black : .gray.opacity(0.3))
+                                            .animation(.easeInOut(duration: 0.2), value: isPasswordFocused),
+                                        alignment: .bottom
+                                    )
+                                    .onTapGesture {
+                                        withAnimation(.easeInOut(duration: 0.2)) {
+                                            isPasswordFocused = true
+                                        }
                                     }
-                                })
-                                .textContentType(.newPassword)
-                                .font(.system(size: 16, weight: .regular))
-                                .foregroundColor(.black)
-                                .padding(.horizontal, 0)
-                                .padding(.vertical, 16)
-                                .background(Color.clear)
-                                .overlay(
-                                    Rectangle()
-                                        .frame(height: 1)
-                                        .foregroundColor(isPasswordFocused ? .black : .gray.opacity(0.3))
-                                        .animation(.easeInOut(duration: 0.2), value: isPasswordFocused),
-                                    alignment: .bottom
-                                )
-                                .onTapGesture {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        isPasswordFocused = true
+                                    .onChange(of: password) { _ in
+                                        checkPasswordMatch()
                                     }
-                                }
                             }
                             
                             // Confirm Password Field
@@ -142,59 +174,50 @@ struct SignUpView: View {
                                     .foregroundColor(.black.opacity(0.7))
                                     .tracking(0.3)
                                 
-                                SecureField("Confirm your password", text: $confirmPassword, onCommit: {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        isConfirmPasswordFocused = false
+                                SecureField("Confirm your password", text: $confirmPassword)
+                                    .textContentType(.newPassword)
+                                    .font(.system(size: 16, weight: .regular))
+                                    .foregroundColor(.black)
+                                    .padding(.horizontal, 0)
+                                    .padding(.vertical, 16)
+                                    .background(Color.clear)
+                                    .overlay(
+                                        Rectangle()
+                                            .frame(height: 1)
+                                            .foregroundColor(
+                                                showPasswordMismatch ? .red :
+                                                (isConfirmPasswordFocused ? .black : .gray.opacity(0.3))
+                                            )
+                                            .animation(.easeInOut(duration: 0.2), value: isConfirmPasswordFocused),
+                                        alignment: .bottom
+                                    )
+                                    .onTapGesture {
+                                        withAnimation(.easeInOut(duration: 0.2)) {
+                                            isConfirmPasswordFocused = true
+                                        }
                                     }
-                                })
-                                .textContentType(.newPassword)
-                                .font(.system(size: 16, weight: .regular))
-                                .foregroundColor(.black)
-                                .padding(.horizontal, 0)
-                                .padding(.vertical, 16)
-                                .background(Color.clear)
-                                .overlay(
-                                    Rectangle()
-                                        .frame(height: 1)
-                                        .foregroundColor(
-                                            showPasswordMismatch ? .red :
-                                            (isConfirmPasswordFocused ? .black : .gray.opacity(0.3))
-                                        )
-                                        .animation(.easeInOut(duration: 0.2), value: isConfirmPasswordFocused || showPasswordMismatch),
-                                    alignment: .bottom
-                                )
-                                .onTapGesture {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        isConfirmPasswordFocused = true
+                                    .onChange(of: confirmPassword) { _ in
+                                        checkPasswordMatch()
                                     }
-                                }
-                            }
-                            
-                            // Error Message
-                            if showPasswordMismatch {
-                                HStack {
+                                
+                                // Password mismatch warning
+                                if showPasswordMismatch {
                                     Text("Passwords do not match")
-                                        .font(.system(size: 13, weight: .regular))
+                                        .font(.system(size: 12, weight: .medium))
                                         .foregroundColor(.red)
                                         .tracking(0.1)
-                                    
-                                    Spacer()
+                                        .padding(.top, 4)
                                 }
-                                .transition(.opacity.combined(with: .offset(y: -5)))
                             }
                         }
                         .padding(.horizontal, 40)
                         .padding(.bottom, 50)
                         
-                        // Create Account Button
-                        VStack(spacing: 24) {
+                        // Action Buttons
+                        VStack(spacing: 32) {
+                            // Sign Up Button
                             Button(action: {
-                                if password == confirmPassword {
-                                    showPasswordMismatch = false
-                                    authVM.signUp(name: "", email: email, password: password)
-                                } else {
-                                    showPasswordMismatch = true
-                                }
+                                coordinator.signUp(name: name, email: email, password: password, confirmPassword: confirmPassword)
                             }) {
                                 Text("Create Account")
                                     .font(.system(size: 16, weight: .medium))
@@ -206,12 +229,13 @@ struct SignUpView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 26))
                                     .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 8)
                             }
+                            .disabled(coordinator.isLoading || showPasswordMismatch)
                             .scaleEffect(showPasswordMismatch ? 0.98 : 1.0)
                             .animation(.easeInOut(duration: 0.1), value: showPasswordMismatch)
                             
                             // Sign In Link
                             Button(action: {
-                                authVM.authFlow = .signIn
+                                coordinator.navigateTo(.signIn)
                             }) {
                                 HStack(spacing: 6) {
                                     Text("Already have an account?")
@@ -232,12 +256,51 @@ struct SignUpView: View {
                         Spacer(minLength: 40)
                     }
                 }
+                
+                // Loading overlay
+                if coordinator.isLoading {
+                    AuthLoadingOverlay()
+                }
             }
+        }
+    }
+    
+    // MARK: - Helper Methods
+    private func checkPasswordMatch() {
+        if !confirmPassword.isEmpty && password != confirmPassword {
+            showPasswordMismatch = true
+        } else {
+            showPasswordMismatch = false
+        }
+    }
+}
+
+// MARK: - Loading Overlay (if not already defined in SignInView)
+struct LoadingOverlaySignUp: View {
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.3)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 16) {
+                ProgressView()
+                    .scaleEffect(1.2)
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                
+                Text("Creating account...")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white)
+            }
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.black.opacity(0.8))
+            )
         }
     }
 }
 
 #Preview {
     SignUpView()
-        .environmentObject(AuthViewModel.shared)
+        .environmentObject(AuthCoordinator())
 }

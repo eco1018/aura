@@ -1,5 +1,8 @@
 //
 //  SignInView.swift
+//
+//
+//  SignInView.swift
 //  aura
 //
 //  Created by Ella A. Sadduq on 3/27/25.
@@ -8,7 +11,7 @@
 import SwiftUI
 
 struct SignInView: View {
-    @EnvironmentObject var authVM: AuthViewModel
+    @EnvironmentObject var coordinator: AuthCoordinator
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var isEmailFocused: Bool = false
@@ -57,8 +60,6 @@ struct SignInView: View {
                                     .font(.system(size: 28, weight: .light, design: .default))
                                     .foregroundColor(.black)
                                     .tracking(0.5)
-                                
-                             
                             }
                         }
                         .padding(.bottom, 60)
@@ -101,38 +102,35 @@ struct SignInView: View {
                                     .foregroundColor(.black.opacity(0.7))
                                     .tracking(0.3)
                                 
-                                SecureField("Enter your password", text: $password, onCommit: {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        isPasswordFocused = false
+                                SecureField("Enter your password", text: $password)
+                                    .textContentType(.password)
+                                    .font(.system(size: 16, weight: .regular))
+                                    .foregroundColor(.black)
+                                    .padding(.horizontal, 0)
+                                    .padding(.vertical, 16)
+                                    .background(Color.clear)
+                                    .overlay(
+                                        Rectangle()
+                                            .frame(height: 1)
+                                            .foregroundColor(isPasswordFocused ? .black : .gray.opacity(0.3))
+                                            .animation(.easeInOut(duration: 0.2), value: isPasswordFocused),
+                                        alignment: .bottom
+                                    )
+                                    .onTapGesture {
+                                        withAnimation(.easeInOut(duration: 0.2)) {
+                                            isPasswordFocused = true
+                                        }
                                     }
-                                })
-                                .textContentType(.password)
-                                .font(.system(size: 16, weight: .regular))
-                                .foregroundColor(.black)
-                                .padding(.horizontal, 0)
-                                .padding(.vertical, 16)
-                                .background(Color.clear)
-                                .overlay(
-                                    Rectangle()
-                                        .frame(height: 1)
-                                        .foregroundColor(isPasswordFocused ? .black : .gray.opacity(0.3))
-                                        .animation(.easeInOut(duration: 0.2), value: isPasswordFocused),
-                                    alignment: .bottom
-                                )
-                                .onTapGesture {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        isPasswordFocused = true
-                                    }
-                                }
                             }
                         }
                         .padding(.horizontal, 40)
                         .padding(.bottom, 50)
                         
-                        // Sign In Button
+                        // Action Buttons
                         VStack(spacing: 32) {
+                            // Sign In Button
                             Button(action: {
-                                authVM.signIn(email: email, password: password)
+                                coordinator.signIn(email: email, password: password)
                             }) {
                                 Text("Sign In")
                                     .font(.system(size: 16, weight: .medium))
@@ -144,12 +142,13 @@ struct SignInView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 26))
                                     .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 8)
                             }
+                            .disabled(coordinator.isLoading)
                             
                             // Secondary Actions
                             VStack(spacing: 20) {
                                 // Forgot Password Link
                                 Button(action: {
-                                    authVM.authFlow = .forgotPassword
+                                    coordinator.navigateTo(.forgotPassword)
                                 }) {
                                     Text("Forgot Password?")
                                         .font(.system(size: 15, weight: .medium))
@@ -159,7 +158,7 @@ struct SignInView: View {
                                 
                                 // Sign Up Link
                                 Button(action: {
-                                    authVM.authFlow = .signUp
+                                    coordinator.navigateTo(.signUp)
                                 }) {
                                     HStack(spacing: 6) {
                                         Text("Don't have an account?")
@@ -181,12 +180,42 @@ struct SignInView: View {
                         Spacer(minLength: 40)
                     }
                 }
+                
+                // Loading overlay
+                if coordinator.isLoading {
+                    AuthLoadingOverlay()
+                }
             }
+        }
+    }
+}
+
+// MARK: - Auth Loading Overlay
+struct AuthLoadingOverlay: View {
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.3)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 16) {
+                ProgressView()
+                    .scaleEffect(1.2)
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                
+                Text("Please wait...")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white)
+            }
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.black.opacity(0.8))
+            )
         }
     }
 }
 
 #Preview {
     SignInView()
-        .environmentObject(AuthViewModel.shared)
+        .environmentObject(AuthCoordinator())
 }
