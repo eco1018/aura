@@ -1,7 +1,4 @@
 //
-//  AuthCoordinator.swift
-//  aura
-//
 //
 //  AuthCoordinator.swift
 //  aura
@@ -10,6 +7,26 @@
 
 import SwiftUI
 import FirebaseAuth
+import Combine
+
+// MARK: - Auth Loading View
+struct AuthLoadingView: View {
+    var body: some View {
+        ZStack {
+            Color.white.ignoresSafeArea()
+            
+            VStack(spacing: 16) {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                    .scaleEffect(1.2)
+                
+                Text("Loading...")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.black.opacity(0.7))
+            }
+        }
+    }
+}
 
 // MARK: - Auth Coordinator Protocol
 protocol AuthCoordinatorProtocol: ObservableObject {
@@ -37,25 +54,21 @@ final class AuthCoordinator: AuthCoordinatorProtocol {
     
     // MARK: - Published Properties
     @Published var currentView: AuthCoordinatorState = .signIn
-    @Published var isLoading: Bool = false
     @Published var errorMessage: String = ""
     @Published var showError: Bool = false
     
     // MARK: - Dependencies
     let authViewModel: AuthViewModel
-    private var authStateListener: AuthStateDidChangeListenerHandle?
+    private var cancellables = Set<AnyCancellable>()
+    
+    // MARK: - Computed Properties
+    var isLoading: Bool { authViewModel.isLoading }
     
     // MARK: - Initialization
     init(authViewModel: AuthViewModel = AuthViewModel.shared) {
         self.authViewModel = authViewModel
-        setupAuthStateListener()
+        observeAuthViewModel()
         determineInitialView()
-    }
-    
-    deinit {
-        if let listener = authStateListener {
-            Auth.auth().removeStateDidChangeListener(listener)
-        }
     }
     
     // MARK: - Public Methods
@@ -78,7 +91,6 @@ final class AuthCoordinator: AuthCoordinatorProtocol {
     func reset() {
         print("🔄 AuthCoordinator: Resetting to initial state")
         currentView = .signIn
-        isLoading = false
         errorMessage = ""
         showError = false
     }
@@ -95,10 +107,7 @@ final class AuthCoordinator: AuthCoordinatorProtocol {
             return
         }
         
-        isLoading = true
         clearError()
-        
-        // Use existing AuthViewModel method
         authViewModel.signIn(email: email, password: password)
     }
     
@@ -119,10 +128,7 @@ final class AuthCoordinator: AuthCoordinatorProtocol {
             return
         }
         
-        isLoading = true
         clearError()
-        
-        // Use existing AuthViewModel method
         authViewModel.signUp(name: name, email: email, password: password)
     }
     
@@ -132,28 +138,25 @@ final class AuthCoordinator: AuthCoordinatorProtocol {
             return
         }
         
-        isLoading = true
         clearError()
-        
         authViewModel.resetPassword(email: email)
         
         // Show success message and navigate back
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.isLoading = false
             self.showSuccessMessage("Password reset email sent")
             self.navigateTo(.signIn)
         }
     }
     
     // MARK: - Private Methods
-    private func setupAuthStateListener() {
-        authStateListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                self.isLoading = false
+    private func observeAuthViewModel() {
+        // Observe authentication state changes
+        authViewModel.$isAuthenticated
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isAuthenticated in
+                guard let self = self else { return }
                 
-                if user != nil {
+                if isAuthenticated {
                     print("✅ AuthCoordinator: User authenticated")
                     self.handleAuthSuccess()
                 } else {
@@ -163,7 +166,16 @@ final class AuthCoordinator: AuthCoordinatorProtocol {
                     }
                 }
             }
-        }
+            .store(in: &cancellables)
+        
+        // Observe auth errors from AuthViewModel
+        authViewModel.$authError
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] errorMessage in
+                self?.showErrorMessage(errorMessage)
+            }
+            .store(in: &cancellables)
     }
     
     private func determineInitialView() {
@@ -177,11 +189,9 @@ final class AuthCoordinator: AuthCoordinatorProtocol {
     private func showErrorMessage(_ message: String) {
         errorMessage = message
         showError = true
-        isLoading = false
     }
     
     private func showSuccessMessage(_ message: String) {
-        // You could add a success message system here
         print("✅ Success: \(message)")
     }
 }
@@ -194,23 +204,22 @@ struct AuthCoordinatorMainView: View {
         Group {
             switch coordinator.currentView {
             case .loading:
-                LoadingView()
+                AuthLoadingView()
                 
             case .signIn:
-                SignInView()
+                SignInCoordinatedView()
                     .environmentObject(coordinator)
                 
             case .signUp:
-                SignUpView()
+                SignUpCoordinatedView()
                     .environmentObject(coordinator)
                 
             case .forgotPassword:
-                ForgotPasswordView()
+                ForgotPasswordCoordinatedView()
                     .environmentObject(coordinator)
                 
             case .authenticated:
-                // This would transition to your main app flow
-                // or could emit an event that RootView listens to
+                // This transitions to main app flow via RootView
                 EmptyView()
             }
         }
@@ -235,50 +244,38 @@ struct SignInCoordinatedView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Your existing background styling
                 Color.white.ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         Spacer(minLength: 100)
                         
-                        // Header Section (your existing styling)
                         headerSection
-                        
-                        // Form Container (your existing styling)
                         formSection
-                        
-                        // Action Buttons (your existing styling)
                         actionSection
                         
-                        Spacer(minLength: 40)
+                        Spacer(minLength: 50)
                     }
                 }
                 
                 // Loading overlay
                 if coordinator.isLoading {
-                    LoadingOverlay()
+                    loadingOverlay
                 }
             }
         }
     }
     
     private var headerSection: some View {
-        VStack(spacing: 32) {
-            ZStack {
-                Circle()
-                    .fill(Color.black)
-                    .frame(width: 60, height: 60)
-                    .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 8)
-                
-                Image(systemName: "person.circle")
-                    .font(.system(size: 24, weight: .medium))
-                    .foregroundColor(.white)
-            }
-            
+        VStack(spacing: 24) {
             Text("Welcome Back")
-                .font(.system(size: 28, weight: .light, design: .default))
+                .font(.system(size: 32, weight: .light))
                 .foregroundColor(.black)
+                .tracking(1.2)
+            
+            Text("Sign in to continue your journey")
+                .font(.system(size: 16, weight: .regular))
+                .foregroundColor(.black.opacity(0.6))
                 .tracking(0.5)
         }
         .padding(.bottom, 60)
@@ -293,26 +290,27 @@ struct SignInCoordinatedView: View {
                     .foregroundColor(.black.opacity(0.7))
                     .tracking(0.3)
                 
-                TextField("Enter your email address", text: $email, onEditingChanged: { focused in
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isEmailFocused = focused
+                TextField("Enter your email", text: $email)
+                    .textContentType(.emailAddress)
+                    .keyboardType(.emailAddress)
+                    .autocapitalization(.none)
+                    .font(.system(size: 16, weight: .regular))
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 0)
+                    .padding(.vertical, 16)
+                    .background(Color.clear)
+                    .overlay(
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundColor(isEmailFocused ? .black : .gray.opacity(0.3))
+                            .animation(.easeInOut(duration: 0.2), value: isEmailFocused),
+                        alignment: .bottom
+                    )
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isEmailFocused = true
+                        }
                     }
-                })
-                .keyboardType(.emailAddress)
-                .autocapitalization(.none)
-                .textContentType(.emailAddress)
-                .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.black)
-                .padding(.horizontal, 0)
-                .padding(.vertical, 16)
-                .background(Color.clear)
-                .overlay(
-                    Rectangle()
-                        .frame(height: 1)
-                        .foregroundColor(isEmailFocused ? .black : .gray.opacity(0.3))
-                        .animation(.easeInOut(duration: 0.2), value: isEmailFocused),
-                    alignment: .bottom
-                )
             }
             
             // Password Field
@@ -382,50 +380,30 @@ struct SignInCoordinatedView: View {
                     HStack(spacing: 6) {
                         Text("Don't have an account?")
                             .font(.system(size: 15, weight: .regular))
-                            .foregroundColor(.gray)
-                            .tracking(0.2)
+                            .foregroundColor(.black.opacity(0.6))
                         
                         Text("Sign Up")
                             .font(.system(size: 15, weight: .medium))
                             .foregroundColor(.black)
-                            .tracking(0.2)
                     }
+                    .tracking(0.2)
                 }
             }
         }
         .padding(.horizontal, 40)
-        .padding(.bottom, 60)
     }
-}
-
-// MARK: - Supporting Views
-struct LoadingView: View {
-    var body: some View {
-        VStack(spacing: 20) {
-            ProgressView()
-                .scaleEffect(1.5)
-            
-            Text("Loading...")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemBackground))
-    }
-}
-
-struct LoadingOverlay: View {
-    var body: some View {
+    
+    private var loadingOverlay: some View {
         ZStack {
             Color.black.opacity(0.3)
                 .ignoresSafeArea()
             
             VStack(spacing: 16) {
                 ProgressView()
-                    .scaleEffect(1.2)
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .scaleEffect(1.2)
                 
-                Text("Please wait...")
+                Text("Signing you in...")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.white)
             }
@@ -438,32 +416,7 @@ struct LoadingOverlay: View {
     }
 }
 
-// MARK: - Integration with RootView
-struct RootViewWithCoordinator: View {
-    @StateObject private var authCoordinator = AuthCoordinator()
-    @StateObject private var onboardingVM = OnboardingViewModel.shared
-    
-    var body: some View {
-        Group {
-            if !authCoordinator.authViewModel.isAuthenticated {
-                AuthCoordinatorMainView()
-            } else if !onboardingVM.hasCompletedOnboarding {
-                OnboardingFlowView()
-                    .environmentObject(onboardingVM)
-            } else {
-                MainView()
-                    .environmentObject(authCoordinator.authViewModel)
-            }
-        }
-        .onAppear {
-            print("📱 RootViewWithCoordinator appeared")
-            print("   - Authenticated: \(authCoordinator.authViewModel.isAuthenticated)")
-            print("   - Onboarding Complete: \(onboardingVM.hasCompletedOnboarding)")
-        }
-    }
-}
-
-// MARK: - Placeholder Views for Sign Up and Forgot Password (Remove these - use your actual views)
+// MARK: - Coordinated Sign Up View
 struct SignUpCoordinatedView: View {
     @EnvironmentObject var coordinator: AuthCoordinator
     @State private var name: String = ""
@@ -472,40 +425,68 @@ struct SignUpCoordinatedView: View {
     @State private var confirmPassword: String = ""
     
     var body: some View {
-        // Similar structure to SignInCoordinatedView but for sign up
-        VStack {
-            Text("Sign Up View")
-            // Add your sign up form here
+        VStack(spacing: 32) {
+            Text("Create Account")
+                .font(.system(size: 32, weight: .light))
+                .foregroundColor(.black)
+            
+            VStack(spacing: 20) {
+                TextField("Full Name", text: $name)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                TextField("Email", text: $email)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .keyboardType(.emailAddress)
+                    .autocapitalization(.none)
+                
+                SecureField("Password", text: $password)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                SecureField("Confirm Password", text: $confirmPassword)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            }
             
             Button("Sign Up") {
                 coordinator.signUp(name: name, email: email, password: password, confirmPassword: confirmPassword)
             }
+            .buttonStyle(.borderedProminent)
+            .disabled(coordinator.isLoading)
             
             Button("Back to Sign In") {
                 coordinator.navigateTo(.signIn)
             }
+            .buttonStyle(.bordered)
         }
+        .padding()
     }
 }
 
+// MARK: - Coordinated Forgot Password View
 struct ForgotPasswordCoordinatedView: View {
     @EnvironmentObject var coordinator: AuthCoordinator
     @State private var email: String = ""
     
     var body: some View {
-        VStack {
-            Text("Forgot Password View")
+        VStack(spacing: 32) {
+            Text("Reset Password")
+                .font(.system(size: 32, weight: .light))
+                .foregroundColor(.black)
             
             TextField("Email", text: $email)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .keyboardType(.emailAddress)
+                .autocapitalization(.none)
             
-            Button("Reset Password") {
+            Button("Send Reset Email") {
                 coordinator.resetPassword(email: email)
             }
+            .buttonStyle(.borderedProminent)
+            .disabled(coordinator.isLoading)
             
             Button("Back to Sign In") {
                 coordinator.navigateTo(.signIn)
             }
+            .buttonStyle(.bordered)
         }
         .padding()
     }

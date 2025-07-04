@@ -1,10 +1,6 @@
 
 
 //
-//
-//  AuthViewModel.swift
-//  aura
-//
 //  AuthViewModel.swift
 //  aura
 //
@@ -23,8 +19,10 @@ final class AuthViewModel: ObservableObject {
     
     // MARK: - Published Properties
     @Published var user: User?
-    @Published var userProfile: UserProfile? = nil
+    @Published var userProfile: UserProfile?
     @Published var isAuthenticated: Bool = false
+    @Published var isLoading: Bool = false
+    @Published var authError: String?
     
     private var authHandle: AuthStateDidChangeListenerHandle?
     
@@ -44,6 +42,7 @@ final class AuthViewModel: ObservableObject {
                 
                 self.user = user
                 self.isAuthenticated = (user != nil)
+                self.isLoading = false // Stop loading when auth state changes
                 
                 if let uid = newUserId {
                     print("🔐 Auth state changed - User: \(uid)")
@@ -73,14 +72,24 @@ final class AuthViewModel: ObservableObject {
     func signIn(email: String, password: String) {
         print("🔐 Attempting sign in for: \(email)")
         
+        isLoading = true
+        clearError()
+        
         Auth.auth().signIn(withEmail: email, password: password) { [weak self] result, error in
-            if let error = error {
-                print("❌ Sign in failed: \(error.localizedDescription)")
-                return
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Sign in failed: \(error.localizedDescription)")
+                    self?.handleAuthError(error)
+                    return
+                }
+                
+                guard let user = result?.user else {
+                    self?.isLoading = false
+                    return
+                }
+                print("✅ Sign in successful for: \(user.uid)")
+                // isLoading will be set to false by auth state listener
             }
-            
-            guard let user = result?.user else { return }
-            print("✅ Sign in successful for: \(user.uid)")
         }
     }
     
@@ -88,24 +97,32 @@ final class AuthViewModel: ObservableObject {
     func signUp(name: String, email: String, password: String) {
         print("🔐 Attempting sign up for: \(email)")
         
+        isLoading = true
+        clearError()
+        
         Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
-            if let error = error {
-                print("❌ Sign up failed: \(error.localizedDescription)")
-                return
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Sign up failed: \(error.localizedDescription)")
+                    self?.handleAuthError(error)
+                    return
+                }
+                
+                guard let user = result?.user else {
+                    self?.isLoading = false
+                    return
+                }
+                
+                print("✅ Sign up successful for: \(user.uid)")
+                
+                // Create user profile in Firestore
+                self?.createUserProfile(uid: user.uid, name: name, email: email)
             }
-            
-            guard let user = result?.user else { return }
-            print("✅ Sign up successful for: \(user.uid)")
-            
-            // Create user profile in Firestore
-            self?.createUserProfile(uid: user.uid, name: name, email: email)
         }
     }
     
     // MARK: - Create User Profile
     private func createUserProfile(uid: String, name: String, email: String) {
-        print("👤 Creating user profile for: \(uid)")
-        
         let userProfile = UserProfile(
             uid: uid,
             name: name,
@@ -117,35 +134,41 @@ final class AuthViewModel: ObservableObject {
         
         do {
             try db.collection("users").document(uid).setData(from: userProfile) { [weak self] error in
-                if let error = error {
-                    print("❌ Failed to create user profile: \(error.localizedDescription)")
-                } else {
-                    print("✅ User profile created successfully")
-                    
-                    DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    if let error = error {
+                        print("❌ Failed to create user profile: \(error.localizedDescription)")
+                        self?.authError = "Failed to create user profile"
+                    } else {
+                        print("✅ User profile created successfully")
                         self?.userProfile = userProfile
                     }
+                    // isLoading will be set to false by auth state listener
                 }
             }
         } catch {
-            print("❌ Failed to encode user profile: \(error.localizedDescription)")
+            DispatchQueue.main.async {
+                print("❌ Failed to encode user profile: \(error.localizedDescription)")
+                self.authError = "Failed to create user profile"
+                self.isLoading = false
+            }
         }
     }
     
     // MARK: - Load User Profile
     private func loadUserProfile(uid: String) {
-        print("👤 Loading user profile for: \(uid)")
-        
         let db = Firestore.firestore()
         
         db.collection("users").document(uid).getDocument { [weak self] document, error in
             if let error = error {
                 print("❌ Failed to load user profile: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self?.userProfile = nil
+                }
                 return
             }
             
             guard let document = document, document.exists else {
-                print("⚠️ No profile found for user: \(uid)")
+                print("⚠️ User profile document does not exist")
                 DispatchQueue.main.async {
                     self?.userProfile = nil
                 }
@@ -178,11 +201,19 @@ final class AuthViewModel: ObservableObject {
     func resetPassword(email: String) {
         print("🔑 Attempting password reset for: \(email)")
         
-        Auth.auth().sendPasswordReset(withEmail: email) { error in
-            if let error = error {
-                print("❌ Password reset failed: \(error.localizedDescription)")
-            } else {
-                print("✅ Password reset email sent")
+        isLoading = true
+        clearError()
+        
+        Auth.auth().sendPasswordReset(withEmail: email) { [weak self] error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                if let error = error {
+                    print("❌ Password reset failed: \(error.localizedDescription)")
+                    self?.handleAuthError(error)
+                } else {
+                    print("✅ Password reset email sent")
+                }
             }
         }
     }
@@ -198,6 +229,8 @@ final class AuthViewModel: ObservableObject {
                 self.user = nil
                 self.userProfile = nil
                 self.isAuthenticated = false
+                self.isLoading = false
+                self.clearError()
                 
                 // Reset onboarding state
                 OnboardingViewModel.shared.startFreshOnboarding()
@@ -206,7 +239,42 @@ final class AuthViewModel: ObservableObject {
             print("✅ Sign out successful")
         } catch {
             print("❌ Sign out failed: \(error.localizedDescription)")
+            DispatchQueue.main.async {
+                self.authError = "Failed to sign out"
+            }
         }
+    }
+    
+    // MARK: - Error Handling
+    private func handleAuthError(_ error: Error) {
+        isLoading = false
+        
+        if let authError = error as? AuthErrorCode {
+            switch authError.code {
+            case .invalidEmail:
+                self.authError = "Invalid email address"
+            case .userNotFound:
+                self.authError = "No account found with this email"
+            case .wrongPassword:
+                self.authError = "Incorrect password"
+            case .emailAlreadyInUse:
+                self.authError = "An account already exists with this email"
+            case .weakPassword:
+                self.authError = "Password is too weak"
+            case .networkError:
+                self.authError = "Network error. Please check your connection"
+            case .tooManyRequests:
+                self.authError = "Too many attempts. Please try again later"
+            default:
+                self.authError = error.localizedDescription
+            }
+        } else {
+            self.authError = error.localizedDescription
+        }
+    }
+    
+    private func clearError() {
+        authError = nil
     }
     
     deinit {
