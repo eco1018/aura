@@ -2,6 +2,7 @@
 //
 //
 //
+<<<<<<< HEAD
 //
 //  OnboardingViewModel.swift
 //  aura
@@ -14,6 +15,9 @@
 //
 //  Created by Ella A. Sadduq on 3/30/25.
 //
+=======
+// Fixed OnboardingViewModel.swift - Properly Save Reminder Times
+>>>>>>> origin/New_Main
 
 import Foundation
 import FirebaseAuth
@@ -104,6 +108,7 @@ final class OnboardingViewModel: ObservableObject {
         }
     }
     
+<<<<<<< HEAD
     // Reminder Times
     @Published var morningReminderTime: Date = Calendar.current.date(bySettingHour: 8, minute: 30, second: 0, of: Date()) ?? Date() {
         didSet {
@@ -115,6 +120,11 @@ final class OnboardingViewModel: ObservableObject {
             print("📝 Evening reminder time updated: \(formatTime(eveningReminderTime))")
         }
     }
+=======
+    // FIXED: Reminder Times with proper initialization and saving
+    @Published var morningReminderTime: Date = Calendar.current.date(bySettingHour: 8, minute: 30, second: 0, of: Date()) ?? Date()
+    @Published var eveningReminderTime: Date = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: Date()) ?? Date()
+>>>>>>> origin/New_Main
     
     // Track the current user to detect user changes
     private var currentUserId: String?
@@ -135,7 +145,6 @@ final class OnboardingViewModel: ObservableObject {
     private func handleAuthStateChange(user: User?) {
         let newUserId = user?.uid
         
-        // If user changed, reset everything
         if newUserId != currentUserId {
             currentUserId = newUserId
             
@@ -213,6 +222,7 @@ final class OnboardingViewModel: ObservableObject {
         onboardingStep = OnboardingStep.allCases[currentIndex - 1]
     }
     
+<<<<<<< HEAD
     // MARK: - Helper Methods for Data Management
     func addCustomAction(_ action: String) {
         let trimmedAction = action.trimmingCharacters(in: .whitespaces)
@@ -220,6 +230,27 @@ final class OnboardingViewModel: ObservableObject {
             customActions.append(trimmedAction)
             print("📝 Added custom action: \(trimmedAction). Total: \(customActions)")
         }
+=======
+    // MARK: - FIXED: Reminder Time Management
+    func updateMorningReminderTime(_ time: Date) {
+        morningReminderTime = time
+        print("⏰ Updated morning reminder time to: \(formatTime(time))")
+    }
+    
+    func updateEveningReminderTime(_ time: Date) {
+        eveningReminderTime = time
+        print("⏰ Updated evening reminder time to: \(formatTime(time))")
+    }
+    
+    // MARK: - Data Management
+    func updatePersonalInfo(firstName: String? = nil, lastName: String? = nil, age: Int? = nil, gender: String? = nil) {
+        if let firstName = firstName { self.firstName = firstName }
+        if let lastName = lastName { self.lastName = lastName }
+        if let age = age { self.age = age }
+        if let gender = gender { self.gender = gender }
+        
+        print("📝 Updated personal info: \(firstName ?? self.firstName) \(lastName ?? self.lastName), age: \(age ?? self.age)")
+>>>>>>> origin/New_Main
     }
     
     func removeCustomAction(_ action: String) {
@@ -337,7 +368,6 @@ final class OnboardingViewModel: ObservableObject {
                 return
             }
             
-            // Double-check the profile belongs to the correct user
             guard profile.uid == userId else {
                 print("⚠️ Profile UID mismatch! Expected: \(userId), Got: \(profile.uid)")
                 return
@@ -346,7 +376,6 @@ final class OnboardingViewModel: ObservableObject {
             DispatchQueue.main.async {
                 print("✅ Existing profile loaded for \(profile.name) (UID: \(profile.uid))")
                 
-                // If user has completed onboarding, load their data
                 if profile.hasCompletedOnboarding {
                     self.hasCompletedOnboarding = true
                     
@@ -366,14 +395,26 @@ final class OnboardingViewModel: ObservableObject {
                     self.takesMedications = profile.takesMedications
                     self.medications = profile.medications
                     
-                    self.morningReminderTime = profile.morningReminderTime ?? self.morningReminderTime
-                    self.eveningReminderTime = profile.eveningReminderTime ?? self.eveningReminderTime
+                    // FIXED: Load reminder times properly
+                    if let morningTime = profile.morningReminderTime {
+                        self.morningReminderTime = morningTime
+                        print("📅 Loaded morning reminder: \(self.formatTime(morningTime))")
+                    }
+                    if let eveningTime = profile.eveningReminderTime {
+                        self.eveningReminderTime = eveningTime
+                        print("📅 Loaded evening reminder: \(self.formatTime(eveningTime))")
+                    }
+                    
+                    // Update reminder frequency based on what's saved
+                    self.reminderFrequency = (profile.morningReminderTime != nil && profile.eveningReminderTime != nil) ? .twice : .once
                     
                     print("📊 Loaded profile data:")
                     print("   - Has completed onboarding: \(profile.hasCompletedOnboarding)")
                     print("   - Name: \(profile.name)")
                     print("   - Custom Actions: \(profile.customActions)")
                     print("   - Takes Medications: \(profile.takesMedications)")
+                    print("   - Morning Reminder: \(profile.morningReminderTime?.formatted(date: .omitted, time: .shortened) ?? "none")")
+                    print("   - Evening Reminder: \(profile.eveningReminderTime?.formatted(date: .omitted, time: .shortened) ?? "none")")
                 } else {
                     print("📝 User has profile but hasn't completed onboarding yet")
                     self.hasCompletedOnboarding = false
@@ -382,7 +423,7 @@ final class OnboardingViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Complete Onboarding
+    // MARK: - ENHANCED: Complete Onboarding with Proper Reminder Time Handling
     func completeOnboarding() {
         print("🚀 Starting onboarding completion...")
         
@@ -392,7 +433,6 @@ final class OnboardingViewModel: ObservableObject {
             return
         }
         
-        // Double-check we're working with the right user
         guard user.uid == currentUserId else {
             print("❌ User ID mismatch during completion!")
             errorMessage = "User authentication error"
@@ -403,6 +443,22 @@ final class OnboardingViewModel: ObservableObject {
         printCurrentDataState()
         
         print("👤 Completing onboarding for user: \(user.uid)")
+<<<<<<< HEAD
+=======
+        print("📝 Collected data:")
+        print("   Name: \(firstName) \(lastName)")
+        print("   Age: \(age)")
+        print("   Gender: \(gender)")
+        print("   Custom Actions: \(customActions)")
+        print("   Selected Actions: \(selectedActions)")
+        print("   Custom Urges: \(customUrges)")
+        print("   Custom Goals: \(customGoals)")
+        print("   Takes Medications: \(takesMedications)")
+        print("   Medications Count: \(medications.count)")
+        print("   Reminder Frequency: \(reminderFrequency)")
+        print("   Morning Time: \(formatTime(morningReminderTime))")
+        print("   Evening Time: \(formatTime(eveningReminderTime))")
+>>>>>>> origin/New_Main
         
         isLoading = true
         errorMessage = ""
@@ -413,6 +469,7 @@ final class OnboardingViewModel: ObservableObject {
         let allUrges = Array(Set(selectedUrges + customUrges)).prefix(5).map { $0 }
         let allGoals = Array(Set(selectedGoals + customGoals)).prefix(5).map { $0 }
         
+<<<<<<< HEAD
         // Validate required fields
         if fullName.isEmpty {
             print("❌ Name is empty!")
@@ -420,6 +477,11 @@ final class OnboardingViewModel: ObservableObject {
             errorMessage = "Please enter your name"
             return
         }
+=======
+        // FIXED: Properly set reminder times based on user selection
+        let finalMorningTime: Date? = (reminderFrequency == .twice) ? morningReminderTime : nil
+        let finalEveningTime: Date? = eveningReminderTime  // Always save evening time
+>>>>>>> origin/New_Main
         
         let updatedProfile = UserProfile(
             uid: user.uid,
@@ -434,13 +496,14 @@ final class OnboardingViewModel: ObservableObject {
             takesMedications: takesMedications,
             medications: medications,
             medicationProfileVersion: takesMedications ? 1 : 0,
-            morningReminderTime: reminderFrequency == .twice ? morningReminderTime : nil,
-            eveningReminderTime: eveningReminderTime,
+            morningReminderTime: finalMorningTime,
+            eveningReminderTime: finalEveningTime,
             hasCompletedOnboarding: true
         )
         
         print("💾 Final profile to save:")
         print("   Profile UID: \(updatedProfile.uid)")
+<<<<<<< HEAD
         print("   Profile Name: '\(updatedProfile.name)'")
         print("   Profile Age: \(updatedProfile.age)")
         print("   Profile Gender: '\(updatedProfile.gender)'")
@@ -450,6 +513,10 @@ final class OnboardingViewModel: ObservableObject {
         print("   Profile Emotions: \(updatedProfile.selectedEmotions)")
         print("   Profile Medications: \(updatedProfile.medications.count)")
         print("   Profile Takes Meds: \(updatedProfile.takesMedications)")
+=======
+        print("   Morning Reminder: \(updatedProfile.morningReminderTime?.formatted(date: .omitted, time: .shortened) ?? "none")")
+        print("   Evening Reminder: \(updatedProfile.eveningReminderTime?.formatted(date: .omitted, time: .shortened) ?? "none")")
+>>>>>>> origin/New_Main
         
         // Save to Firestore
         updatedProfile.save { [weak self] success in
@@ -464,9 +531,15 @@ final class OnboardingViewModel: ObservableObject {
                     AuthViewModel.shared.userProfile = updatedProfile
                     print("✅ AuthViewModel updated with new profile")
                     
-                    // 🔔 Setup notifications after successful save
+                    // 🔔 CRITICAL: Setup notifications with the saved profile
+                    print("🔔 Setting up notifications with saved profile...")
                     Task {
                         await SimpleNotificationService.shared.setupNotifications(for: updatedProfile)
+                        
+                        // Debug: List what was scheduled
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            SimpleNotificationService.shared.listScheduledNotifications()
+                        }
                     }
                     
                 } else {
@@ -477,11 +550,16 @@ final class OnboardingViewModel: ObservableObject {
         }
     }
     
+<<<<<<< HEAD
     // MARK: - Utility Methods
+=======
+    // MARK: - Helper Methods
+>>>>>>> origin/New_Main
     private func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter.string(from: date)
+<<<<<<< HEAD
     }
     
     // MARK: - Manual Save Test (for debugging)
@@ -492,5 +570,7 @@ final class OnboardingViewModel: ObservableObject {
         age = 30
         customActions = ["Test Action 1", "Test Action 2"]
         completeOnboarding()
+=======
+>>>>>>> origin/New_Main
     }
 }

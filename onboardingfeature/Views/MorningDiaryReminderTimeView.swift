@@ -1,22 +1,31 @@
 //
+//
 //  MorningDiaryReminderTimeView.swift
 //  aura
 //
 //
+<<<<<<< HEAD
 //  MorningDiaryReminderTimeView.swift
 //  aura
 //
 //  Created by Ella A. Sadduq on 3/30/25.
 //
+=======
+// Fixed MorningDiaryReminderTimeView.swift - Only Morning View
+>>>>>>> origin/New_Main
 
 import SwiftUI
 
 struct MorningDiaryReminderTimeView: View {
     @ObservedObject var onboardingVM = OnboardingViewModel.shared
+<<<<<<< HEAD
+=======
+    @State private var selectedTime: Date = Date()
+>>>>>>> origin/New_Main
 
     var body: some View {
         ZStack {
-            // Premium gradient background (matching design system)
+            // Premium gradient background
             LinearGradient(
                 colors: [
                     Color(.systemGray6).opacity(0.1),
@@ -53,11 +62,19 @@ struct MorningDiaryReminderTimeView: View {
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.primary.opacity(0.9))
                     
+<<<<<<< HEAD
                     DatePicker("Morning Reminder", selection: $onboardingVM.morningReminderTime, displayedComponents: .hourAndMinute)
+=======
+                    DatePicker("Morning Reminder", selection: $selectedTime, displayedComponents: .hourAndMinute)
+>>>>>>> origin/New_Main
                         .labelsHidden()
                         .datePickerStyle(WheelDatePickerStyle())
                         .frame(height: 120)
                         .clipped()
+                        .onChange(of: selectedTime) { _, newTime in
+                            // FIXED: Actually save the selected time
+                            onboardingVM.updateMorningReminderTime(newTime)
+                        }
                 }
                 .padding(28)
                 .background(
@@ -74,8 +91,9 @@ struct MorningDiaryReminderTimeView: View {
                 
                 Spacer()
                 
-                // Standard next button (matching other onboarding views)
+                // Standard next button
                 Button(action: {
+<<<<<<< HEAD
                     print("📝 Morning reminder time set: \(onboardingVM.morningReminderTime.formatted(date: .omitted, time: .shortened))")
                     
                     // Navigate based on reminder frequency
@@ -84,6 +102,14 @@ struct MorningDiaryReminderTimeView: View {
                     } else {
                         onboardingVM.goToNextStep() // Skip evening reminder
                     }
+=======
+                    // Save the final time and proceed
+                    onboardingVM.updateMorningReminderTime(selectedTime)
+                    print("⏰ Saved morning reminder time: \(selectedTime.formatted(date: .omitted, time: .shortened))")
+                    
+                    // Go to evening time or wrap up based on frequency
+                    onboardingVM.onboardingStep = .diaryReminderTimeEvening
+>>>>>>> origin/New_Main
                 }) {
                     HStack(spacing: 12) {
                         Text("Next")
@@ -106,6 +132,11 @@ struct MorningDiaryReminderTimeView: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 40)
             }
+        }
+        .onAppear {
+            // Initialize with the current value from onboarding
+            selectedTime = onboardingVM.morningReminderTime
+            print("📱 Morning reminder view appeared - current time: \(selectedTime.formatted(date: .omitted, time: .shortened))")
         }
     }
 }

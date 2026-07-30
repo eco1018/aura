@@ -1,5 +1,6 @@
 //
 //
+//
 //  DiaryCardFlowView.swift
 //  aura
 //
@@ -25,6 +26,7 @@ struct DiaryCardFlowView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
+<<<<<<< HEAD
                 // Progress bar
                 ProgressView(value: currentStep.progressPercentage)
                     .progressViewStyle(LinearProgressViewStyle(tint: .blue))
@@ -54,6 +56,9 @@ struct DiaryCardFlowView: View {
                 .padding(.bottom, 16)
                 
                 // Current step view
+=======
+                // Current step view (removed progress bar and step indicator)
+>>>>>>> origin/New_Main
                 currentStepView
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing),
@@ -105,10 +110,6 @@ struct DiaryCardFlowView: View {
             print("   - User has custom goals: \(diaryEntry.getAllGoals().count)")
             print("   - User has emotions: \(diaryEntry.getAllEmotions().count)")
         }
-    }
-    
-    private var stepNumber: Int {
-        (DiaryStep.allCases.firstIndex(of: currentStep) ?? 0) + 1
     }
     
     @ViewBuilder

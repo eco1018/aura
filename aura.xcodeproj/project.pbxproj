@@ -162,9 +162,15 @@
 			path = Notifications;
 			sourceTree = "<group>";
 		};
+<<<<<<< HEAD
 		C8FF0E002E120B6A00EA863D /* NavigationFoundation */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = NavigationFoundation;
+=======
+		C8FF0A962E10FB5E00EA863D /* Coordinators */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Coordinators;
+>>>>>>> origin/New_Main
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -221,7 +227,11 @@
 		C82400972D95C935004AE981 = {
 			isa = PBXGroup;
 			children = (
+<<<<<<< HEAD
 				C8FF0E002E120B6A00EA863D /* NavigationFoundation */,
+=======
+				C8FF0A962E10FB5E00EA863D /* Coordinators */,
+>>>>>>> origin/New_Main
 				C8A66E282DE0D3090053DA0C /* Notifications */,
 				C84F27D02DDF625300E1D280 /* Medications */,
 				C84F27362DDF4F1600E1D280 /* Settings */,
@@ -371,7 +381,11 @@
 				C84F27362DDF4F1600E1D280 /* Settings */,
 				C84F27D02DDF625300E1D280 /* Medications */,
 				C8A66E282DE0D3090053DA0C /* Notifications */,
+<<<<<<< HEAD
 				C8FF0E002E120B6A00EA863D /* NavigationFoundation */,
+=======
+				C8FF0A962E10FB5E00EA863D /* Coordinators */,
+>>>>>>> origin/New_Main
 			);
 			name = aura;
 			packageProductDependencies = (
